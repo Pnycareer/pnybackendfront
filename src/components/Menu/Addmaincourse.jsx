@@ -103,7 +103,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/v1/subCourse/getsubcourses/${selectedSlug}`
+        `${import.meta.env.VITE_API_URL}/api/v1/subCourse/getsubcourses/${selectedSlug}`
       );
       const data = await response.json();
 
@@ -186,7 +186,7 @@ function App() {
       });
 
       // 4c. POST to your endpoint
-      const response = await fetch("http://localhost:8080/api/v1/subCourse", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/subCourse`, {
         method: "POST",
         body: formData,
       });

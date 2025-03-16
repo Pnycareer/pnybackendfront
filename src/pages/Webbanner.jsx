@@ -15,7 +15,7 @@ const Webbanner = () => {
   const fetchBanner = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("https://api.pnytrainings.com/api/v1/webbanner/get");
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/webbanner/get`);
       setBanner(response.data[0]);
     } catch (err) {
       console.error("Error fetching banner:", err);

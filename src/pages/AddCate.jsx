@@ -31,7 +31,7 @@ const AddCategory = () => {
       Index_Page_Option: data.Index_Page_Option === "Yes",
     };
   
-    axios.post('https://api.pnytrainings.com/api/categories', transformedData)
+    axios.post(`${import.meta.env.VITE_API_URL}/api/v1/categories`, transformedData)
       .then(response => {
         console.log(response);
         setCategories(response.data);
