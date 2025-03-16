@@ -12,9 +12,7 @@ function App() {
   const [metaDescription, setMetaDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false); // For loader
 
-  const slugOptions = ["diploma", "marketing", "development", "designing" , "business" , "multimedia"
-    ,
-  ];
+  const slugOptions = ["diploma", "marketing", "development", "designing" , "business" , "multimedia"];
   // -----------------------------
   // 2. Courses (array)
   // -----------------------------

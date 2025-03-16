@@ -74,7 +74,7 @@ const AddCourse = () => {
     }
     try {
       const response = await axios.post(
-        "https://api.pnytrainings.com/api/courses",
+        "${import.meta.env.VITE_API_URL}/api/courses",
         formData,
         {
           headers: {
