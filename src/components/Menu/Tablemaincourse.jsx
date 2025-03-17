@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const Tablemaincourse = () => {
   const [courses, setCourses] = useState([]);
@@ -15,7 +16,7 @@ const Tablemaincourse = () => {
   // Fetch courses data
   const fetchCourses = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/v1/subCourse");
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/subCourse`);
       const data = await response.json();
       setCourses(data);
     } catch (error) {
@@ -75,7 +76,7 @@ const Tablemaincourse = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/v1/subCourse/update-sub-courses/${editData.courseId}/${editData._id}`,
+        `${import.meta.env.VITE_API_URL}/api/v1/subCourse/update-sub-courses/${editData.courseId}/${editData._id}`,
         {
           method: "PUT",
           body: formData,
@@ -101,7 +102,7 @@ const Tablemaincourse = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/v1/subCourse/update-sub-courses/${editCourse._id}`,
+        `${import.meta.env.VITE_API_URL}/api/v1/subCourse/update-sub-courses/${editCourse._id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -136,7 +137,7 @@ const Tablemaincourse = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/v1/subCourse/delete-category/${courseId}${
+        `${import.meta.env.VITE_API_URL}/api/v1/subCourse/delete-category/${courseId}${
           itemId ? `/${itemId}` : ""
         }`,
         { method: "DELETE" }
@@ -156,6 +157,9 @@ const Tablemaincourse = () => {
 
   return (
     <div className="container mx-auto p-4">
+      <div className="flex justify-end px-4">
+        <Link to='/addmainc' className="bg-blue-500 px-3 py-2">Add Categories</Link>
+      </div>
       <h2 className="text-2xl font-bold mb-4 text-white">Courses List</h2>
       <table className="min-w-full bg-gray-900 text-white border border-gray-300">
         <thead>
@@ -223,7 +227,7 @@ const Tablemaincourse = () => {
                             </td>
                             <td className="py-2 px-4 border">
                               <img
-                                src={`http://localhost:8080/${subCourse.course_image}`}
+                                src={`${import.meta.env.VITE_API_URL}/${subCourse.course_image}`}
                                 alt={subCourse.name}
                                 className="w-32 h-20 object-cover rounded-md"
                               />
@@ -276,7 +280,7 @@ const Tablemaincourse = () => {
                               </td>
                               <td className="py-2 px-4 border">
                                 <img
-                                  src={`http://localhost:8080/${instructor.photo}`}
+                                  src={`${import.meta.env.VITE_API_URL}/${instructor.photo}`}
                                   alt={instructor.name}
                                   className="w-16 h-16 object-cover"
                                 />
