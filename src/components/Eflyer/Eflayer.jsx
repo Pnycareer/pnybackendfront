@@ -16,7 +16,9 @@ const Eflayer = () => {
     // Fetch data from the API when the component mounts
     const fetchEflyers = async () => {
       try {
-        const response = await axios.get("https://api.pnytrainings.com/api/eflyer");
+        const response = await axios.get(
+          "${import.meta.env.VITE_API_URL}/api/eflyer"
+        );
         setEflyers(response.data); // Set fetched data
         setFilteredEflyers(response.data); // Initialize filtered data
         console.log(response.data);
@@ -50,7 +52,9 @@ const Eflayer = () => {
       console.log("Deleting eFlyer with ID:", id);
 
       // Send the DELETE request
-      const response = await axios.delete(`https://api.pnytrainings.com/api/eflyer/${id}`);
+      const response = await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/eflyer/${id}`
+      );
 
       // Log the response for debugging
       console.log("Delete response:", response);
@@ -107,7 +111,10 @@ const Eflayer = () => {
                   value={searchTerm}
                   onChange={handleSearch}
                 />
-                <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                <Search
+                  className="absolute left-3 top-2.5 text-gray-400"
+                  size={18}
+                />
               </div>
               <Link to="/addeflayer">
                 <button className="bg-blue-600 hover:bg-blue-500 text-white hidden sm:block font-semibold py-2 px-4 rounded-lg transition-all duration-300">

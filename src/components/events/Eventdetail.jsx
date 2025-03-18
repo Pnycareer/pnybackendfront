@@ -25,7 +25,7 @@ const EventDetail = () => {
 
   useEffect(() => {
     axios
-      .get(`https://api.pnytrainings.com/api/eventpost/${id}`)
+      .get(`${import.meta.env.VITE_API_URL}/api/eventpost/${id}`)
       .then((response) => {
         setEvent(response.data);
         setUpdatedEvent(response.data); // Set fetched event data for editing
@@ -53,9 +53,13 @@ const EventDetail = () => {
     e.preventDefault();
 
     try {
-      await axios.put(`https://api.pnytrainings.com/api/eventpost/${id}`, updatedEvent, {
-        headers: { "Content-Type": "application/json" },
-      });
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/eventpost/${id}`,
+        updatedEvent,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       navigate(`/event-post/${id}`); // Redirect after successful update
     } catch (error) {
       console.error("Error updating event:", error);
@@ -70,7 +74,9 @@ const EventDetail = () => {
     <div className="w-full overflow-auto">
       <Header />
       <div className="container mx-auto p-6 w-[50%] bg-gray-800 rounded-xl shadow-md">
-        <h2 className="text-2xl font-semibold text-white mb-4">Event Details</h2>
+        <h2 className="text-2xl font-semibold text-white mb-4">
+          Event Details
+        </h2>
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">

@@ -15,7 +15,7 @@ const UsersTable = () => {
   useEffect(() => {
     const fetchInstructors = async () => {
       try {
-        const response = await axios.get("https://api.pnytrainings.com/api/instructors");
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/instructors/get-instructor`);
         console.log(response.data); // Log fetched users
         setUsers(response.data);
         setFilteredUsers(response.data);
@@ -42,7 +42,7 @@ const UsersTable = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://api.pnytrainings.com/api/instructors/${id}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/instructors/${id}`);
       setFilteredUsers(filteredUsers.filter((user) => user._id !== id));
     } catch (error) {
       console.error("Failed to delete user", error);
@@ -126,7 +126,7 @@ const UsersTable = () => {
                         <img
                           src={
                             user.photo
-                              ? `https://api.pnytrainings.com/${user.photo.replace(/\\/g, '/')}`
+                              ? `${import.meta.env.VITE_API_URL}/${user.photo.replace(/\\/g, '/')}`
                               : 'path/to/default-image.jpg' // Use a fallback image here
                           }
                           alt="User profile"

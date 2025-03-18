@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +14,9 @@ const AddModel = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axios.get("https://api.pnytrainings.com/api/courses");
+        const response = await axios.get(
+          "${import.meta.env.VITE_API_URL}/api/courses"
+        );
         setCourses(response.data); // Set courses from API response
       } catch (error) {
         console.error("Error fetching courses:", error);
@@ -38,9 +39,13 @@ const AddModel = () => {
 
     try {
       // Send POST request to backend
-      await axios.post("https://api.pnytrainings.com/api/coursemodel", payload, {
-        headers: { "Content-Type": "application/json" },
-      });
+      await axios.post(
+        "${import.meta.env.VITE_API_URL}/api/coursemodel",
+        payload,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
       navigate("/coursemodel"); // Redirect after successful submission
     } catch (error) {
       console.error("Error adding Course Model:", error);
@@ -49,7 +54,9 @@ const AddModel = () => {
 
   return (
     <div className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700 overflow-auto w-full">
-      <h2 className="text-2xl font-semibold text-gray-100 mb-5">Add Course Model</h2>
+      <h2 className="text-2xl font-semibold text-gray-100 mb-5">
+        Add Course Model
+      </h2>
       <form onSubmit={handleSubmit}>
         <div className="space-y-4">
           {/* Dropdown to select course */}
@@ -59,7 +66,9 @@ const AddModel = () => {
             className="w-full p-3 bg-gray-700 text-white placeholder-gray-400 rounded-lg"
             required
           >
-            <option value="" disabled>Select Course Module</option>
+            <option value="" disabled>
+              Select Course Module
+            </option>
             {courses.map((course) => (
               <option key={course._id} value={course._id}>
                 {course.course_Name} {/* Display course name */}

@@ -13,7 +13,7 @@ const Tablefaqs = () => {
   useEffect(() => {
     // Fetch FAQ categories from the API
     axios
-      .get("https://api.pnytrainings.com/api/faqcat")
+      .get("${import.meta.env.VITE_API_URL}/api/faqcat")
       .then((response) => setFaqCategories(response.data))
       .catch((error) => console.error("Error fetching FAQ categories:", error));
   }, []);
@@ -25,8 +25,12 @@ const Tablefaqs = () => {
 
   const handleDelete = async (categoryId) => {
     try {
-      await axios.delete(`https://api.pnytrainings.com/api/faqcat/${categoryId}`);
-      setFaqCategories(faqCategories.filter((category) => category._id !== categoryId));
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/faqcat/${categoryId}`
+      );
+      setFaqCategories(
+        faqCategories.filter((category) => category._id !== categoryId)
+      );
     } catch (error) {
       console.error("Error deleting FAQ category:", error);
     }
@@ -57,7 +61,10 @@ const Tablefaqs = () => {
                   value={searchTerm}
                   onChange={handleSearch}
                 />
-                <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                <Search
+                  className="absolute left-3 top-2.5 text-gray-400"
+                  size={18}
+                />
               </div>
 
               <Link to="/addfaq">
@@ -96,11 +103,17 @@ const Tablefaqs = () => {
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{category.categoryName}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {index + 1}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {category.categoryName}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                         <Link to={`/editfaq/${category._id}`}>
-                          <button className="text-indigo-400 hover:text-indigo-300 mr-2">Edit</button>
+                          <button className="text-indigo-400 hover:text-indigo-300 mr-2">
+                            Edit
+                          </button>
                         </Link>
                         <button
                           onClick={() => handleDelete(category._id)}

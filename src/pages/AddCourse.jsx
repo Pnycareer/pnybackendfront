@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../components/common/Header";
 import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css"; 
+import "react-quill/dist/quill.snow.css";
 import { toast } from "react-toastify";
 const AddCourse = () => {
   const [categories, setCategories] = useState([]);
@@ -21,14 +21,14 @@ const AddCourse = () => {
   const [brochure, setBrochure] = useState(null); // State for brochure file
   // Fetch categories
   const fetchCategories = () => {
-    fetch("https://api.pnytrainings.com/api/categories")
+    fetch(`${import.meta.env.VITE_API_URL}/api/v1/categories`)
       .then((response) => response.json())
       .then((data) => setCategories(data))
       .catch((error) => console.error("Error fetching categories:", error));
   };
   // Fetch instructors
   const fetchInstructors = () => {
-    fetch("https://api.pnytrainings.com/api/instructors")
+    fetch(`${import.meta.env.VITE_API_URL}/api/instructors/get-instructor`)
       .then((response) => response.json())
       .then((data) => setInstructors(data))
       .catch((error) => console.error("Error fetching instructors:", error));
@@ -74,7 +74,7 @@ const AddCourse = () => {
     }
     try {
       const response = await axios.post(
-        "${import.meta.env.VITE_API_URL}//api/courses",
+        `${import.meta.env.VITE_API_URL}/courses/add-course`,
         formData,
         {
           headers: {
@@ -87,12 +87,15 @@ const AddCourse = () => {
       navigate("/courses");
     } catch (error) {
       console.error("Error adding course:", error.response || error.message);
-      toast.error("Error adding course:", error.response?.data || error.message);
+      toast.error(
+        "Error adding course:",
+        error.response?.data || error.message
+      );
     }
   };
   return (
     <div className="w-full overflow-y-auto">
-      <Header/>
+      <Header />
       <div className="p-6 bg-gray-800 rounded-lg shadow-md m-full mx-auto mt-10">
         <h2 className="text-3xl font-semibold text-gray-100 mb-6 text-center">
           Add Course
@@ -170,15 +173,15 @@ const AddCourse = () => {
           <div className="mb-4">
             <label className="block text-gray-400 mb-2">Course Category*</label>
             <select
-  {...register("course_Category", { required: true })}
-  className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
->
-  {categories.map((category) => (
-    <option key={category._id} value={category._id}>
-      {category.Category_Name}
-    </option>
-  ))}
-</select>
+              {...register("course_Category", { required: true })}
+              className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+            >
+              {categories.map((category) => (
+                <option key={category._id} value={category._id}>
+                  {category.Category_Name}
+                </option>
+              ))}
+            </select>
             {errors.courseCategory && (
               <span className="text-red-500">Course Category is required</span>
             )}
@@ -217,17 +220,21 @@ const AddCourse = () => {
           </div>
           {/* Course Description (CKEditor) */}
           <div className="mb-4">
-  <label className="block text-gray-300 mb-2">Course Description*</label>
-  <ReactQuill
-    value={courseDescription}
-    onChange={setCourseDescription}
-    theme="snow"
-    className="bg-white text-black rounded-md"
-  />
-  {errors.courseDescription && (
-    <span className="text-red-500">Course Description is required</span>
-  )}
-</div>
+            <label className="block text-gray-300 mb-2">
+              Course Description*
+            </label>
+            <ReactQuill
+              value={courseDescription}
+              onChange={setCourseDescription}
+              theme="snow"
+              className="bg-white text-black rounded-md"
+            />
+            {errors.courseDescription && (
+              <span className="text-red-500">
+                Course Description is required
+              </span>
+            )}
+          </div>
           <div className="mb-4">
             <label className="block text-gray-400 mb-2">Instructor*</label>
             <select
@@ -341,18 +348,18 @@ const AddCourse = () => {
           </div>
           {/* Status */}
           <div className="mb-4">
-  <label className="block text-gray-400 mb-2">Status*</label>
-  <select
-    {...register("Status", { required: true })}
-    className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
-  >
-    <option value="Active">Active</option>
-    <option value="Inactive">Inactive</option>
-  </select>
-  {errors.Status && (
-    <span className="text-red-500">Status is required</span>
-  )}
-</div>
+            <label className="block text-gray-400 mb-2">Status*</label>
+            <select
+              {...register("Status", { required: true })}
+              className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+            {errors.Status && (
+              <span className="text-red-500">Status is required</span>
+            )}
+          </div>
 
           {/* Is View on Web? */}
           <div className="mb-4">

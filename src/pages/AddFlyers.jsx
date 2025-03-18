@@ -15,7 +15,9 @@ const AddFlyers = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch("https://api.pnytrainings.com/api/categories");
+        const response = await fetch(
+          "${import.meta.env.VITE_API_URL}/api/categories"
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch categories");
         }
@@ -28,7 +30,9 @@ const AddFlyers = () => {
 
     const fetchCourses = async () => {
       try {
-        const response = await fetch("https://api.pnytrainings.com/api/courses");
+        const response = await fetch(
+          "${import.meta.env.VITE_API_URL}/api/courses"
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch courses");
         }
@@ -64,15 +68,20 @@ const AddFlyers = () => {
     }
 
     try {
-      const response = await fetch("https://api.pnytrainings.com/api/eflyer", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "${import.meta.env.VITE_API_URL}/api/eflyer",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.text(); // Get the error response body
-        console.log('Error: ' + errorText);
-        toast.error("Failed to add E-flayer. Please check the data and try again.");
+        console.log("Error: " + errorText);
+        toast.error(
+          "Failed to add E-flayer. Please check the data and try again."
+        );
         return;
       }
 

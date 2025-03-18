@@ -14,12 +14,17 @@ const EditInstructor = () => {
   useEffect(() => {
     const fetchInstructor = async () => {
       try {
-        const response = await axios.get(`https://api.pnytrainings.com/api/instructors/${userId}`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/instructors/${userId}`
+        );
         const data = response.data.data;
         setInstructor(data);
         setImagePreview(data.photo); // Set the current image as the initial preview
       } catch (error) {
-        console.error("Error fetching instructor:", error.response ? error.response.data : error.message);
+        console.error(
+          "Error fetching instructor:",
+          error.response ? error.response.data : error.message
+        );
       }
     };
     fetchInstructor();
@@ -35,16 +40,26 @@ const EditInstructor = () => {
     formData.append("in_View", instructor.in_View === "Yes");
 
     try {
-      await axios.put(`https://api.pnytrainings.com/api/instructors/${userId}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/instructors/${userId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       toast.success("Instructor updated successfully!");
       navigate("/users");
     } catch (error) {
-      console.error("Error updating instructor:", error.response ? error.response.data : error.message);
-      toast.error("Failed to update instructor. Reason: " + (error.response?.data?.message || error.message));
+      console.error(
+        "Error updating instructor:",
+        error.response ? error.response.data : error.message
+      );
+      toast.error(
+        "Failed to update instructor. Reason: " +
+          (error.response?.data?.message || error.message)
+      );
     }
   };
 
@@ -73,72 +88,76 @@ const EditInstructor = () => {
   }
 
   return (
-<div className="overflow-auto mx-auto w-full">
-  <Header/>
-  <div className="bg-gray-800 bg-opacity-50 my-6 backdrop-blur-md shadow-lg rounded-xl p-6 border mx-auto border-gray-700 w-full">
-      <h2 className="text-2xl font-semibold text-gray-100 mb-5">Edit Instructor</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-gray-300">Instructor Name</label>
-          <input
-            type="text"
-            name="name"
-            value={instructor.name || ""}
-            onChange={handleInputChange}
-            required
-            className="w-full p-2 rounded bg-gray-700 text-white"
-          />
-        </div>
+    <div className="overflow-auto mx-auto w-full">
+      <Header />
+      <div className="bg-gray-800 bg-opacity-50 my-6 backdrop-blur-md shadow-lg rounded-xl p-6 border mx-auto border-gray-700 w-full">
+        <h2 className="text-2xl font-semibold text-gray-100 mb-5">
+          Edit Instructor
+        </h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-gray-300">Instructor Name</label>
+            <input
+              type="text"
+              name="name"
+              value={instructor.name || ""}
+              onChange={handleInputChange}
+              required
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            />
+          </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-300">Upload Image</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="w-full p-2 rounded bg-gray-700 text-white"
-          />
-          {imagePreview && (
-            <div className="mt-4 w-20">
-              <img
-                src={imagePreview}
-                alt="Selected"
-                className="w-full h-auto rounded-md border border-gray-600"
-              />
-            </div>
-          )}
-        </div>
+          <div className="mb-4">
+            <label className="block text-gray-300">Upload Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            />
+            {imagePreview && (
+              <div className="mt-4 w-20">
+                <img
+                  src={imagePreview}
+                  alt="Selected"
+                  className="w-full h-auto rounded-md border border-gray-600"
+                />
+              </div>
+            )}
+          </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-300">Instructor Profile</label>
-          <textarea
-            name="other_info"
-            value={instructor.other_info || ""}
-            onChange={handleInputChange}
-            className="w-full p-2 rounded bg-gray-700 text-white"
-            placeholder="Write profile description"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-300">Is View on Web?</label>
-          <select
-            name="in_View"
-            value={instructor.in_View || "No"}
-            onChange={handleInputChange}
-            className="w-full p-2 rounded bg-gray-700 text-white"
+          <div className="mb-4">
+            <label className="block text-gray-300">Instructor Profile</label>
+            <textarea
+              name="other_info"
+              value={instructor.other_info || ""}
+              onChange={handleInputChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+              placeholder="Write profile description"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-300">Is View on Web?</label>
+            <select
+              name="in_View"
+              value={instructor.in_View || "No"}
+              onChange={handleInputChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            >
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+          <button
+            type="submit"
+            className="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded-lg"
           >
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-          </select>
-        </div>
-        <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded-lg">
-          Update Instructor
-        </button>
-      </form>
+            Update Instructor
+          </button>
+        </form>
+      </div>
     </div>
-</div>
-  
   );
 };
 

@@ -41,11 +41,14 @@ const EditCourse = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [courseResponse, categoriesResponse, instructorsResponse] = await Promise.all([
-          axios.get(`https://api.pnytrainings.com/api/courses/${courseId}`),
-          axios.get(`https://api.pnytrainings.com/api/categories`),
-          axios.get(`https://api.pnytrainings.com/api/instructors`),
-        ]);
+        const [courseResponse, categoriesResponse, instructorsResponse] =
+          await Promise.all([
+            axios.get(
+              `${import.meta.env.VITE_API_URL}/api/courses/${courseId}`
+            ),
+            axios.get(`${import.meta.env.VITE_API_URL}/api/categories`),
+            axios.get(`${import.meta.env.VITE_API_URL}/api/instructors`),
+          ]);
         const fetchedCourse = courseResponse.data;
         // Ensure all keys in the state exist in the fetched course
         const updatedCourse = { ...course };
@@ -73,8 +76,14 @@ const EditCourse = () => {
 
     for (const key in course) {
       if (key === "course_Category") {
-        formData.append(key, course.course_Category._id || course.course_Category);
-      } else if (key === "course_Image" && course.course_Image instanceof File) {
+        formData.append(
+          key,
+          course.course_Category._id || course.course_Category
+        );
+      } else if (
+        key === "course_Image" &&
+        course.course_Image instanceof File
+      ) {
         formData.append(key, course.course_Image);
       } else {
         formData.append(key, course[key]);
@@ -84,9 +93,13 @@ const EditCourse = () => {
     if (brochureFile) formData.append("Brochure", brochureFile);
 
     try {
-      await axios.put(`https://api.pnytrainings.com/api/courses/${courseId}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/courses/${courseId}`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
       toast.success("Course updated successfully!");
       navigate("/courses");
     } catch (error) {
@@ -95,7 +108,6 @@ const EditCourse = () => {
     }
   };
 
-  
   const handleCancel = () => {
     navigate("/courses");
   };
@@ -113,7 +125,9 @@ const EditCourse = () => {
     <div className="w-full overflow-auto">
       <Header />
       <div className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border my-10 border-gray-700 mx-auto w-full">
-        <h2 className="text-2xl font-semibold text-gray-100 mb-5">Edit Course</h2>
+        <h2 className="text-2xl font-semibold text-gray-100 mb-5">
+          Edit Course
+        </h2>
         <form onSubmit={handleSubmit} encType="multipart/form-data">
           {/* Course Name */}
           <div className="mb-4">
@@ -172,7 +186,10 @@ const EditCourse = () => {
               type="file"
               name="course_Image"
               onChange={(e) =>
-                setCourse((prev) => ({ ...prev, course_Image: e.target.files[0] }))
+                setCourse((prev) => ({
+                  ...prev,
+                  course_Image: e.target.files[0],
+                }))
               }
               className="w-full p-2 rounded bg-gray-700 text-white"
             />
@@ -180,7 +197,9 @@ const EditCourse = () => {
 
           {/* Featured Option */}
           <div className="mb-4">
-            <label className="block text-gray-300">Enable Featured Option?</label>
+            <label className="block text-gray-300">
+              Enable Featured Option?
+            </label>
             <select
               name="featured_Option"
               value={course.featured_Option ? "yes" : "no"}
@@ -289,61 +308,67 @@ const EditCourse = () => {
             />
           </div>
           <div>
-        <label>View on Web</label>
-        <input
-          type="checkbox"
-          name="View_On_Web"
-          checked={course.View_On_Web}
-          onChange={(e) => setCourse({ ...course, View_On_Web: e.target.checked })}
-        />
-      </div>
-      <div className="my-2">
-        <label>Video ID</label>
-        <input
-          className="bg-gray-900 text-white"
-          type="text"
-          name="video_Id"
-          value={course.video_Id}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="my-2">
-        <label>Page Index</label>
-        <input
-          type="checkbox"
-          name="Page_Index"
-          checked={course.Page_Index}
-          onChange={(e) => setCourse({ ...course, Page_Index: e.target.checked })}
-        />
-      </div>
+            <label>View on Web</label>
+            <input
+              type="checkbox"
+              name="View_On_Web"
+              checked={course.View_On_Web}
+              onChange={(e) =>
+                setCourse({ ...course, View_On_Web: e.target.checked })
+              }
+            />
+          </div>
+          <div className="my-2">
+            <label>Video ID</label>
+            <input
+              className="bg-gray-900 text-white"
+              type="text"
+              name="video_Id"
+              value={course.video_Id}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="my-2">
+            <label>Page Index</label>
+            <input
+              type="checkbox"
+              name="Page_Index"
+              checked={course.Page_Index}
+              onChange={(e) =>
+                setCourse({ ...course, Page_Index: e.target.checked })
+              }
+            />
+          </div>
           {/* Other fields (like status, duration, etc.) can be added here */}
           <div className="mb-4">
-          <label className="block text-gray-300">Status</label>
-          <select
-            name="status"
-            value={course.status}
-            onChange={(e) => setCourse((prev) => ({ ...prev, status: e.target.value }))}
-            className="w-full p-2 rounded bg-gray-700 text-white"
-          >
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-        </div>
-      <div className="flex justify-between">
-      <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded-lg"
-          >
-            Update Course
-          </button>
-          <button
+            <label className="block text-gray-300">Status</label>
+            <select
+              name="status"
+              value={course.status}
+              onChange={(e) =>
+                setCourse((prev) => ({ ...prev, status: e.target.value }))
+              }
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div className="flex justify-between">
+            <button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded-lg"
+            >
+              Update Course
+            </button>
+            <button
               type="button"
               onClick={handleCancel}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 focus:outline-none"
             >
               Cancel
             </button>
-      </div>
+          </div>
         </form>
       </div>
     </div>

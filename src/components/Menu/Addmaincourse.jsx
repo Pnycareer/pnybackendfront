@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ToastContainer, toast, Zoom } from "react-toastify";
 
 function App() {
@@ -10,16 +10,25 @@ function App() {
   const [description, setDescription] = useState("");
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
+  const [instructorOptions, setInstructorOptions] = useState([]);
+  const [courseOptions, setCourseOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // For loader
 
-  const slugOptions = ["diploma", "marketing", "development", "designing" , "business" , "multimedia"];
+  const slugOptions = [
+    "diploma",
+    "marketing",
+    "development",
+    "designing",
+    "business",
+    "multimedia",
+  ];
   // -----------------------------
   // 2. Courses (array)
   // -----------------------------
   const [courses, setCourses] = useState([
     {
       name: "",
-      course_image: null,
+      course_image: "",
       monthly_tution_fee: "",
       url_slug: "",
       description: "",
@@ -32,7 +41,7 @@ function App() {
       ...prev,
       {
         name: "",
-        course_image: null,
+        course_image: "",
         monthly_tution_fee: "",
         url_slug: "",
         description: "",
@@ -61,7 +70,7 @@ function App() {
     {
       name: "",
       other_info: "",
-      photo: null,
+      photo: "",
     },
   ]);
 
@@ -72,7 +81,7 @@ function App() {
       {
         name: "",
         other_info: "",
-        photo: null,
+        photo: "",
       },
     ]);
   };
@@ -101,7 +110,9 @@ function App() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v1/subCourse/getsubcourses/${selectedSlug}`
+        `${
+          import.meta.env.VITE_API_URL
+        }/api/v1/subCourse/getsubcourses/${selectedSlug}`
       );
       const data = await response.json();
 
@@ -132,62 +143,70 @@ function App() {
     }
   };
 
-  // -----------------------------
-  // 4. Handle form submit
-  // -----------------------------
+  useEffect(() => {
+    const fetchInstructors = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/instructors/get-instructor`
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setInstructorOptions(data);
+        } else {
+          console.error("Error fetching instructors");
+        }
+      } catch (error) {
+        console.error("Failed to fetch instructors:", error);
+      }
+    };
+
+    fetchInstructors();
+  }, []);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/courses/get-course`
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setCourseOptions(data); // Set course options
+        } else {
+          console.error("Error fetching courses");
+        }
+      } catch (error) {
+        console.error("Failed to fetch courses:", error);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const requestBody = {
+      name,
+      url_slug: urlSlug,
+      description,
+      meta_title: metaTitle,
+      meta_description: metaDescription,
+      category_courses: courses,
+      category_instructors: instructors,
+    };
+
     try {
-      // 4a. Build the arrays to send as JSON
-      const category_courses = courses.map((course) => ({
-        name: course.name,
-        monthly_tution_fee: course.monthly_tution_fee,
-        url_slug: course.url_slug,
-        description: course.description,
-        course_image: "", // We handle file separately
-      }));
-
-      const category_instructors = instructors.map((inst) => ({
-        name: inst.name,
-        other_info: inst.other_info,
-        photo: "", // We handle file separately
-      }));
-
-      // 4b. Create FormData for multipart/form-data
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("url_slug", urlSlug);
-      formData.append("description", description);
-      formData.append("meta_title", metaTitle);
-      formData.append("meta_description", metaDescription);
-
-      // JSON versions of courses & instructors
-      formData.append("category_courses", JSON.stringify(category_courses));
-      formData.append(
-        "category_instructors",
-        JSON.stringify(category_instructors)
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/v1/subCourse`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
       );
-
-      // Append each course_image as part of "course_images"
-      courses.forEach((course) => {
-        if (course.course_image) {
-          formData.append("course_image", course.course_image);
-        }
-      });
-
-      // Append each instructor photo as part of "instructor_photos"
-      instructors.forEach((inst) => {
-        if (inst.photo) {
-          formData.append("photo", inst.photo);
-        }
-      });
-
-      // 4c. POST to your endpoint
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/subCourse`, {
-        method: "POST",
-        body: formData,
-      });
 
       const data = await response.json();
       if (response.ok) {
@@ -316,15 +335,45 @@ function App() {
                 {/* Course name */}
                 <div>
                   <label className="block font-semibold">Course Name:</label>
-                  <input
-                    type="text"
+                  <select
                     className="border rounded w-full p-2 text-black"
                     value={course.name}
-                    onChange={(e) =>
-                      handleCourseChange(index, "name", e.target.value)
-                    }
+                    onChange={(e) => {
+                      const selectedCourse = courseOptions.find(
+                        (course) => course.course_Name === e.target.value
+                      );
+                      if (selectedCourse) {
+                        handleCourseChange(
+                          index,
+                          "name",
+                          selectedCourse.course_Name
+                        );
+                        handleCourseChange(
+                          index,
+                          "url_slug",
+                          selectedCourse.url_Slug
+                        );
+                        handleCourseChange(
+                          index,
+                          "course_image",
+                          selectedCourse.course_Image
+                        );
+                        handleCourseChange(
+                          index,
+                          "description",
+                          selectedCourse.Short_Description
+                        );
+                      }
+                    }}
                     required
-                  />
+                  >
+                    <option value="">Select a course</option>
+                    {courseOptions.map((course) => (
+                      <option key={course._id} value={course.course_Name}>
+                        {course.course_Name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* URL Slug */}
@@ -336,10 +385,7 @@ function App() {
                     type="text"
                     className="border rounded w-full p-2 text-black"
                     value={course.url_slug}
-                    onChange={(e) =>
-                      handleCourseChange(index, "url_slug", e.target.value)
-                    }
-                    required
+                    readOnly
                   />
                 </div>
               </div>
@@ -352,10 +398,7 @@ function App() {
                     type="text"
                     className="border rounded w-full p-2 text-black"
                     value={course.description}
-                    onChange={(e) =>
-                      handleCourseChange(index, "description", e.target.value)
-                    }
-                    required
+                    readOnly
                   />
                 </div>
               </div>
@@ -364,12 +407,15 @@ function App() {
               <div className="mt-4">
                 <label className="block font-semibold">Course Image:</label>
                 <input
-                  type="file"
-                  accept="image/*"
-                  className="border rounded w-full p-2"
-                  onChange={(e) =>
-                    handleCourseChange(index, "course_image", e.target.files[0])
-                  }
+                  type="text"
+                  className="border rounded w-full p-2 text-black hidden"
+                  value={course.course_image}
+                  readOnly
+                />
+                <img
+                  src={`http://localhost:8080/${course.course_image}`}
+                  alt="Course Image"
+                  className="w-24 h-24 rounded-md mt-2"
                 />
               </div>
             </div>
@@ -402,16 +448,40 @@ function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Instructor name */}
                 <div>
-                  <label className="block font-semibold">Name:</label>
-                  <input
-                    type="text"
+                  <label className="block font-semibold">Select:</label>
+                  <select
                     className="border rounded w-full p-2 text-black"
-                    value={inst.name}
-                    onChange={(e) =>
-                      handleInstructorChange(index, "name", e.target.value)
-                    }
-                    required
-                  />
+                    value={inst.name} // ✅ Use inst.name to keep the selected instructor
+                    onChange={(e) => {
+                      const selectedInstructor = instructorOptions.find(
+                        (inst) => inst.name === e.target.value
+                      );
+                      if (selectedInstructor) {
+                        handleInstructorChange(
+                          index,
+                          "name",
+                          selectedInstructor.name
+                        );
+                        handleInstructorChange(
+                          index,
+                          "other_info",
+                          selectedInstructor.other_info
+                        );
+                        handleInstructorChange(
+                          index,
+                          "photo",
+                          selectedInstructor.photo
+                        );
+                      }
+                    }}
+                  >
+                    <option value="">Select an instructor</option>
+                    {instructorOptions.map((instructor) => (
+                      <option key={instructor._id} value={instructor.name}>
+                        {instructor.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Other Info */}
@@ -421,29 +491,28 @@ function App() {
                     type="text"
                     className="border rounded w-full p-2 text-black"
                     value={inst.other_info}
-                    onChange={(e) =>
-                      handleInstructorChange(
-                        index,
-                        "other_info",
-                        e.target.value
-                      )
-                    }
-                    required
+                    readOnly
                   />
                 </div>
-              </div>
 
-              {/* Instructor Photo */}
-              <div className="mt-4">
-                <label className="block font-semibold">Photo:</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="border rounded w-full p-2"
-                  onChange={(e) =>
-                    handleInstructorChange(index, "photo", e.target.files[0])
-                  }
-                />
+                <div>
+                  {/* Instructor Photo */}
+                  <input
+                    type="text"
+                    className="border rounded w-full p-2 text-black hidden"
+                    value={inst.photo || ""}
+                    readOnly // Prevent manual editing
+                  />
+                  <img
+                    src={
+                      inst.photo
+                        ? `http://localhost:8080/${inst.photo}`
+                        : "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png"
+                    }
+                    alt="Instructor"
+                    className="w-24 h-24 rounded-md mt-2"
+                  />
+                </div>
               </div>
             </div>
           ))}

@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 const EditFaq = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const [categoryName, setCategoryName] = useState("");
   const [categoryDescription, setCategoryDescription] = useState("");
   const [categoryImage, setCategoryImage] = useState(null);
@@ -16,12 +16,12 @@ const EditFaq = () => {
   const [inSitemap, setInSitemap] = useState(false);
   const [indexPage, setIndexPage] = useState(false);
   const [customCanonicalUrl, setCustomCanonicalUrl] = useState("");
-  
+
   const [existingImage, setExistingImage] = useState(""); // Store the existing image path
 
   useEffect(() => {
     axios
-      .get(`https://api.pnytrainings.com/api/faqcat/${id}`)
+      .get(`${import.meta.env.VITE_API_URL}/api/faqcat/${id}`)
       .then((response) => {
         setCategoryName(response.data.categoryName);
         setCategoryDescription(response.data.categoryDescription);
@@ -56,13 +56,17 @@ const EditFaq = () => {
     }
 
     try {
-      await axios.put(`https://api.pnytrainings.com/api/faqcat/${id}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data", // Ensure the content type is set for file uploads
-        },
-      });
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/faqcat/${id}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // Ensure the content type is set for file uploads
+          },
+        }
+      );
       navigate("/faqs"); // Redirect after successful update
-      toast.success("FAQ category updated successfully")
+      toast.success("FAQ category updated successfully");
     } catch (error) {
       console.error("Error updating FAQ category:", error);
     }
@@ -72,7 +76,9 @@ const EditFaq = () => {
     <div className="overflow-auto w-full">
       <Header />
       <div className="p-6 bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl w-full mx-auto my-6">
-        <h2 className="text-2xl font-semibold text-gray-100 mb-5">Edit FAQ Category</h2>
+        <h2 className="text-2xl font-semibold text-gray-100 mb-5">
+          Edit FAQ Category
+        </h2>
 
         <div className="mb-4">
           <label className="block text-gray-300 mb-2">Category Name</label>
@@ -85,7 +91,9 @@ const EditFaq = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-300 mb-2">Category Description</label>
+          <label className="block text-gray-300 mb-2">
+            Category Description
+          </label>
           <textarea
             className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none"
             value={categoryDescription}
@@ -103,7 +111,7 @@ const EditFaq = () => {
           {existingImage && (
             <div className="mt-2">
               <img
-                src={`https://api.pnytrainings.com/${existingImage}`} // Display existing image
+                src={`${import.meta.env.VITE_API_URL}/${existingImage}`} // Display existing image
                 alt="Category"
                 className="w-24 h-24 object-cover rounded-lg"
               />

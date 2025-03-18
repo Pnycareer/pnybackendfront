@@ -50,7 +50,7 @@ const SIDEBAR_ITEMS = [
 		name: "Instructor",
 		icon: GiTeacher,
 		color: "#10B981",
-		href: "/users",
+		href: "/instructors",
 	},
 	{
 		name: "Special Blog",

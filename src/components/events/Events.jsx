@@ -11,7 +11,7 @@ const Events = () => {
 
   useEffect(() => {
     axios
-      .get("https://api.pnytrainings.com/api/eventpost")
+      .get("${import.meta.env.VITE_API_URL}/api/eventpost")
       .then((response) => {
         setEvents(response.data);
         setFilteredEvents(response.data);
@@ -34,7 +34,9 @@ const Events = () => {
 
   const handleDelete = async (eventId) => {
     try {
-      await axios.delete(`https://api.pnytrainings.com/api/eventpost/${eventId}`);
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/eventpost/${eventId}`
+      );
       const updatedEvents = events.filter((item) => item._id !== eventId);
       setEvents(updatedEvents);
       setFilteredEvents(updatedEvents);
@@ -100,13 +102,19 @@ const Events = () => {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
               >
-                <td className="px-6 py-4 whitespace-nowrap">{event.metaTitle}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{event.category.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {event.metaTitle}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {event.category.name}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {/* Check if event.image is not null or undefined before rendering */}
                   {event.image ? (
                     <img
-                      src={`https://api.pnytrainings.com/${event.image.replace(/\\/g, '/')}`}
+                      src={`${
+                        import.meta.env.VITE_API_URL
+                      }/${event.image.replace(/\\/g, "/")}`}
                       alt={event.title}
                       className="w-16 h-16 object-cover"
                     />

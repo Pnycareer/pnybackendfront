@@ -1,32 +1,34 @@
-import  { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { toast } from 'react-toastify';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const EditBlog = () => {
   const { id } = useParams(); // Get the blog ID from URL parameters
   const navigate = useNavigate(); // Use to navigate back after editing
   const [formData, setFormData] = useState({
-    postTitle: '',
-    urlSlug: '',
-    postCategory: '',
-    postThumbnailImage: '',
-    shortDescription: '',
-    postDescription: '',
+    postTitle: "",
+    urlSlug: "",
+    postCategory: "",
+    postThumbnailImage: "",
+    shortDescription: "",
+    postDescription: "",
     isPublish: false,
     featured: false,
-    metaTitle: '',
-    metaDescription: '',
+    metaTitle: "",
+    metaDescription: "",
     inSitemap: false,
     pageIndex: false,
-    customCanonicalUrl: ''
+    customCanonicalUrl: "",
   });
 
   // Fetch blog data
   useEffect(() => {
     const fetchBlog = async () => {
       try {
-        const response = await axios.get(`https://api.pnytrainings.com/api/blogpost/${id}`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/blogpost/${id}`
+        );
         const blog = response.data;
         setFormData({
           postTitle: blog.postTitle,
@@ -41,10 +43,10 @@ const EditBlog = () => {
           metaDescription: blog.metaDescription,
           inSitemap: blog.inSitemap,
           pageIndex: blog.pageIndex,
-          customCanonicalUrl: blog.customCanonicalUrl
+          customCanonicalUrl: blog.customCanonicalUrl,
         });
       } catch (error) {
-        console.error('Error fetching blog:', error);
+        console.error("Error fetching blog:", error);
       }
     };
 
@@ -76,18 +78,22 @@ const EditBlog = () => {
     });
 
     try {
-      await axios.put(`https://api.pnytrainings.com/api/blogpost/${id}`, updatedBlogData, {
-        headers: {
-          'Content-Type': 'multipart/form-data', // Important for file upload
-        },
-      });
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/blogpost/${id}`,
+        updatedBlogData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // Important for file upload
+          },
+        }
+      );
 
       // Redirect after successful edit
-      navigate('/blog-post');
-       // Change this to your desired route
-       toast.success("blog updated successfully")
+      navigate("/blog-post");
+      // Change this to your desired route
+      toast.success("blog updated successfully");
     } catch (error) {
-      toast.error('Error updating blog:', error);
+      toast.error("Error updating blog:", error);
     }
   };
 
@@ -111,7 +117,9 @@ const EditBlog = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-white">URL Slug</label>
+          <label className="block text-sm font-medium text-white">
+            URL Slug
+          </label>
           <input
             type="text"
             name="urlSlug"
@@ -122,7 +130,9 @@ const EditBlog = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-white">Category</label>
+          <label className="block text-sm font-medium text-white">
+            Category
+          </label>
           <input
             type="text"
             name="postCategory"
@@ -133,7 +143,9 @@ const EditBlog = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-white">Short Description</label>
+          <label className="block text-sm font-medium text-white">
+            Short Description
+          </label>
           <textarea
             name="shortDescription"
             className="w-full px-3 py-2 border rounded-md text-black"
@@ -143,7 +155,9 @@ const EditBlog = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-white">Post Description</label>
+          <label className="block text-sm font-medium text-white">
+            Post Description
+          </label>
           <textarea
             name="postDescription"
             className="w-full px-3 py-2 border rounded-md text-black"
@@ -153,25 +167,35 @@ const EditBlog = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-white">Publish Status</label>
+          <label className="block text-sm font-medium text-white">
+            Publish Status
+          </label>
           <input
             type="checkbox"
             name="isPublish"
             checked={formData.isPublish}
-            onChange={(e) => setFormData({ ...formData, isPublish: e.target.checked })}
+            onChange={(e) =>
+              setFormData({ ...formData, isPublish: e.target.checked })
+            }
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-white">Featured Status</label>
+          <label className="block text-sm font-medium text-white">
+            Featured Status
+          </label>
           <input
             type="checkbox"
             name="featured"
             checked={formData.featured}
-            onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+            onChange={(e) =>
+              setFormData({ ...formData, featured: e.target.checked })
+            }
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-white">Meta Title</label>
+          <label className="block text-sm font-medium text-white">
+            Meta Title
+          </label>
           <input
             type="text"
             name="metaTitle"
@@ -181,7 +205,9 @@ const EditBlog = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-white">Meta Description</label>
+          <label className="block text-sm font-medium text-white">
+            Meta Description
+          </label>
           <textarea
             name="metaDescription"
             className="w-full px-3 py-2 border rounded-md text-black"
@@ -190,7 +216,9 @@ const EditBlog = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-white">Canonical URL</label>
+          <label className="block text-sm font-medium text-white">
+            Canonical URL
+          </label>
           <input
             type="text"
             name="customCanonicalUrl"
@@ -200,7 +228,9 @@ const EditBlog = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium text-white">Thumbnail Image</label>
+          <label className="block text-sm font-medium text-white">
+            Thumbnail Image
+          </label>
           <input
             type="file"
             name="postThumbnailImage"
@@ -213,15 +243,13 @@ const EditBlog = () => {
             Update Blog
           </button>
 
-          
-       <button
-              type="button"
-              onClick={handleCancel}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 focus:outline-none"
-            >
-              Cancel
-            </button>
-
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 focus:outline-none"
+          >
+            Cancel
+          </button>
         </div>
       </form>
     </div>

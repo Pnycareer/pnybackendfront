@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const AddEvents = () => {
-  const [categoryName, setCategoryName] = useState("");  // Holds the selected category
+  const [categoryName, setCategoryName] = useState(""); // Holds the selected category
   const [urlSlug, setUrlSlug] = useState("");
   const [categoryDescription, setCategoryDescription] = useState("");
   const [image, setCategoryImage] = useState("");
@@ -13,15 +13,15 @@ const AddEvents = () => {
   const [inSitemap, setInSitemap] = useState(false);
   const [indexPage, setIndexPage] = useState(false);
   const [customCanonicalUrl, setCustomCanonicalUrl] = useState("");
-  const [categories, setCategories] = useState([]);  // To hold the category data fetched from API
+  const [categories, setCategories] = useState([]); // To hold the category data fetched from API
   const navigate = useNavigate();
 
   // Fetch categories from the API on component mount
   useEffect(() => {
     axios
-      .get("https://api.pnytrainings.com/api/event")  // API to get categories
+      .get("${import.meta.env.VITE_API_URL}/api/event") // API to get categories
       .then((response) => {
-        setCategories(response.data);  // Assuming the categories are in response.data
+        setCategories(response.data); // Assuming the categories are in response.data
       })
       .catch((error) => {
         console.error("Error fetching categories:", error);
@@ -31,7 +31,7 @@ const AddEvents = () => {
   // Handle file change
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    
+
     // Validate file type (e.g., image files only)
     if (file && !file.type.startsWith("image/")) {
       toast.error("Please upload a valid image file.");
@@ -59,7 +59,7 @@ const AddEvents = () => {
     }
 
     const formData = new FormData();
-    formData.append("categoryName", categoryName);  // Send category name or ID
+    formData.append("categoryName", categoryName); // Send category name or ID
     formData.append("urlSlug", urlSlug);
     formData.append("categoryDescription", categoryDescription);
     formData.append("image", image); // Append the image file
@@ -79,12 +79,16 @@ const AddEvents = () => {
         throw new Error("Category not found");
       }
 
-      formData.append("category", selectedCategory._id);  // Append category ID
+      formData.append("category", selectedCategory._id); // Append category ID
 
       // Send POST request to create event
-      const response = await axios.post("https://api.pnytrainings.com/api/eventpost", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await axios.post(
+        "${import.meta.env.VITE_API_URL}/api/eventpost",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
       console.log("Response:", response); // Debugging: Log response
       toast.success("Event posted successfully!");
@@ -135,9 +139,9 @@ const AddEvents = () => {
             type="file"
             className="w-full p-3 bg-gray-700 text-white placeholder-gray-400 rounded-lg"
             onChange={handleFileChange}
-            accept="image/*"  // Only allow image files
+            accept="image/*" // Only allow image files
           />
-          
+
           {/* Image Preview */}
           {image && (
             <div className="mt-2">

@@ -19,13 +19,13 @@ const AddInstructor = () => {
     formData.append("in_View", viewOnWeb === "Yes"); // Convert to boolean
 
     try {
-      const response = await axios.post("https://api.pnytrainings.com/api/instructors", formData, {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/instructors/add-instructor`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
       console.log("Instructor Added:", response.data);
-      navigate("/users");
+      navigate("/instructors");
       toast.success("instructor added successfully")
     } catch (error) {
       toast.error("Error adding instructor:", error);

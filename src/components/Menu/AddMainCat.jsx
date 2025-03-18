@@ -12,7 +12,7 @@ const AddMainCat = () => {
   const navigate = useNavigate();
   useState(() => {
     axios
-      .get("https://api.pnytrainings.com/api/courses")
+      .get("${import.meta.env.VITE_API_URL}/api/courses")
       .then((response) => {
         if (Array.isArray(response.data)) {
           setCourses(response.data);
@@ -29,7 +29,10 @@ const AddMainCat = () => {
     setSubImage(e.target.files[0]);
   };
   const handleCourseSelection = (e) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
+    const selectedOptions = Array.from(
+      e.target.selectedOptions,
+      (option) => option.value
+    );
     setSelectedCourses(selectedOptions);
   };
   const handleSubmit = async (e) => {
@@ -62,7 +65,9 @@ const AddMainCat = () => {
     <div className="overflow-auto w-full">
       <Header />
       <div className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700 mx-auto w-full my-6">
-        <h2 className="text-2xl font-semibold text-gray-100 mb-5">Add SubCategory</h2>
+        <h2 className="text-2xl font-semibold text-gray-100 mb-5">
+          Add SubCategory
+        </h2>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <input

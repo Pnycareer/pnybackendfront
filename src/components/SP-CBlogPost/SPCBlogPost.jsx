@@ -8,8 +8,8 @@ import { toast } from "react-toastify";
 const SPCBlogPost = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [blogPosts, setBlogPosts] = useState([]);
-  const [filteredPosts, setFilteredPosts] = useState([]);  
-console.log(blogPosts)
+  const [filteredPosts, setFilteredPosts] = useState([]);
+  console.log(blogPosts);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -17,7 +17,9 @@ console.log(blogPosts)
   useEffect(() => {
     const fetchBlogPosts = async () => {
       try {
-        const response = await axios.get("https://api.pnytrainings.com/api/specialcatblog");
+        const response = await axios.get(
+          "${import.meta.env.VITE_API_URL}/api/specialcatblog"
+        );
         setBlogPosts(response.data); // Assuming response contains an array of blog posts
         setFilteredPosts(response.data); // Set filtered posts initially to the full list
       } catch (error) {
@@ -40,7 +42,9 @@ console.log(blogPosts)
 
   const handleDelete = async (postId) => {
     try {
-      await axios.delete(`https://api.pnytrainings.com/api/specialcatblog/${postId}`);
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/specialcatblog/${postId}`
+      );
       setBlogPosts(blogPosts.filter((post) => post._id !== postId)); // Update the posts after deletion
       setFilteredPosts(filteredPosts.filter((post) => post._id !== postId)); // Update the filtered posts
       toast.success(`Deleted post with ID: ${postId}`);
@@ -81,7 +85,10 @@ console.log(blogPosts)
                   value={searchTerm}
                   onChange={handleSearch}
                 />
-                <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                <Search
+                  className="absolute left-3 top-2.5 text-gray-400"
+                  size={18}
+                />
               </div>
 
               <Link to="/specialbp">
@@ -116,51 +123,56 @@ console.log(blogPosts)
               </thead>
 
               <tbody className="divide-y divide-gray-700">
-  {filteredPosts.map((post, index) => (
-    <motion.tr
-      key={post._id}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm font-medium text-gray-100">{index + 1}</div>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-100">{post.postTitle}</div>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <img
-          src={`https://api.pnytrainings.com/${post.postThumbnailImage}`}
-          alt={post.postTitle}
-          className="h-10 w-10 rounded-full"
-        />
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-300">
-          {post.postCategory?.cityCategoryName || "Unknown"}
-        </div>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-        <button
-          className="text-indigo-400 hover:text-indigo-300 mr-2"
-          onClick={() => handleEdit(post._id)}
-        >
-          {/* <Edit size={18} /> */}
-          Edit
-        </button>
-        <button
-          className="text-red-400 hover:text-red-300"
-          onClick={() => handleDelete(post._id)}
-        >
-          {/* <Trash size={18} /> */}
-          Delete
-        </button>
-      </td>
-    </motion.tr>
-  ))}
-</tbody>
-
+                {filteredPosts.map((post, index) => (
+                  <motion.tr
+                    key={post._id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-100">
+                        {index + 1}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-100">
+                        {post.postTitle}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <img
+                        src={`${import.meta.env.VITE_API_URL}/${
+                          post.postThumbnailImage
+                        }`}
+                        alt={post.postTitle}
+                        className="h-10 w-10 rounded-full"
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-300">
+                        {post.postCategory?.cityCategoryName || "Unknown"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      <button
+                        className="text-indigo-400 hover:text-indigo-300 mr-2"
+                        onClick={() => handleEdit(post._id)}
+                      >
+                        {/* <Edit size={18} /> */}
+                        Edit
+                      </button>
+                      <button
+                        className="text-red-400 hover:text-red-300"
+                        onClick={() => handleDelete(post._id)}
+                      >
+                        {/* <Trash size={18} /> */}
+                        Delete
+                      </button>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
             </table>
           </div>
         </>

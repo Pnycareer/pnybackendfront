@@ -19,7 +19,7 @@ const Editfaquestion = () => {
   // Fetch the FAQ categories from the API
   useEffect(() => {
     axios
-      .get("https://api.pnytrainings.com/api/faqcat") // Fetch FAQ categories
+      .get("${import.meta.env.VITE_API_URL}/api/faqcat") // Fetch FAQ categories
       .then((response) => {
         setCategories(response.data); // Set the categories in state
       })
@@ -27,9 +27,10 @@ const Editfaquestion = () => {
 
     // Fetch the FAQ question details
     axios
-      .get(`https://api.pnytrainings.com/api/faquestion/${id}`) // Fetch the specific FAQ question
+      .get(`${import.meta.env.VITE_API_URL}/api/faquestion/${id}`) // Fetch the specific FAQ question
       .then((response) => {
-        const { question, faqCategory, answer, status, customCanonicalUrl } = response.data;
+        const { question, faqCategory, answer, status, customCanonicalUrl } =
+          response.data;
         setQuestion(question);
         setFaqCategory(faqCategory ? faqCategory._id : ""); // Set category ID if exists
         setAnswer(answer);
@@ -42,7 +43,7 @@ const Editfaquestion = () => {
   // Handle form submission and update the FAQ question
   const handleUpdate = async () => {
     try {
-      await axios.put(`https://api.pnytrainings.com/api/faquestion/${id}`, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/api/faquestion/${id}`, {
         question,
         faqCategory,
         answer,
@@ -50,7 +51,7 @@ const Editfaquestion = () => {
         customCanonicalUrl,
       });
       navigate("/faquestion"); // Redirect after successful update
-      toast.success("FAQ question Successfully updated")
+      toast.success("FAQ question Successfully updated");
     } catch (error) {
       console.error("Error updating FAQ question:", error);
     }
@@ -59,63 +60,67 @@ const Editfaquestion = () => {
     navigate("/faquestion");
   };
   return (
-  <div className="w-full overflow-auto">
-    <Header/>
-    <div className="p-6 bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl w-full mx-auto">
-      <h2 className="text-2xl font-semibold text-gray-100 mb-5">Edit FAQ Question</h2>
+    <div className="w-full overflow-auto">
+      <Header />
+      <div className="p-6 bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl w-full mx-auto">
+        <h2 className="text-2xl font-semibold text-gray-100 mb-5">
+          Edit FAQ Question
+        </h2>
 
-      {/* Question input */}
-      <div className="mb-4">
-        <label className="block text-gray-300 mb-2">Question</label>
-        <input
-          type="text"
-          className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-        />
-      </div>
+        {/* Question input */}
+        <div className="mb-4">
+          <label className="block text-gray-300 mb-2">Question</label>
+          <input
+            type="text"
+            className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+          />
+        </div>
 
-      {/* FAQ Category dropdown */}
-      <div className="mb-4">
-        <label className="block text-gray-300 mb-2">FAQ Category</label>
-        <select
-          value={faqCategory}
-          onChange={(e) => setFaqCategory(e.target.value)}
-          className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none"
-        >
-          <option value="">Select Category</option>
-          {categories.map((category) => (
-            <option key={category._id} value={category._id}>
-              {category.categoryName}
-            </option>
-          ))}
-        </select>
-      </div>
+        {/* FAQ Category dropdown */}
+        <div className="mb-4">
+          <label className="block text-gray-300 mb-2">FAQ Category</label>
+          <select
+            value={faqCategory}
+            onChange={(e) => setFaqCategory(e.target.value)}
+            className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none"
+          >
+            <option value="">Select Category</option>
+            {categories.map((category) => (
+              <option key={category._id} value={category._id}>
+                {category.categoryName}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      {/* Answer input */}
-      <div className="mb-4">
-        <label className="block text-gray-300 mb-2">Answer</label>
-        <textarea
-          className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none"
-          value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
-        />
-      </div>
+        {/* Answer input */}
+        <div className="mb-4">
+          <label className="block text-gray-300 mb-2">Answer</label>
+          <textarea
+            className="w-full p-2 bg-gray-700 text-white rounded-lg focus:outline-none"
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+          />
+        </div>
 
-      {/* Status checkbox */}
-      <div className="mb-4 flex items-center">
-        <label className="block text-gray-300 mr-2">Status</label>
-        <input
-          type="checkbox"
-          checked={status}
-          onChange={() => setStatus(!status)}
-          className="text-gray-700"
-        />
-        <span className="text-gray-300">{status ? "Active" : "Inactive"}</span>
-      </div>
+        {/* Status checkbox */}
+        <div className="mb-4 flex items-center">
+          <label className="block text-gray-300 mr-2">Status</label>
+          <input
+            type="checkbox"
+            checked={status}
+            onChange={() => setStatus(!status)}
+            className="text-gray-700"
+          />
+          <span className="text-gray-300">
+            {status ? "Active" : "Inactive"}
+          </span>
+        </div>
 
-      {/* Custom Canonical URL input */}
-      {/* <div className="mb-4">
+        {/* Custom Canonical URL input */}
+        {/* <div className="mb-4">
         <label className="block text-gray-300 mb-2">Custom Canonical URL</label>
         <input
           type="text"
@@ -125,24 +130,24 @@ const Editfaquestion = () => {
         />
       </div> */}
 
-      {/* Save Changes button */}
- <div className="flex justify-between">
- <button
-        onClick={handleUpdate}
-        className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg"
-      >
-        Save Changes
-      </button>
-      <button
-              type="button"
-              onClick={handleCancel}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 focus:outline-none"
-            >
-              Cancel
-            </button>
- </div>
+        {/* Save Changes button */}
+        <div className="flex justify-between">
+          <button
+            onClick={handleUpdate}
+            className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg"
+          >
+            Save Changes
+          </button>
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 focus:outline-none"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
   );
 };
 

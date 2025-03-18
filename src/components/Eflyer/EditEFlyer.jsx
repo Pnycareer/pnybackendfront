@@ -22,7 +22,9 @@ const EditEFlyer = () => {
     const fetchData = async () => {
       try {
         // Fetch eFlyer details
-        const eflyerResponse = await axios.get(`https://api.pnytrainings.com/api/eflyer/${id}`);
+        const eflyerResponse = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/eflyer/${id}`
+        );
         const eflyerData = eflyerResponse.data;
 
         setEFlyer({
@@ -33,8 +35,8 @@ const EditEFlyer = () => {
 
         // Fetch categories and courses
         const [categoriesResponse, coursesResponse] = await Promise.all([
-          axios.get("https://api.pnytrainings.com/api/categories"),
-          axios.get("https://api.pnytrainings.com/api/courses"),
+          axios.get("${import.meta.env.VITE_API_URL}/api/categories"),
+          axios.get("${import.meta.env.VITE_API_URL}/api/courses"),
         ]);
 
         setCategories(categoriesResponse.data);
@@ -58,9 +60,13 @@ const EditEFlyer = () => {
     if (flyerFile) formData.append("flyerFile", flyerFile);
 
     try {
-      await axios.put(`https://api.pnytrainings.com/api/eflyer/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/eflyer/${id}`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
       toast.success("eFlyer updated successfully!");
       navigate("/eflayer");
     } catch (error) {
@@ -90,8 +96,13 @@ const EditEFlyer = () => {
       <Header />
       <div className="flex justify-center items-center my-5 bg-gray-900 overflow-auto w-full">
         <div className="bg-gray-800 bg-opacity-80 backdrop-blur-md shadow-lg rounded-xl p-8 border border-gray-700 w-full">
-          <h2 className="text-2xl font-semibold text-gray-100 mb-6">Edit eFlyer</h2>
-          <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto max-h-[500px]">
+          <h2 className="text-2xl font-semibold text-gray-100 mb-6">
+            Edit eFlyer
+          </h2>
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4 overflow-y-auto max-h-[500px]"
+          >
             {/* Category Dropdown */}
             <div className="mb-4">
               <label className="block text-gray-300">Category</label>
@@ -102,7 +113,9 @@ const EditEFlyer = () => {
                 required
                 className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:ring focus:ring-blue-500 focus:outline-none"
               >
-                <option value="" disabled>Select Category</option>
+                <option value="" disabled>
+                  Select Category
+                </option>
                 {categories.map((cat) => (
                   <option key={cat._id} value={cat._id}>
                     {cat.Category_Name}
@@ -121,7 +134,9 @@ const EditEFlyer = () => {
                 required
                 className="w-full p-3 rounded bg-gray-700 text-white border border-gray-600 focus:ring focus:ring-blue-500 focus:outline-none"
               >
-                <option value="" disabled>Select Course</option>
+                <option value="" disabled>
+                  Select Course
+                </option>
                 {courses.map((course) => (
                   <option key={course._id} value={course._id}>
                     {course.course_Name}
@@ -156,26 +171,22 @@ const EditEFlyer = () => {
             </div>
 
             {/* Submit Button */}
-         <div className="flex justify-between">
-         <button
-              type="submit"
-              className=" bg-blue-600 hover:bg-blue-500 text-white font-semibold p-2 rounded-lg transition duration-200"
-            >
-              Update e_Flyer
-            </button>
+            <div className="flex justify-between">
+              <button
+                type="submit"
+                className=" bg-blue-600 hover:bg-blue-500 text-white font-semibold p-2 rounded-lg transition duration-200"
+              >
+                Update e_Flyer
+              </button>
 
-            
-
-
-       <button
-              type="button"
-              onClick={handleCancel}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 focus:outline-none"
-            >
-              Cancel
-            </button>
-
-         </div>
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 focus:outline-none"
+              >
+                Cancel
+              </button>
+            </div>
           </form>
         </div>
       </div>

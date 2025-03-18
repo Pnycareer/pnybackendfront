@@ -34,7 +34,7 @@ const EditMaincat = () => {
   // Fetch all courses
   useEffect(() => {
     axios
-      .get("https://api.pnytrainings.com/api/courses")
+      .get("${import.meta.env.VITE_API_URL}/api/courses")
       .then((response) => {
         if (Array.isArray(response.data)) {
           setCourses(response.data);
@@ -56,7 +56,10 @@ const EditMaincat = () => {
 
   // Handle course selection
   const handleCourseSelection = (e) => {
-    const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
+    const selectedOptions = Array.from(
+      e.target.selectedOptions,
+      (option) => option.value
+    );
     setSelectedCourses(selectedOptions);
   };
 
@@ -66,7 +69,8 @@ const EditMaincat = () => {
     setSearchTerm(term);
     const filtered = courses.filter(
       (course) =>
-        (course.course_Name && course.course_Name.toLowerCase().includes(term)) ||
+        (course.course_Name &&
+          course.course_Name.toLowerCase().includes(term)) ||
         (course.url_Slug && course.url_Slug.toLowerCase().includes(term))
     );
     setFilteredCourses(filtered);
@@ -105,7 +109,9 @@ const EditMaincat = () => {
     <div className="overflow-auto w-full">
       <Header />
       <div className="p-6 bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg my-6 rounded-xl mx-auto w-full">
-        <h2 className="text-2xl font-semibold text-gray-100 mb-5">Edit Category</h2>
+        <h2 className="text-2xl font-semibold text-gray-100 mb-5">
+          Edit Category
+        </h2>
 
         {/* Name Field */}
         <div className="mb-4">
@@ -139,7 +145,11 @@ const EditMaincat = () => {
           />
           {subImage && (
             <img
-              src={typeof subImage === "string" ? subImage : URL.createObjectURL(subImage)}
+              src={
+                typeof subImage === "string"
+                  ? subImage
+                  : URL.createObjectURL(subImage)
+              }
               alt="Sub Image"
               className="mt-2 w-32 h-32 object-cover rounded-lg border border-gray-500"
             />

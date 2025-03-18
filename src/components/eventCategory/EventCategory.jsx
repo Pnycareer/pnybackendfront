@@ -11,7 +11,7 @@ const EventCategory = () => {
 
   useEffect(() => {
     axios
-      .get("https://api.pnytrainings.com/api/event")
+      .get("${import.meta.env.VITE_API_URL}/api/event")
       .then((response) => {
         setEvent(response.data);
         setFilteredEvents(response.data); // Initially show all events
@@ -34,7 +34,9 @@ const EventCategory = () => {
 
   const handleDelete = async (eventId) => {
     try {
-      await axios.delete(`https://api.pnytrainings.com/api/event/${eventId}`);
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/event/${eventId}`
+      );
       const updatedEvents = event.filter((item) => item._id !== eventId);
       setEvent(updatedEvents);
       setFilteredEvents(updatedEvents);
@@ -56,21 +58,21 @@ const EventCategory = () => {
         </h2>
         <hr className="w-full h-1 bg-slate-500 rounded-sm mb-5" />
         <div className="flex justify-between">
-<div className="relative">
-  <input
-          type="text"
-          placeholder="Search by title"
-          className="bg-gray-700 text-white rounded-lg py-2 px-4 mb-4"
-          value={searchTerm}
-          onChange={handleSearch}
-        />
-  </div>
-             <Link to="/addevent">
-                <button className="bg-blue-600 hover:bg-blue-500 text-white hidden sm:block font-semibold py-2 px-4 rounded-lg transition-all duration-300">
-                  Add Event
-                </button>
-              </Link>
-</div>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by title"
+              className="bg-gray-700 text-white rounded-lg py-2 px-4 mb-4"
+              value={searchTerm}
+              onChange={handleSearch}
+            />
+          </div>
+          <Link to="/addevent">
+            <button className="bg-blue-600 hover:bg-blue-500 text-white hidden sm:block font-semibold py-2 px-4 rounded-lg transition-all duration-300">
+              Add Event
+            </button>
+          </Link>
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -101,8 +103,12 @@ const EventCategory = () => {
                 transition={{ duration: 0.3 }}
               >
                 <td className="px-6 py-4 whitespace-nowrap">{event.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{event.metaTitle}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{event.metaDescription}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {event.metaTitle}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {event.metaDescription}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                   <Link to={`/editeventcat/${event._id}`}>
                     <button className="text-indigo-400 hover:text-indigo-300 mr-2">

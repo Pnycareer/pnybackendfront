@@ -14,8 +14,7 @@ const EditSpecialcat = () => {
     metaDescription: "",
     metaTitle: "",
     urlSlug: "",
-    pageIndex:" ",
-
+    pageIndex: " ",
   });
 
   console.log(categoryData);
@@ -24,7 +23,9 @@ const EditSpecialcat = () => {
   useEffect(() => {
     const fetchCategoryDetails = async () => {
       try {
-        const response = await axios.get(`https://api.pnytrainings.com/api/citycategory/${id}`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/citycategory/${id}`
+        );
         console.log("API Response:", response.data); // Debugging: check the response
         setCategoryData({
           cityCategoryName: response.data.cityCategoryName, // Update these fields based on your API response
@@ -55,12 +56,15 @@ const EditSpecialcat = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`https://api.pnytrainings.com/api/citycategory/${id}`, categoryData);
-      navigate("/sp-c-categories"); // Redirect to categories page after successful 
-      toast.success('Special blog category updated successfully!'); // Show success toast message
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/citycategory/${id}`,
+        categoryData
+      );
+      navigate("/sp-c-categories"); // Redirect to categories page after successful
+      toast.success("Special blog category updated successfully!"); // Show success toast message
     } catch (error) {
       console.error("Error updating category:", error);
-      toast.error('Error updating category:', error); // Show error toast message
+      toast.error("Error updating category:", error); // Show error toast message
     }
   };
 
@@ -153,8 +157,7 @@ const EditSpecialcat = () => {
               type="checkbox"
               name="pageIndex
 "
-              checked={categoryData.pageIndex
-                }
+              checked={categoryData.pageIndex}
               onChange={handleChange}
               className="rounded-md"
             />

@@ -14,7 +14,7 @@ const TableGallery = () => {
   useEffect(() => {
     // Fetch gallery items from the API
     axios
-      .get("https://api.pnytrainings.com/api/gallery")
+      .get("${import.meta.env.VITE_API_URL}/api/gallery")
       .then((response) => setGalleryItems(response.data))
       .catch((error) => console.error("Error fetching gallery items:", error));
   }, []);
@@ -26,7 +26,9 @@ const TableGallery = () => {
 
   const handleDelete = async (itemId) => {
     try {
-      await axios.delete(`https://api.pnytrainings.com/api/gallery/${itemId}`);
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/gallery/${itemId}`
+      );
       setGalleryItems(galleryItems.filter((item) => item._id !== itemId));
       toast.success("Gallery item deleted successfully");
     } catch (error) {
@@ -36,7 +38,7 @@ const TableGallery = () => {
 
   // const handleAddGalleryItem = async (newItem) => {
   //   try {
-  //     const response = await axios.post("https://api.pnytrainings.com/api/gallery", newItem);
+  //     const response = await axios.post("${import.meta.env.VITE_API_URL}/api/gallery", newItem);
   //     setGalleryItems([...galleryItems, response.data]);
   //   } catch (error) {
   //     console.error("Error adding new gallery item:", error);
@@ -69,7 +71,10 @@ const TableGallery = () => {
                   value={searchTerm}
                   onChange={handleSearch}
                 />
-                <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                <Search
+                  className="absolute left-3 top-2.5 text-gray-400"
+                  size={18}
+                />
               </div>
 
               <Link to="/addgallery">
@@ -107,8 +112,10 @@ const TableGallery = () => {
 
               <tbody className="divide-y divide-gray-700">
                 {galleryItems
-                  .filter((item) =>
-                    item.galleryTitle && item.galleryTitle.toLowerCase().includes(searchTerm)
+                  .filter(
+                    (item) =>
+                      item.galleryTitle &&
+                      item.galleryTitle.toLowerCase().includes(searchTerm)
                   )
                   .map((item, index) => (
                     <motion.tr
@@ -117,16 +124,32 @@ const TableGallery = () => {
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{item.galleryTitle}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <img src={`https://api.pnytrainings.com/${item.coverImage.replace(/\\/g, '/')}`} alt="Cover" className="h-12 w-12 rounded" />
+                        {index + 1}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">{item.isViewable ? "Yes" : "No"}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{item.note}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {item.galleryTitle}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <img
+                          src={`${
+                            import.meta.env.VITE_API_URL
+                          }/${item.coverImage.replace(/\\/g, "/")}`}
+                          alt="Cover"
+                          className="h-12 w-12 rounded"
+                        />
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {item.isViewable ? "Yes" : "No"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {item.note}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                         <Link to={`/editgallery/${item._id}`}>
-                          <button className="text-indigo-400 hover:text-indigo-300 mr-2">Edit</button>
+                          <button className="text-indigo-400 hover:text-indigo-300 mr-2">
+                            Edit
+                          </button>
                         </Link>
                         <button
                           onClick={() => handleDelete(item._id)}

@@ -9,14 +9,14 @@ const Tablefaqquestion = () => {
   const [faqQuestions, setFaqQuestions] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
-  console.log(faqQuestions)
+  console.log(faqQuestions);
   useEffect(() => {
     // Fetch FAQ questions from the API
     axios
-      .get("https://api.pnytrainings.com/api/faquestion")
+      .get("${import.meta.env.VITE_API_URL}/api/faquestion")
       .then((response) => setFaqQuestions(response.data))
       .catch((error) => console.error("Error fetching FAQ questions:", error));
-      console.log(faqQuestions)
+    console.log(faqQuestions);
   }, []);
 
   const handleSearch = (e) => {
@@ -25,9 +25,11 @@ const Tablefaqquestion = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://api.pnytrainings.com/api/faquestion/${id}`);
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/faquestion/${id}`
+      );
       setFaqQuestions(faqQuestions.filter((question) => question._id !== id));
-      toast.success("faq questions deleted successfully")
+      toast.success("faq questions deleted successfully");
     } catch (error) {
       console.error("Error deleting FAQ question:", error);
     }
@@ -57,7 +59,10 @@ const Tablefaqquestion = () => {
                   value={searchTerm}
                   onChange={handleSearch}
                 />
-                <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                <Search
+                  className="absolute left-3 top-2.5 text-gray-400"
+                  size={18}
+                />
               </div>
 
               <Link to="/addfaquestion">
@@ -99,8 +104,12 @@ const Tablefaqquestion = () => {
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{question.question}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {index + 1}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {question.question}
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {question.status ? "Active" : "Inactive"}
                       </td>

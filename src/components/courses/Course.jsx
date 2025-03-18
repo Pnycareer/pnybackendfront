@@ -13,7 +13,7 @@ const Courses = () => {
   // Fetch courses from the API
   const fetchCourses = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/courses", {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/courses/get-course`, {
         withCredentials: true,
       });
       setCourses(response.data);
@@ -31,12 +31,19 @@ const Courses = () => {
   // Delete a course
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://api.pnytrainings.com/api/courses/${id}`, { withCredentials: true });
-      const updatedCourses = filteredCourses.filter((course) => course._id !== id);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/courses/${id}`, {
+        withCredentials: true,
+      });
+      const updatedCourses = filteredCourses.filter(
+        (course) => course._id !== id
+      );
       setFilteredCourses(updatedCourses);
       toast.success("Course deleted successfully!");
     } catch (error) {
-      console.error("Error deleting course:", error.response ? error.response.data : error.message);
+      console.error(
+        "Error deleting course:",
+        error.response ? error.response.data : error.message
+      );
       toast.error("Failed to delete course.");
     }
   };
@@ -45,7 +52,7 @@ const Courses = () => {
     const newStatus = currentStatus === "Active" ? "Inactive" : "Active";
     try {
       await axios.put(
-        `https://api.pnytrainings.com/api/courses/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/courses/${id}`,
         { status: newStatus },
         { withCredentials: true }
       );
@@ -55,7 +62,10 @@ const Courses = () => {
       setFilteredCourses(updatedCourses);
       toast.success(`Status updated to ${newStatus}`);
     } catch (error) {
-      console.error("Error updating status:", error.response ? error.response.data : error.message);
+      console.error(
+        "Error updating status:",
+        error.response ? error.response.data : error.message
+      );
       toast.error("Failed to update status.");
     }
   };
@@ -65,7 +75,8 @@ const Courses = () => {
     setSearchTerm(term);
     const filtered = courses.filter(
       (course) =>
-        (course.course_Name && course.course_Name.toLowerCase().includes(term)) ||
+        (course.course_Name &&
+          course.course_Name.toLowerCase().includes(term)) ||
         (course.email && course.email.toLowerCase().includes(term))
     );
     setFilteredCourses(filtered);
@@ -88,7 +99,9 @@ const Courses = () => {
       {!isAddCoursePage && (
         <>
           <div className="text-center items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-100 mb-5 cursor-pointer">Courses</h2>
+            <h2 className="text-2xl font-semibold text-gray-100 mb-5 cursor-pointer">
+              Courses
+            </h2>
             <hr className="w-full h-1 bg-slate-500 rounded-sm" />
             <div className="my-5 flex justify-center lg:justify-between items-center space-x-4">
               <div className="relative">
@@ -99,7 +112,10 @@ const Courses = () => {
                   value={searchTerm}
                   onChange={handleSearch}
                 />
-                <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                <Search
+                  className="absolute left-3 top-2.5 text-gray-400"
+                  size={18}
+                />
               </div>
               <Link to="/addcourse">
                 <button className="bg-blue-600 hover:bg-blue-500 text-white hidden sm:block font-semibold py-2 px-4 rounded-lg transition-all duration-300">
@@ -112,14 +128,30 @@ const Courses = () => {
             <table className="min-w-full divide-y divide-gray-700">
               <thead>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Sr. No.</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Course</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Description</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Image</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Monthly Fee</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Admission Fee</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Sr. No.
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Course
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Description
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Image
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Monthly Fee
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Admission Fee
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-700">
@@ -132,28 +164,49 @@ const Courses = () => {
                       transition={{ duration: 0.3 }}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-100">{index + 1}</div>
+                        <div className="text-sm font-medium text-gray-100">
+                          {index + 1}
+                        </div>
                       </td>
-                      <div className="text-sm font-medium text-gray-100">{course.course_Name ? course.course_Name.slice(0, 20) : "N/A"}</div>
-<div className="text-sm text-gray-300">{course.Short_Description ? course.Short_Description.slice(0, 20) : "N/A"}</div>
+                      <div className="text-sm font-medium text-gray-100">
+                        {course.course_Name
+                          ? course.course_Name.slice(0, 20)
+                          : "N/A"}
+                      </div>
+                      <div className="text-sm text-gray-300">
+                        {course.Short_Description
+                          ? course.Short_Description.slice(0, 20)
+                          : "N/A"}
+                      </div>
 
                       <td className="px-6 py-4 whitespace-nowrap">
-                      <img
-  src={course.course_Image ? `https://api.pnytrainings.com/${course.course_Image.replace(/\\/g, "/")}` : "https://via.placeholder.com/50"}
-  alt="Course"
-  className="h-14 w-14"
-/>
-
+                        <img
+                          src={
+                            course.course_Image
+                              ? `${
+                                  import.meta.env.VITE_API_URL
+                                }/${course.course_Image.replace(/\\/g, "/")}`
+                              : "https://via.placeholder.com/50"
+                          }
+                          alt="Course"
+                          className="h-14 w-14"
+                        />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-300">{course.Monthly_Fee || "N/A"}</div>
+                        <div className="text-sm text-gray-300">
+                          {course.Monthly_Fee || "N/A"}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-300">{course.Admission_Fee || "N/A"}</div>
+                        <div className="text-sm text-gray-300">
+                          {course.Admission_Fee || "N/A"}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
-                          onClick={() => updateStatus(course._id, course.status)}
+                          onClick={() =>
+                            updateStatus(course._id, course.status)
+                          }
                           className={`px-2 py-1 text-xs font-semibold rounded ${
                             course.status === "Active"
                               ? "bg-green-800 text-green-100"

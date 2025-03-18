@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import Sidebar from "./components/common/Sidebar";
 import OverviewPage from "./pages/OverviewPage";
-import UsersPage from "./pages/UsersPage";
+import InstructorAdd from "./pages/Instructor.jsx";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import SettingsPage from "./pages/SettingsPage";
 import AddInstructor from "./pages/AddInstructor";
@@ -64,7 +64,7 @@ function App() {
       <Sidebar />
       <Routes>
         <Route path="/" element={<OverviewPage />} />
-        <Route path="/users" element={<UsersPage />}>
+        <Route path="/instructors" element={<InstructorAdd />}>
           <Route path="adduser" element={<AddInstructor />} />
         </Route>
         <Route path="/users/:userId" element={<EditInstructor />} />
@@ -108,14 +108,12 @@ function App() {
         <Route path="/editfaquestion/:id" element={<Editfaquestion />} />
         <Route path="/addfaquestion" element={<AddFaqquestion />} />
         {/* main category  */}
-        <Route path="/subcat" element={<Maincat/>} />
-        <Route path="/editsubcat/:id" element={<EditMaincat/>} />
-        <Route path="/addsubcat" element={<AddMainCat/>} />
-      {/* main subcourse */}
-      <Route path="/maincourse" element={<Maincourse/>} />
-      <Route path="/addmainc" element={<Addmaincourse/>} />
-
-
+        <Route path="/subcat" element={<Maincat />} />
+        <Route path="/editsubcat/:id" element={<EditMaincat />} />
+        <Route path="/addsubcat" element={<AddMainCat />} />
+        {/* main subcourse */}
+        <Route path="/maincourse" element={<Maincourse />} />
+        <Route path="/addmainc" element={<Addmaincourse />} />
 
         <Route path="/event-post" element={<MainEvents />} />
         <Route path="/freetrail" element={<MainFreeTrail />} />

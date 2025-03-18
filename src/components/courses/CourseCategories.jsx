@@ -19,7 +19,9 @@ const CourseCategories = () => {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("https://api.pnytrainings.com/api/categories", { withCredentials: true });
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/v1/categories`
+        );
         setCategories(response.data);
         setFilteredCategories(response.data);
         setLoading(false);
@@ -48,15 +50,22 @@ const CourseCategories = () => {
   // Handle category deletion
   const handleDelete = (id) => {
     axios
-      .delete(`https://api.pnytrainings.com/api/categories/${id}`, { withCredentials: true })
+      .delete(`${import.meta.env.VITE_API_URL}/api/categories/${id}`, {
+        withCredentials: true,
+      })
       .then(() => {
-        const updatedCategories = categories.filter((category) => category._id !== id);
+        const updatedCategories = categories.filter(
+          (category) => category._id !== id
+        );
         setCategories(updatedCategories);
         setFilteredCategories(updatedCategories);
         toast.success("Category item deleted successfully");
       })
       .catch((error) => {
-        console.error("Error deleting category:", error.response?.data || error.message);
+        console.error(
+          "Error deleting category:",
+          error.response?.data || error.message
+        );
         setError("Failed to delete category");
       });
   };
@@ -79,7 +88,9 @@ const CourseCategories = () => {
       {!isAddCategoryPage && (
         <>
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-100 cursor-pointer">Course Categories</h2>
+            <h2 className="text-2xl font-semibold text-gray-100 cursor-pointer">
+              Course Categories
+            </h2>
             <div className="flex items-center space-x-4">
               <div className="relative hidden md:block">
                 <input
@@ -89,7 +100,10 @@ const CourseCategories = () => {
                   value={searchTerm}
                   onChange={handleSearch}
                 />
-                <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                <Search
+                  className="absolute left-3 top-2.5 text-gray-400"
+                  size={18}
+                />
               </div>
               <Link to="addcategory">
                 <button className="bg-blue-600 hover:bg-blue-500 hidden md:block text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300">
@@ -123,41 +137,60 @@ const CourseCategories = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-700">
-  {filteredCategories.length > 0 ? (
-    filteredCategories.map((category, index) => (
-      <motion.tr key={category._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-        <td className="px-6 py-4 whitespace-nowrap">
-          <div className="text-sm font-medium text-gray-100">{index + 1}</div>
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap">
-          <div className="text-sm font-medium text-gray-100">
-            {category.Category_Name ? category.Category_Name.slice(0, 20) + "..." : "No Name"}
-          </div>
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap">
-          <div className="text-sm text-gray-300">
-            {category.short_Description ? category.short_Description.slice(0, 30) : "No Description"}
-          </div>
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-          <button className="text-indigo-400 hover:text-indigo-300 mr-2" onClick={() => handleEdit(category._id)}>
-            Edit
-          </button>
-          <button className="text-red-400 hover:text-red-300" onClick={() => handleDelete(category._id)}>
-            Delete
-          </button>
-        </td>
-      </motion.tr>
-    ))
-  ) : (
-    <tr>
-      <td colSpan="4" className="text-center text-gray-300 py-4">
-        No categories found
-      </td>
-    </tr>
-  )}
-</tbody>
-
+                  {filteredCategories.length > 0 ? (
+                    filteredCategories.map((category, index) => (
+                      <motion.tr
+                        key={category._id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-100">
+                            {index + 1}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-100">
+                            {category.Category_Name
+                              ? category.Category_Name.slice(0, 20) + "..."
+                              : "No Name"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-300">
+                            {category.short_Description
+                              ? category.short_Description.slice(0, 30)
+                              : "No Description"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          <button
+                            className="text-indigo-400 hover:text-indigo-300 mr-2"
+                            onClick={() => handleEdit(category._id)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="text-red-400 hover:text-red-300"
+                            onClick={() => handleDelete(category._id)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </motion.tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="4"
+                        className="text-center text-gray-300 py-4"
+                      >
+                        No categories found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
               </table>
             </div>
           )}

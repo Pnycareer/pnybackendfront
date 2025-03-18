@@ -21,8 +21,11 @@ const EditModel = () => {
   useEffect(() => {
     const fetchCourseModel = async () => {
       try {
-        const response = await axios.get(`https://api.pnytrainings.com/api/coursemodel/${id}`);
-        const { course, courseModulePosition, textEditor, status } = response.data;
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/coursemodel/${id}`
+        );
+        const { course, courseModulePosition, textEditor, status } =
+          response.data;
 
         setCourseModel({
           course: course?.course_Name || "", // Adjust this to map the course name
@@ -37,7 +40,9 @@ const EditModel = () => {
 
     const fetchCourses = async () => {
       try {
-        const response = await axios.get("https://api.pnytrainings.com/api/courses");
+        const response = await axios.get(
+          "${import.meta.env.VITE_API_URL}/api/courses"
+        );
         setCourseList(response.data); // Assuming the API returns a list of courses
       } catch (error) {
         console.error("Error fetching course list:", error);
@@ -62,7 +67,9 @@ const EditModel = () => {
     e.preventDefault();
 
     // Resolve course name to ID
-    const selectedCourse = courseList.find((course) => course.course_Name === courseModel.course);
+    const selectedCourse = courseList.find(
+      (course) => course.course_Name === courseModel.course
+    );
 
     if (!selectedCourse) {
       alert("Invalid course selected.");
@@ -79,9 +86,13 @@ const EditModel = () => {
 
       console.log("Updated Model to be sent:", updatedModel);
 
-      await axios.put(`https://api.pnytrainings.com/api/coursemodel/${id}`, updatedModel, {
-        headers: { "Content-Type": "application/json" },
-      });
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/coursemodel/${id}`,
+        updatedModel,
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       alert("Course model updated successfully!");
       navigate("/coursemodel"); // Redirect to main page after update
@@ -94,8 +105,13 @@ const EditModel = () => {
   return (
     <div className="flex justify-center items-center my-5 bg-gray-900 overflow-auto w-full">
       <div className="bg-gray-800 bg-opacity-80 backdrop-blur-md shadow-lg rounded-xl p-8 border border-gray-700 w-full max-w-lg">
-        <h2 className="text-2xl font-semibold text-gray-100 mb-6">Edit Course Model</h2>
-        <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto max-h-[500px]">
+        <h2 className="text-2xl font-semibold text-gray-100 mb-6">
+          Edit Course Model
+        </h2>
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 overflow-y-auto max-h-[500px]"
+        >
           {/* Course Dropdown */}
           <div className="mb-4">
             <label className="block text-gray-300">Course</label>

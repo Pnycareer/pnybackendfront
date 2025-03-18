@@ -22,7 +22,7 @@ const AddSpecialbp = () => {
     featured: false,
     inSitemap: false,
     pageIndex: false,
-    customCanonicalUrl: ""
+    customCanonicalUrl: "",
   });
 
   const [cityCategories, setCityCategories] = useState([]);
@@ -31,7 +31,9 @@ const AddSpecialbp = () => {
   useEffect(() => {
     const fetchCityCategories = async () => {
       try {
-        const response = await axios.get("https://api.pnytrainings.com/api/citycategory");
+        const response = await axios.get(
+          "${import.meta.env.VITE_API_URL}/api/citycategory"
+        );
         setCityCategories(response.data);
 
         console.log(response.data);
@@ -48,38 +50,41 @@ const AddSpecialbp = () => {
     const { name, value, type, checked, files } = e.target;
     setFormData((prevData) => ({
       ...prevData,
-      [name]: type === "checkbox" ? checked : type === "file" ? files[0] : value
+      [name]:
+        type === "checkbox" ? checked : type === "file" ? files[0] : value,
     }));
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
-  
+
     // Prepare data for submission
     const formSubmitData = new FormData();
     Object.keys(formData).forEach((key) => {
       formSubmitData.append(key, formData[key]);
     });
-  
+
     try {
-      const res = await axios.post("https://api.pnytrainings.com/api/specialcatblog", formSubmitData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-  
+      const res = await axios.post(
+        "${import.meta.env.VITE_API_URL}/api/specialcatblog",
+        formSubmitData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
       if (res.status === 200 || res.status === 201) {
         toast.success("Blog post added successfully", res.data);
-        navigate("/sp-c-blog-post");  // Navigate after successful creation
+        navigate("/sp-c-blog-post"); // Navigate after successful creation
       } else {
         toast.error("Error adding blog post", res.data);
       }
-  
     } catch (error) {
       console.error("Error:", error);
     }
   };
-  
 
   return (
     <div className="w-full overflow-y-auto">
@@ -118,29 +123,34 @@ const AddSpecialbp = () => {
           </div>
 
           {/* Assigned Post Category Cities */}
-        {/* Assigned Post Category Cities */}
-<div className="mb-4">
-  <label className="block text-gray-400 mb-2">Assigned Post Category Cities*</label>
-  <select
-    name="postCategory" // Corrected name
-    value={formData.postCategory}
-    onChange={handleChange}
-    className="w-full px-4 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-    required
-  >
-    <option value="">Select City Category</option>
-    {cityCategories.map((category) => (
-      <option key={category._id} value={category._id}> {/* Use category ID */}
-        {category.cityCategoryName}
-      </option>
-    ))}
-  </select>
-</div>
-
+          {/* Assigned Post Category Cities */}
+          <div className="mb-4">
+            <label className="block text-gray-400 mb-2">
+              Assigned Post Category Cities*
+            </label>
+            <select
+              name="postCategory" // Corrected name
+              value={formData.postCategory}
+              onChange={handleChange}
+              className="w-full px-4 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Select City Category</option>
+              {cityCategories.map((category) => (
+                <option key={category._id} value={category._id}>
+                  {" "}
+                  {/* Use category ID */}
+                  {category.cityCategoryName}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Post Thumbnail Image */}
           <div className="mb-4">
-            <label className="block text-gray-400 mb-2">Post Thumbnail Image*</label>
+            <label className="block text-gray-400 mb-2">
+              Post Thumbnail Image*
+            </label>
             <input
               type="file"
               name="postThumbnailImage"
@@ -153,7 +163,9 @@ const AddSpecialbp = () => {
 
           {/* Short Description */}
           <div className="mb-4">
-            <label className="block text-gray-400 mb-2">Short Description*</label>
+            <label className="block text-gray-400 mb-2">
+              Short Description*
+            </label>
             <textarea
               name="shortDescription"
               value={formData.shortDescription}
@@ -166,7 +178,9 @@ const AddSpecialbp = () => {
 
           {/* Post Description */}
           <div className="mb-4">
-            <label className="block text-gray-400 mb-2">Post Description*</label>
+            <label className="block text-gray-400 mb-2">
+              Post Description*
+            </label>
             <textarea
               name="postDescription"
               value={formData.postDescription}
@@ -207,7 +221,9 @@ const AddSpecialbp = () => {
 
           {/* Meta Description */}
           <div className="mb-4">
-            <label className="block text-gray-400 mb-2">Meta Description*</label>
+            <label className="block text-gray-400 mb-2">
+              Meta Description*
+            </label>
             <textarea
               name="metaDescription"
               value={formData.metaDescription}
@@ -220,7 +236,9 @@ const AddSpecialbp = () => {
 
           {/* Canonical URL */}
           <div className="mb-4">
-            <label className="block text-gray-400 mb-2">Custom Canonical URL</label>
+            <label className="block text-gray-400 mb-2">
+              Custom Canonical URL
+            </label>
             <input
               type="text"
               name="customCanonicalUrl"
