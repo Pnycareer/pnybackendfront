@@ -413,7 +413,7 @@ function App() {
                   readOnly
                 />
                 <img
-                  src={`http://localhost:8080/${course.course_image}`}
+                  src={`${import.meta.env.VITE_API_URL}/${course.course_image}`}
                   alt="Course Image"
                   className="w-24 h-24 rounded-md mt-2"
                 />
@@ -506,7 +506,7 @@ function App() {
                   <img
                     src={
                       inst.photo
-                        ? `http://localhost:8080/${inst.photo}`
+                        ? `${import.meta.env.VITE_API_URL}/${inst.photo}`
                         : "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png"
                     }
                     alt="Instructor"
