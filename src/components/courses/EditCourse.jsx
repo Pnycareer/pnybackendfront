@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 
 const EditCourse = () => {
   const navigate = useNavigate();
-  const { courseId } = useParams();
+  const { id } = useParams();
   const [course, setCourse] = useState({
     course_Name: "",
     Short_Description: "",
@@ -43,11 +43,11 @@ const EditCourse = () => {
       try {
         const [courseResponse, categoriesResponse, instructorsResponse] =
           await Promise.all([
+            axios.get(`http://localhost:8080/courses/${id}`),
+            axios.get(`${import.meta.env.VITE_API_URL}/api/v1/categories`),
             axios.get(
-              `${import.meta.env.VITE_API_URL}/api/courses/${courseId}`
+              `${import.meta.env.VITE_API_URL}/api/instructors/get-instructor`
             ),
-            axios.get(`${import.meta.env.VITE_API_URL}/api/categories`),
-            axios.get(`${import.meta.env.VITE_API_URL}/api/instructors`),
           ]);
         const fetchedCourse = courseResponse.data;
         // Ensure all keys in the state exist in the fetched course
@@ -67,8 +67,8 @@ const EditCourse = () => {
         setLoading(false);
       }
     };
-    if (courseId) fetchData();
-  }, [courseId]);
+    if (id) fetchData();
+  }, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -94,7 +94,7 @@ const EditCourse = () => {
 
     try {
       await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/courses/${courseId}`,
+        `${import.meta.env.VITE_API_URL}/courses/update/${id}`,
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -119,6 +119,20 @@ const EditCourse = () => {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8080/courses/get-course"
+        );
+        setCategories(response.data); // Assuming response contains an array of categories
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
   return (
@@ -155,46 +169,6 @@ const EditCourse = () => {
             />
           </div>
 
-          {/* Skill Level */}
-          <div className="mb-4">
-            <label className="block text-gray-300">Skill Level</label>
-            <input
-              type="text"
-              name="Skill_Level"
-              value={course.Skill_Level}
-              onChange={handleChange}
-              required
-              className="w-full p-2 rounded bg-gray-700 text-white"
-            />
-          </div>
-
-          {/* Short Description */}
-          <div className="mb-4">
-            <label className="block text-gray-300">Short Description</label>
-            <textarea
-              name="Short_Description"
-              value={course.Short_Description}
-              onChange={handleChange}
-              className="w-full p-2 rounded bg-gray-700 text-white"
-            />
-          </div>
-
-          {/* Course Image */}
-          <div className="mb-4">
-            <label className="block text-gray-300">Upload Course Image</label>
-            <input
-              type="file"
-              name="course_Image"
-              onChange={(e) =>
-                setCourse((prev) => ({
-                  ...prev,
-                  course_Image: e.target.files[0],
-                }))
-              }
-              className="w-full p-2 rounded bg-gray-700 text-white"
-            />
-          </div>
-
           {/* Featured Option */}
           <div className="mb-4">
             <label className="block text-gray-300">
@@ -216,6 +190,98 @@ const EditCourse = () => {
             </select>
           </div>
 
+          {/* Course Image */}
+          <div className="mb-4">
+            <label className="block text-gray-300">Upload Course Image</label>
+            <input
+              type="file"
+              name="course_Image"
+              onChange={(e) =>
+                setCourse((prev) => ({
+                  ...prev,
+                  course_Image: e.target.files[0],
+                }))
+              }
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            />
+          </div>
+
+          <div className="my-2">
+            <label>Video ID</label>
+            <input
+              className="w-full p-2 rounded bg-gray-700 text-white"
+              type="text"
+              name="video_Id"
+              value={course.video_Id}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-300">Course Category*</label>
+            <select
+              name="course_Category"
+              value={course.course_Category}
+              onChange={handleChange}
+              required
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            >
+              <option value="" disabled>
+                Select Course Category
+              </option>
+              {categories.map((category) => (
+                <option key={category._id} value={category._id}>
+                  {category.Category_Name}{" "}
+                  {/* Adjust according to API response */}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Skill Level */}
+          <div className="mb-4">
+            <label className="block text-gray-300">Skill Level</label>
+            <select
+              name="Skill_Level"
+              value={course.Skill_Level}
+              onChange={handleChange}
+              required
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            >
+              <option value="" disabled>
+                Select Skill Level
+              </option>{" "}
+              {/* Default Placeholder */}
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </div>
+
+          {/* Short Description */}
+          <div className="mb-4">
+            <label className="block text-gray-300">Short Description</label>
+            <textarea
+              name="Short_Description"
+              value={course.Short_Description}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            />
+          </div>
+
+          {/* Course Description */}
+          <div className="mb-4">
+            <label className="block text-gray-300">Course Description</label>
+            <ReactQuill
+              value={course.Course_Description}
+              onChange={(content) =>
+                setCourse((prev) => ({ ...prev, Course_Description: content }))
+              }
+              theme="snow"
+              className="text-gray-700 bg-white rounded-md"
+            />
+          </div>
+
           {/* Instructor */}
           <div className="mb-4">
             <label className="block text-gray-300">Instructor</label>
@@ -234,6 +300,17 @@ const EditCourse = () => {
             </select>
           </div>
 
+          <div className="mb-4">
+            <label className="block text-gray-300">Monthly_Fee</label>
+            <input
+              type="number"
+              name="Monthly_Fee"
+              value={course.Monthly_Fee}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            />
+          </div>
+
           {/* Admission Fee */}
           <div className="mb-4">
             <label className="block text-gray-300">Admission Fee</label>
@@ -241,16 +318,6 @@ const EditCourse = () => {
               type="number"
               name="Admission_Fee"
               value={course.Admission_Fee}
-              onChange={handleChange}
-              className="w-full p-2 rounded bg-gray-700 text-white"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-300">Monthly_Fee</label>
-            <input
-              type="number"
-              name="Monthly_Fee"
-              value={course.Monthly_Fee}
               onChange={handleChange}
               className="w-full p-2 rounded bg-gray-700 text-white"
             />
@@ -266,17 +333,7 @@ const EditCourse = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block text-gray-300">Admission Fee</label>
-            <input
-              type="number"
-              name="Admission_Fee"
-              value={course.Admission_Fee}
-              onChange={handleChange}
-              className="w-full p-2 rounded bg-gray-700 text-white"
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-300">Admission Fee</label>
+            <label className="block text-gray-300">Duration_Day</label>
             <input
               type="number"
               name="Duration_Day"
@@ -285,16 +342,26 @@ const EditCourse = () => {
               className="w-full p-2 rounded bg-gray-700 text-white"
             />
           </div>
-          {/* Course Description */}
+
           <div className="mb-4">
-            <label className="block text-gray-300">Course Description</label>
-            <ReactQuill
-              value={course.Course_Description}
-              onChange={(content) =>
-                setCourse((prev) => ({ ...prev, Course_Description: content }))
-              }
-              theme="snow"
-              className="text-gray-700 bg-white rounded-md"
+            <label className="block text-gray-300">Meta_Title</label>
+            <input
+              type="text"
+              name="Meta_Title"
+              value={course.Meta_Title}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-300">Meta_Description</label>
+            <input
+              type="text"
+              name="Meta_Description"
+              value={course.Meta_Description}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
             />
           </div>
 
@@ -307,39 +374,7 @@ const EditCourse = () => {
               className="w-full p-2 rounded bg-gray-700 text-white"
             />
           </div>
-          <div>
-            <label>View on Web</label>
-            <input
-              type="checkbox"
-              name="View_On_Web"
-              checked={course.View_On_Web}
-              onChange={(e) =>
-                setCourse({ ...course, View_On_Web: e.target.checked })
-              }
-            />
-          </div>
-          <div className="my-2">
-            <label>Video ID</label>
-            <input
-              className="bg-gray-900 text-white"
-              type="text"
-              name="video_Id"
-              value={course.video_Id}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="my-2">
-            <label>Page Index</label>
-            <input
-              type="checkbox"
-              name="Page_Index"
-              checked={course.Page_Index}
-              onChange={(e) =>
-                setCourse({ ...course, Page_Index: e.target.checked })
-              }
-            />
-          </div>
-          {/* Other fields (like status, duration, etc.) can be added here */}
+
           <div className="mb-4">
             <label className="block text-gray-300">Status</label>
             <select
@@ -354,6 +389,54 @@ const EditCourse = () => {
               <option value="Inactive">Inactive</option>
             </select>
           </div>
+
+          <div>
+            <label>View on Web</label>
+            <input
+              type="checkbox"
+              name="View_On_Web"
+              checked={course.View_On_Web}
+              onChange={(e) =>
+                setCourse({ ...course, View_On_Web: e.target.checked })
+              }
+            />
+          </div>
+
+          <div className="my-2">
+            <label>In_Sitemap</label>
+            <input
+              type="checkbox"
+              name="In_Sitemap"
+              checked={course.In_Sitemap}
+              onChange={(e) =>
+                setCourse({ ...course, In_Sitemap: e.target.checked })
+              }
+            />
+          </div>
+
+          <div className="my-2">
+            <label>Page Index</label>
+            <input
+              type="checkbox"
+              name="Page_Index"
+              checked={course.Page_Index}
+              onChange={(e) =>
+                setCourse({ ...course, Page_Index: e.target.checked })
+              }
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-300">Custom_Canonical_Url</label>
+            <input
+              type="text"
+              name="Custom_Canonical_Url"
+              value={course.Custom_Canonical_Url}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            />
+          </div>
+
           <div className="flex justify-between">
             <button
               type="submit"

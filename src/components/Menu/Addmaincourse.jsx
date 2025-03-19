@@ -25,28 +25,12 @@ function App() {
   // -----------------------------
   // 2. Courses (array)
   // -----------------------------
-  const [courses, setCourses] = useState([
-    {
-      name: "",
-      course_image: "",
-      monthly_tution_fee: "",
-      url_slug: "",
-      description: "",
-    },
-  ]);
+  const [courses, setCourses] = useState([{ course_id: "" }]);
+  const [instructors, setInstructors] = useState([{ instructor_id: "" }]);
 
   // Add a new empty course
   const handleAddCourse = () => {
-    setCourses((prev) => [
-      ...prev,
-      {
-        name: "",
-        course_image: "",
-        monthly_tution_fee: "",
-        url_slug: "",
-        description: "",
-      },
-    ]);
+    setCourses((prev) => [...prev, { course_id: "" }]);
   };
 
   // Remove a course by index
@@ -54,48 +38,29 @@ function App() {
     setCourses((prev) => prev.filter((_, i) => i !== index));
   };
 
+
   // Update a particular course field
-  const handleCourseChange = (index, field, value) => {
+ const handleCourseChange = (index, value) => {
     setCourses((prev) => {
       const updatedCourses = [...prev];
-      updatedCourses[index][field] = value;
+      updatedCourses[index].course_id = value;
       return updatedCourses;
     });
   };
 
-  // -----------------------------
-  // 3. Instructors (array)
-  // -----------------------------
-  const [instructors, setInstructors] = useState([
-    {
-      name: "",
-      other_info: "",
-      photo: "",
-    },
-  ]);
 
-  // Add a new empty instructor
   const handleAddInstructor = () => {
-    setInstructors((prev) => [
-      ...prev,
-      {
-        name: "",
-        other_info: "",
-        photo: "",
-      },
-    ]);
+    setInstructors((prev) => [...prev, { instructor_id: "" }]);
   };
 
-  // Remove an instructor by index
   const handleRemoveInstructor = (index) => {
     setInstructors((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Update a particular instructor field
-  const handleInstructorChange = (index, field, value) => {
+  const handleInstructorChange = (index, value) => {
     setInstructors((prev) => {
       const updatedInstructors = [...prev];
-      updatedInstructors[index][field] = value;
+      updatedInstructors[index].instructor_id = value;
       return updatedInstructors;
     });
   };
@@ -143,25 +108,7 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    const fetchInstructors = async () => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/instructors/get-instructor`
-        );
-        const data = await response.json();
-        if (response.ok) {
-          setInstructorOptions(data);
-        } else {
-          console.error("Error fetching instructors");
-        }
-      } catch (error) {
-        console.error("Failed to fetch instructors:", error);
-      }
-    };
-
-    fetchInstructors();
-  }, []);
+ 
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -183,6 +130,27 @@ function App() {
     fetchCourses();
   }, []);
 
+  useEffect(() => {
+    const fetchInstructors = async () => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/instructors/get-instructor`
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setInstructorOptions(data);
+        } else {
+          console.error("Error fetching instructors");
+        }
+      } catch (error) {
+        console.error("Failed to fetch instructors:", error);
+      }
+    };
+
+    fetchInstructors();
+  }, []);
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -197,27 +165,22 @@ function App() {
     };
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v1/subCourse`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-        }
-      );
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/subCourse`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
 
       const data = await response.json();
       if (response.ok) {
         alert("Success! " + data.message);
-        console.log("Response data:", data);
       } else {
         alert("Error: " + (data.error || "Unknown error"));
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("Form submission failed. Check console for details.");
     }
   };
 
@@ -319,220 +282,70 @@ function App() {
         {/* =====================
             Courses Section
             ===================== */}
-        <div className="p-4 border rounded-md">
-          <h2 className="text-xl font-semibold mb-4">Courses</h2>
+       <div>
+          <label className="block font-semibold">Select Course:</label>
           {courses.map((course, index) => (
-            <div key={index} className="p-4 mb-4 border rounded-md relative">
+            <div key={index} className="flex items-center gap-4 mb-2">
+              <select
+                className="border rounded w-full p-2 text-black"
+                value={course.course_id}
+                onChange={(e) => handleCourseChange(index, e.target.value)}
+              >
+                <option value="">Select</option>
+                {courseOptions.map((course) => (
+                  <option key={course._id} value={course._id}>
+                    {course.course_Name}
+                  </option>
+                ))}
+              </select>
               <button
                 type="button"
                 onClick={() => handleRemoveCourse(index)}
-                className="absolute top-2 right-2 text-red-600 font-bold"
+                className="text-red-600 font-bold"
               >
                 X
               </button>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Course name */}
-                <div>
-                  <label className="block font-semibold">Course Name:</label>
-                  <select
-                    className="border rounded w-full p-2 text-black"
-                    value={course.name}
-                    onChange={(e) => {
-                      const selectedCourse = courseOptions.find(
-                        (course) => course.course_Name === e.target.value
-                      );
-                      if (selectedCourse) {
-                        handleCourseChange(
-                          index,
-                          "name",
-                          selectedCourse.course_Name
-                        );
-                        handleCourseChange(
-                          index,
-                          "url_slug",
-                          selectedCourse.url_Slug
-                        );
-                        handleCourseChange(
-                          index,
-                          "course_image",
-                          selectedCourse.course_Image
-                        );
-                        handleCourseChange(
-                          index,
-                          "description",
-                          selectedCourse.Short_Description
-                        );
-                      }
-                    }}
-                    required
-                  >
-                    <option value="">Select a course</option>
-                    {courseOptions.map((course) => (
-                      <option key={course._id} value={course.course_Name}>
-                        {course.course_Name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* URL Slug */}
-                <div>
-                  <label className="block font-semibold">
-                    Course URL Slug:
-                  </label>
-                  <input
-                    type="text"
-                    className="border rounded w-full p-2 text-black"
-                    value={course.url_slug}
-                    readOnly
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mt-4">
-                {/* Teacher Name */}
-                <div>
-                  <label className="block font-semibold">Description:</label>
-                  <input
-                    type="text"
-                    className="border rounded w-full p-2 text-black"
-                    value={course.description}
-                    readOnly
-                  />
-                </div>
-              </div>
-
-              {/* Course Image */}
-              <div className="mt-4">
-                <label className="block font-semibold">Course Image:</label>
-                <input
-                  type="text"
-                  className="border rounded w-full p-2 text-black hidden"
-                  value={course.course_image}
-                  readOnly
-                />
-                <img
-                  src={`${import.meta.env.VITE_API_URL}/${course.course_image}`}
-                  alt="Course Image"
-                  className="w-24 h-24 rounded-md mt-2"
-                />
-              </div>
             </div>
           ))}
-
-          <button
-            type="button"
-            onClick={handleAddCourse}
-            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-          >
-            Add Another Course
+          <button type="button" onClick={handleAddCourse} className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
+            Add Course
           </button>
         </div>
 
         {/* =====================
             Instructors Section
             ===================== */}
-        <div className="p-4 border rounded-md">
-          <h2 className="text-xl font-semibold mb-4">Instructors</h2>
+       <div>
+          <label className="block font-semibold">Select Instructor:</label>
           {instructors.map((inst, index) => (
-            <div key={index} className="p-4 mb-4 border rounded-md relative">
+            <div key={index} className="flex items-center gap-4 mb-2">
+              <select
+                className="border rounded w-full p-2 text-black"
+                value={inst.instructor_id}
+                onChange={(e) => handleInstructorChange(index, e.target.value)}
+              >
+                <option value="">Select</option>
+                {instructorOptions.map((instructor) => (
+                  <option key={instructor._id} value={instructor._id}>
+                    {instructor.name}
+                  </option>
+                ))}
+              </select>
               <button
                 type="button"
                 onClick={() => handleRemoveInstructor(index)}
-                className="absolute top-2 right-2 text-red-600 font-bold"
+                className="text-red-600 font-bold"
               >
                 X
               </button>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Instructor name */}
-                <div>
-                  <label className="block font-semibold">Select:</label>
-                  <select
-                    className="border rounded w-full p-2 text-black"
-                    value={inst.name} // ✅ Use inst.name to keep the selected instructor
-                    onChange={(e) => {
-                      const selectedInstructor = instructorOptions.find(
-                        (inst) => inst.name === e.target.value
-                      );
-                      if (selectedInstructor) {
-                        handleInstructorChange(
-                          index,
-                          "name",
-                          selectedInstructor.name
-                        );
-                        handleInstructorChange(
-                          index,
-                          "other_info",
-                          selectedInstructor.other_info
-                        );
-                        handleInstructorChange(
-                          index,
-                          "photo",
-                          selectedInstructor.photo
-                        );
-                      }
-                    }}
-                  >
-                    <option value="">Select an instructor</option>
-                    {instructorOptions.map((instructor) => (
-                      <option key={instructor._id} value={instructor.name}>
-                        {instructor.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Other Info */}
-                <div>
-                  <label className="block font-semibold">Other Info:</label>
-                  <input
-                    type="text"
-                    className="border rounded w-full p-2 text-black"
-                    value={inst.other_info}
-                    readOnly
-                  />
-                </div>
-
-                <div>
-                  {/* Instructor Photo */}
-                  <input
-                    type="text"
-                    className="border rounded w-full p-2 text-black hidden"
-                    value={inst.photo || ""}
-                    readOnly // Prevent manual editing
-                  />
-                  <img
-                    src={
-                      inst.photo
-                        ? `${import.meta.env.VITE_API_URL}/${inst.photo}`
-                        : "https://cdn.pixabay.com/photo/2015/03/04/22/35/avatar-659652_640.png"
-                    }
-                    alt="Instructor"
-                    className="w-24 h-24 rounded-md mt-2"
-                  />
-                </div>
-              </div>
             </div>
           ))}
-
-          <button
-            type="button"
-            onClick={handleAddInstructor}
-            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-          >
-            Add Another Instructor
+          <button type="button" onClick={handleAddInstructor} className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
+            Add Instructor
           </button>
         </div>
 
-        {/* =====================
-            Submit
-            ===================== */}
-        <button
-          type="submit"
-          className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded"
-        >
+        <button type="submit" className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
           Submit
         </button>
       </form>
