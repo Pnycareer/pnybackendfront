@@ -69,66 +69,81 @@ function App() {
     const selectedSlug = e.target.value;
     setUrlSlug(selectedSlug);
 
+    // Reset fields when a new slug is selected
+    setName("");
+    setDescription("");
+    setMetaTitle("");
+    setMetaDescription("");
+    setCourses([{ course_id: "" }]);  // Reset courses
+    setInstructors([{ instructor_id: "" }]);  // Reset instructors
+
     if (!selectedSlug) return;
 
     setIsLoading(true); // Start loader
 
     try {
-      const response = await fetch(
-        `${
-          import.meta.env.VITE_API_URL
-        }/api/v1/subCourse/getsubcourses/${selectedSlug}`
-      );
-      const data = await response.json();
+        const response = await fetch(
+            `${import.meta.env.VITE_API_URL}/api/v1/subCourse/getsubcourses/${selectedSlug}`
+        );
+        const data = await response.json();
 
-      if (response.ok) {
-        // Populate only upper fields (not courses & instructors)
-        setName(data.name);
-        setDescription(data.description);
-        setMetaTitle(data.meta_title);
-        setMetaDescription(data.meta_description);
-      } else {
-        toast.success("Subcategory not found!", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Zoom,
-        });
-      }
+        if (response.ok && data.name) {
+            // Populate fields if data is found
+            setName(data.name);
+            setDescription(data.description);
+            setMetaTitle(data.meta_title);
+            setMetaDescription(data.meta_description);
+        } else {
+            toast.success("Subcategory not found!", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                transition: Zoom,
+            });
+        }
     } catch (error) {
-      console.error("Error fetching subcategory:", error);
-      toast("Failed to fetch subcategory.");
+        console.error("Error fetching subcategory:", error);
+        toast("Failed to fetch subcategory.");
     } finally {
-      setIsLoading(false); // Stop loader
+        setIsLoading(false); // Stop loader
     }
-  };
+};
+
 
  
 
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/courses/get-course`
-        );
-        const data = await response.json();
-        if (response.ok) {
-          setCourseOptions(data); // Set course options
-        } else {
-          console.error("Error fetching courses");
-        }
-      } catch (error) {
-        console.error("Failed to fetch courses:", error);
+useEffect(() => {
+  const fetchCourses = async () => {
+      if (!urlSlug) {
+          setCourseOptions([]); // Reset course dropdown when no slug is selected
+          return;
       }
-    };
 
-    fetchCourses();
-  }, []);
+      try {
+          const response = await fetch(
+              `${import.meta.env.VITE_API_URL}/courses/getonslug/${urlSlug}`
+          );
+          const data = await response.json();
+
+          if (response.ok && data.length > 0) {
+              setCourseOptions(data); // Set course data if available
+          } else {
+              setCourseOptions([]); // Reset dropdown if no data found
+          }
+      } catch (error) {
+          console.error("Failed to fetch course data:", error);
+          setCourseOptions([]); // Reset dropdown in case of an error
+      }
+  };
+
+  fetchCourses();
+}, [urlSlug]); // Runs every time urlSlug changes
+
 
   useEffect(() => {
     const fetchInstructors = async () => {
@@ -183,6 +198,8 @@ function App() {
       console.error("Error submitting form:", error);
     }
   };
+
+  console.log(courseOptions)
 
   return (
     <div className="w-full mx-auto p-6 h-92 overflow-y-auto bg-gray-700">

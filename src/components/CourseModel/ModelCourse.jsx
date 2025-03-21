@@ -8,7 +8,7 @@ const ModelCourse = () => {
   const [modules, setModules] = useState([]);
   const [filteredModules, setFilteredModules] = useState([]);
 
-  const API_URL = "${import.meta.env.VITE_API_URL}/api/coursemodel";
+  const API_URL = `${import.meta.env.VITE_API_URL}/api/coursemodel`;
 
   // Fetch Course Modules
   useEffect(() => {

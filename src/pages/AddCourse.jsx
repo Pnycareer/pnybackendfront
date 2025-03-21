@@ -169,6 +169,8 @@ const AddCourse = () => {
               <span className="text-red-500">Video ID is required</span>
             )}
           </div>
+
+
           {/* Course Category */}
           <div className="mb-4">
             <label className="block text-gray-400 mb-2">Course Category*</label>
@@ -177,7 +179,7 @@ const AddCourse = () => {
               className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
             >
               {categories.map((category) => (
-                <option key={category._id} value={category._id}>
+                <option key={category._id} value={category.url_Slug}>
                   {category.Category_Name}
                 </option>
               ))}
@@ -186,6 +188,9 @@ const AddCourse = () => {
               <span className="text-red-500">Course Category is required</span>
             )}
           </div>
+
+
+
           {/* Skill Level */}
           <div className="mb-4">
             <label className="block text-gray-400 mb-2">Skill Level*</label>

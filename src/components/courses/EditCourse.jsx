@@ -43,7 +43,7 @@ const EditCourse = () => {
       try {
         const [courseResponse, categoriesResponse, instructorsResponse] =
           await Promise.all([
-            axios.get(`http://localhost:8080/courses/${id}`),
+            axios.get(`${import.meta.env.VITE_API_URL}/courses/${id}`),
             axios.get(`${import.meta.env.VITE_API_URL}/api/v1/categories`),
             axios.get(
               `${import.meta.env.VITE_API_URL}/api/instructors/get-instructor`
@@ -124,7 +124,7 @@ const EditCourse = () => {
     const fetchCategories = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8080/courses/get-course"
+          `${import.meta.env.VITE_API_URL}/courses/get-course`
         );
         setCategories(response.data); // Assuming response contains an array of categories
       } catch (error) {
@@ -230,7 +230,7 @@ const EditCourse = () => {
                 Select Course Category
               </option>
               {categories.map((category) => (
-                <option key={category._id} value={category._id}>
+                <option key={category._id} value={category.url_Slug}>
                   {category.Category_Name}{" "}
                   {/* Adjust according to API response */}
                 </option>

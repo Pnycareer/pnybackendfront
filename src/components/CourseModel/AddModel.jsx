@@ -15,7 +15,7 @@ const AddModel = () => {
     const fetchCourses = async () => {
       try {
         const response = await axios.get(
-          "${import.meta.env.VITE_API_URL}/api/courses"
+          `${import.meta.env.VITE_API_URL}/api/courses`
         );
         setCourses(response.data); // Set courses from API response
       } catch (error) {
