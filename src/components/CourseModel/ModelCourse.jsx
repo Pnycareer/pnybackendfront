@@ -29,9 +29,12 @@ const ModelCourse = () => {
   };
 
   const filterData = (search) => {
-    const filtered = modules.filter((module) =>
-      module.textEditor.toLowerCase().includes(search)
-    );
+    const filtered = modules.filter((module) => {
+      const courseName = module.courseId?.course_Name?.toLowerCase() || "";
+      const editorText = module.textEditor?.toLowerCase() || "";
+      return courseName.includes(search) || editorText.includes(search);
+    });
+
     setFilteredModules(filtered);
   };
 
@@ -68,7 +71,7 @@ const ModelCourse = () => {
       <div className="text-center mb-6">
         <input
           type="text"
-          placeholder="Search by Course Module Name"
+          placeholder="Search by Course Name or Module"
           className="bg-gray-700 text-white rounded-lg py-2 px-4 mb-4"
           value={searchTerm}
           onChange={handleSearch}
@@ -83,7 +86,10 @@ const ModelCourse = () => {
                 #SL
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                Course Module Name
+                Course Name
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                Module Description
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                 Position
@@ -103,12 +109,21 @@ const ModelCourse = () => {
                 transition={{ duration: 0.3 }}
               >
                 <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
+
+                {/* ✅ Course Name */}
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {module.textEditor}
+                  {module.courseId?.course_Name || "N/A"}
                 </td>
+
+                {/* ✅ Module TextEditor Description */}
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {module.courseModulePosition}
+                  {module.textEditor || "N/A"}
                 </td>
+
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {module.courseModulePosition || "-"}
+                </td>
+
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                   <Link to={`/editmodel/${module._id}`}>
                     <button className="text-indigo-400 hover:text-indigo-300 mr-2">

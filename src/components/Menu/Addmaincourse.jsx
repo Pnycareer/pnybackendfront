@@ -126,7 +126,7 @@ useEffect(() => {
 
       try {
           const response = await fetch(
-              `${import.meta.env.VITE_API_URL}/courses/getonslug/${urlSlug}`
+              `${import.meta.env.VITE_API_URL}/courses/getoncategory/${urlSlug}`
           );
           const data = await response.json();
 

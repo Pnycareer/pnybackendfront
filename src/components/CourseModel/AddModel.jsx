@@ -1,121 +1,244 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 
 const AddModel = () => {
-  const [course, setCourse] = useState(""); // Selected course ID
-  const [courseModulePosition, setCourseModulePosition] = useState(""); // Position field
-  const [textEditor, setTextEditor] = useState(""); // Text editor content
-  const [status, setStatus] = useState("true"); // Status field, default "true" as string
-  const [courses, setCourses] = useState([]); // List of courses from API
-  const navigate = useNavigate();
+  const [slug, setSlug] = useState("marketing"); // Default slug
+  const [courseList, setCourseList] = useState([]);
+  const [courseId, setCourseId] = useState("");
+  const [lectures, setLectures] = useState([
+    { lectureNumber: 1, title: "", content: "", topics: [""] },
+  ]);
 
-  // Fetch courses from API
+  // Fetch courses when slug changes
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/courses`
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/courses/getoncategory/${slug}`
         );
-        setCourses(response.data); // Set courses from API response
-      } catch (error) {
-        console.error("Error fetching courses:", error);
+        const data = await res.json();
+        setCourseList(data);
+        setCourseId(data[0]?._id || ""); // Auto-select first course
+      } catch (err) {
+        console.error("Failed to fetch courses:", err);
       }
     };
-    fetchCourses();
-  }, []);
 
-  // Handle form submission
+    fetchCourses();
+  }, [slug]);
+
+  // --- rest of your lecture-handling functions (no changes) ---
+
+  const handleLectureChange = (index, field, value) => {
+    const updatedLectures = [...lectures];
+    updatedLectures[index][field] = value;
+    setLectures(updatedLectures);
+  };
+
+  const handleTopicChange = (lectureIndex, topicIndex, value) => {
+    const updatedLectures = [...lectures];
+    updatedLectures[lectureIndex].topics[topicIndex] = value;
+    setLectures(updatedLectures);
+  };
+
+  const addLecture = () => {
+    setLectures([
+      ...lectures,
+      {
+        lectureNumber: lectures.length + 1,
+        title: "",
+        content: "",
+        topics: [""],
+      },
+    ]);
+  };
+
+  const removeLecture = (index) => {
+    if (lectures.length === 1) return;
+    const updatedLectures = lectures.filter((_, i) => i !== index);
+    setLectures(updatedLectures);
+  };
+
+  const addTopic = (lectureIndex) => {
+    const updatedLectures = [...lectures];
+    updatedLectures[lectureIndex].topics.push("");
+    setLectures(updatedLectures);
+  };
+
+  const removeTopic = (lectureIndex, topicIndex) => {
+    const updatedLectures = [...lectures];
+    if (updatedLectures[lectureIndex].topics.length === 1) return;
+    updatedLectures[lectureIndex].topics.splice(topicIndex, 1);
+    setLectures(updatedLectures);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Payload to send as JSON
-    const payload = {
-      course, // Selected course ID
-      courseModulePosition: Number(courseModulePosition), // Convert position to number
-      textEditor, // Text editor content
-      status: status === "true", // Convert "true"/"false" string to boolean
+    const data = {
+      courseId,
+      lectures,
     };
 
     try {
-      // Send POST request to backend
-      await axios.post(
-        "${import.meta.env.VITE_API_URL}/api/coursemodel",
-        payload,
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/coursemodel`,
         {
-          headers: { "Content-Type": "application/json" },
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         }
       );
-      navigate("/coursemodel"); // Redirect after successful submission
+
+      const result = await res.json();
+      console.log("Response:", result);
+      alert("Course Feature Created!");
+
+      setCourseId("");
+      setLectures([{ lectureNumber: 1, title: "", content: "", topics: [""] }]);
     } catch (error) {
-      console.error("Error adding Course Model:", error);
+      console.error("Error:", error);
+      alert("Error submitting form.");
     }
   };
 
   return (
-    <div className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700 overflow-auto w-full">
-      <h2 className="text-2xl font-semibold text-gray-100 mb-5">
-        Add Course Model
-      </h2>
-      <form onSubmit={handleSubmit}>
-        <div className="space-y-4">
-          {/* Dropdown to select course */}
-          <select
-            value={course}
-            onChange={(e) => setCourse(e.target.value)}
-            className="w-full p-3 bg-gray-700 text-white placeholder-gray-400 rounded-lg"
-            required
-          >
-            <option value="" disabled>
-              Select Course Module
+    <div className="p-6 w-full mx-auto h-screen overflow-y-auto bg-black text-white">
+      <h2 className="text-2xl font-bold mb-4">Add Course Feature</h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Slug Dropdown */}
+        <select
+          value={slug}
+          onChange={(e) => setSlug(e.target.value)}
+          className="bg-zinc-900 border border-gray-700 p-2 w-full text-white"
+        >
+          <option value="marketing">Marketing</option>
+          <option value="designing">Designing</option>
+          <option value="diploma">Diploma</option>
+          <option value="development">Development</option>
+          <option value="business">Business</option>
+          <option value="multimedia">Multimedia</option>
+        </select>
+
+        {/* Course Dropdown */}
+        <select
+          value={courseId}
+          onChange={(e) => setCourseId(e.target.value)}
+          className="bg-zinc-900 border border-gray-700 p-2 w-full text-white"
+          required
+        >
+          <option value="">Select a Course</option>
+          {courseList.map((course) => (
+            <option key={course._id} value={course._id}>
+              {course.course_Name}
             </option>
-            {courses.map((course) => (
-              <option key={course._id} value={course._id}>
-                {course.course_Name} {/* Display course name */}
-              </option>
-            ))}
-          </select>
+          ))}
+        </select>
 
-          {/* Course Module Position */}
-          <input
-            type="number"
-            placeholder="Position"
-            className="w-full p-3 bg-gray-700 text-white placeholder-gray-400 rounded-lg"
-            value={courseModulePosition}
-            onChange={(e) => setCourseModulePosition(e.target.value)}
-            required
-          />
-
-          {/* Text Editor Content */}
-          <textarea
-            placeholder="Text Editor Content"
-            className="w-full p-3 bg-gray-700 text-white placeholder-gray-400 rounded-lg"
-            value={textEditor}
-            onChange={(e) => setTextEditor(e.target.value)}
-            rows="4"
-          />
-
-          {/* Status Dropdown */}
-          <label className="flex items-center text-gray-300">
-            Active Status
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="ml-2 p-2 bg-gray-700 text-white rounded-lg"
-            >
-              <option value="true">True</option>
-              <option value="false">False</option>
-            </select>
-          </label>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg"
+        {/* Lectures UI (same as before) */}
+        {lectures.map((lecture, index) => (
+          <div
+            key={index}
+            className="border border-gray-700 p-4 rounded bg-zinc-800"
           >
-            Add Model
-          </button>
-        </div>
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="font-semibold text-white">
+                Lecture {lecture.lectureNumber}
+              </h3>
+              {lectures.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeLecture(index)}
+                  className="text-red-500 text-sm"
+                >
+                  🗑 Remove Lecture
+                </button>
+              )}
+            </div>
+
+            <input
+              type="number"
+              value={lecture.lectureNumber}
+              onChange={(e) =>
+                handleLectureChange(
+                  index,
+                  "lectureNumber",
+                  parseInt(e.target.value)
+                )
+              }
+              placeholder="Lecture Number"
+              className="bg-zinc-900 border border-gray-700 p-2 w-full mb-2 text-white placeholder-gray-400"
+              required
+            />
+            <input
+              type="text"
+              value={lecture.title}
+              onChange={(e) =>
+                handleLectureChange(index, "title", e.target.value)
+              }
+              placeholder="Lecture Title"
+              className="bg-zinc-900 border border-gray-700 p-2 w-full mb-2 text-white placeholder-gray-400"
+              required
+            />
+            <textarea
+              value={lecture.content}
+              onChange={(e) =>
+                handleLectureChange(index, "content", e.target.value)
+              }
+              placeholder="Lecture Content"
+              className="bg-zinc-900 border border-gray-700 p-2 w-full mb-2 text-white placeholder-gray-400"
+              required
+            />
+
+            {lecture.topics.map((topic, tIndex) => (
+              <div key={tIndex} className="flex items-center gap-2 mb-2">
+                <input
+                  type="text"
+                  value={topic}
+                  onChange={(e) =>
+                    handleTopicChange(index, tIndex, e.target.value)
+                  }
+                  placeholder={`Topic ${tIndex + 1}`}
+                  className="bg-zinc-900 border border-gray-700 p-2 w-full text-white placeholder-gray-400"
+                  required
+                />
+                {lecture.topics.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeTopic(index, tIndex)}
+                    className="text-red-500 text-sm"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={() => addTopic(index)}
+              className="text-sm text-blue-400 hover:underline"
+            >
+              + Add Topic
+            </button>
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={addLecture}
+          className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600"
+        >
+          + Add Lecture
+        </button>
+
+        <button
+          type="submit"
+          className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Submit
+        </button>
       </form>
     </div>
   );
