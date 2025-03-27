@@ -12,6 +12,8 @@ const EditModel = () => {
   const [lectures, setLectures] = useState([
     { lectureNumber: "", title: "", content: "", topics: [""] },
   ]);
+  const [showLectures, setShowLectures] = useState([false]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -37,20 +39,18 @@ const EditModel = () => {
         );
         const model = res.data;
 
-        // Set slug based on the course category (which drives course list)
         const modelSlug = model.courseId?.course_Category?.toLowerCase();
         if (modelSlug) setSlug(modelSlug);
 
-        setLectures(
-          model.lectures.length
-            ? model.lectures
-            : [{ lectureNumber: 1, title: "", content: "", topics: [""] }]
-        );
+        const lectureData = model.lectures.length
+          ? model.lectures
+          : [{ lectureNumber: 1, title: "", content: "", topics: [""] }];
+        setLectures(lectureData);
+        setShowLectures(lectureData.map(() => false)); // Closed by default
 
-        // Set courseId after courseList is loaded
         setTimeout(() => {
           setCourseId(model.courseId?._id || "");
-        }, 500); // Wait for courseList to load
+        }, 500);
       } catch (err) {
         console.error("Error fetching course model:", err);
       }
@@ -76,12 +76,15 @@ const EditModel = () => {
       ...lectures,
       { lectureNumber: "", title: "", content: "", topics: [""] },
     ]);
+    setShowLectures([...showLectures, false]); // Closed by default
   };
 
   const removeLecture = (index) => {
     if (lectures.length === 1) return;
     const updatedLectures = lectures.filter((_, i) => i !== index);
+    const updatedShowLectures = showLectures.filter((_, i) => i !== index);
     setLectures(updatedLectures);
+    setShowLectures(updatedShowLectures);
   };
 
   const addTopic = (lectureIndex) => {
@@ -122,6 +125,15 @@ const EditModel = () => {
     }
   };
 
+  const filteredLectures = lectures.filter((lecture) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      lecture.title.toLowerCase().includes(term) ||
+      lecture.content.toLowerCase().includes(term) ||
+      lecture.topics.some((topic) => topic.toLowerCase().includes(term))
+    );
+  });
+
   return (
     <div className="p-6 w-full mx-auto h-screen overflow-y-auto bg-black text-white">
       <h2 className="text-2xl font-bold mb-4">Edit Course Feature</h2>
@@ -155,92 +167,123 @@ const EditModel = () => {
           ))}
         </select>
 
-        {/* Lecture UI */}
-        {lectures.map((lecture, index) => (
-          <div
-            key={index}
-            className="border border-gray-700 p-4 rounded bg-zinc-800"
-          >
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="font-semibold text-white">Lecture</h3>
-              {lectures.length > 1 && (
+        {/* Search Bar */}
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search lectures..."
+          className="bg-zinc-900 border border-gray-700 p-2 w-full text-white"
+        />
+
+        {/* Accordion Lectures */}
+        {filteredLectures.map((lecture, index) => {
+          const originalIndex = lectures.indexOf(lecture);
+          const isOpen = showLectures[originalIndex];
+
+          return (
+            <div
+              key={originalIndex}
+              className="border border-gray-700 p-4 rounded bg-zinc-800"
+            >
+              <div className="flex justify-between items-center mb-2">
                 <button
                   type="button"
-                  onClick={() => removeLecture(index)}
-                  className="text-red-500 text-sm"
+                  className="text-left font-semibold text-white w-full text-lg"
+                  onClick={() => {
+                    const updated = [...showLectures];
+                    updated[originalIndex] = !updated[originalIndex];
+                    setShowLectures(updated);
+                  }}
                 >
-                  🗑 Remove Lecture
+                  {`Lecture ${lecture.lectureNumber || originalIndex + 1}`}{" "}
+                  <span className="text-sm">
+                    ({isOpen ? "Hide" : "Show"})
+                  </span>
                 </button>
-              )}
-            </div>
-
-            <input
-              type="number"
-              value={lecture.lectureNumber}
-              onChange={(e) =>
-                handleLectureChange(
-                  index,
-                  "lectureNumber",
-                  parseInt(e.target.value)
-                )
-              }
-              placeholder="Lecture Number"
-              className="bg-zinc-900 border border-gray-700 p-2 w-full mb-2 text-white"
-              required
-            />
-            <input
-              type="text"
-              value={lecture.title}
-              onChange={(e) =>
-                handleLectureChange(index, "title", e.target.value)
-              }
-              placeholder="Lecture Title"
-              className="bg-zinc-900 border border-gray-700 p-2 w-full mb-2 text-white"
-              required
-            />
-            <textarea
-              value={lecture.content}
-              onChange={(e) =>
-                handleLectureChange(index, "content", e.target.value)
-              }
-              placeholder="Lecture Content"
-              className="bg-zinc-900 border border-gray-700 p-2 w-full mb-2 text-white"
-              required
-            />
-
-            {lecture.topics.map((topic, tIndex) => (
-              <div key={tIndex} className="flex items-center gap-2 mb-2">
-                <input
-                  type="text"
-                  value={topic}
-                  onChange={(e) =>
-                    handleTopicChange(index, tIndex, e.target.value)
-                  }
-                  placeholder={`Topic ${tIndex + 1}`}
-                  className="bg-zinc-900 border border-gray-700 p-2 w-full text-white"
-                  required
-                />
-                {lecture.topics.length > 1 && (
+                {lectures.length > 1 && (
                   <button
                     type="button"
-                    onClick={() => removeTopic(index, tIndex)}
-                    className="text-red-500 text-sm"
+                    onClick={() => removeLecture(originalIndex)}
+                    className="text-red-500 text-sm ml-2"
                   >
-                    ✕
+                    🗑
                   </button>
                 )}
               </div>
-            ))}
 
-            <button
-              type="button"
-              onClick={() => addTopic(index)}
-              className="text-sm text-blue-400 hover:underline"
-            >
-              + Add Topic
-            </button>
-          </div>
-        ))}
+              {isOpen && (
+                <div className="space-y-2">
+                  <input
+                    type="number"
+                    value={lecture.lectureNumber}
+                    onChange={(e) =>
+                      handleLectureChange(
+                        originalIndex,
+                        "lectureNumber",
+                        parseInt(e.target.value)
+                      )
+                    }
+                    placeholder="Lecture Number"
+                    className="bg-zinc-900 border border-gray-700 p-2 w-full text-white"
+                    required
+                  />
+                  <input
+                    type="text"
+                    value={lecture.title}
+                    onChange={(e) =>
+                      handleLectureChange(originalIndex, "title", e.target.value)
+                    }
+                    placeholder="Lecture Title"
+                    className="bg-zinc-900 border border-gray-700 p-2 w-full text-white"
+                    required
+                  />
+                  <textarea
+                    value={lecture.content}
+                    onChange={(e) =>
+                      handleLectureChange(originalIndex, "content", e.target.value)
+                    }
+                    placeholder="Lecture Content"
+                    className="bg-zinc-900 border border-gray-700 p-2 w-full text-white"
+                    required
+                  />
+
+                  {lecture.topics.map((topic, tIndex) => (
+                    <div key={tIndex} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={topic}
+                        onChange={(e) =>
+                          handleTopicChange(originalIndex, tIndex, e.target.value)
+                        }
+                        placeholder={`Topic ${tIndex + 1}`}
+                        className="bg-zinc-900 border border-gray-700 p-2 w-full text-white"
+                        required
+                      />
+                      {lecture.topics.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeTopic(originalIndex, tIndex)}
+                          className="text-red-500 text-sm"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() => addTopic(originalIndex)}
+                    className="text-sm text-blue-400 hover:underline"
+                  >
+                    + Add Topic
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
 
         <button
           type="button"
