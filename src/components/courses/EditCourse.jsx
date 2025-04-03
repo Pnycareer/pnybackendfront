@@ -38,18 +38,31 @@ const EditCourse = () => {
   const [instructors, setInstructors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/v1/categories`
+      );
+      setCategories(response.data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [courseResponse, categoriesResponse, instructorsResponse] =
+        const [courseResponse, instructorsResponse] =
           await Promise.all([
             axios.get(`${import.meta.env.VITE_API_URL}/courses/${id}`),
-            axios.get(`${import.meta.env.VITE_API_URL}/api/v1/categories`),
             axios.get(
               `${import.meta.env.VITE_API_URL}/api/instructors/get-instructor`
             ),
           ]);
         const fetchedCourse = courseResponse.data;
+
+        console.log(fetchedCourse , 'fetched')
         // Ensure all keys in the state exist in the fetched course
         const updatedCourse = { ...course };
         for (const key in updatedCourse) {
@@ -58,7 +71,6 @@ const EditCourse = () => {
           }
         }
         setCourse(fetchedCourse);
-        setCategories(categoriesResponse.data);
         setInstructors(instructorsResponse.data);
         setLoading(false);
       } catch (err) {
@@ -68,6 +80,7 @@ const EditCourse = () => {
       }
     };
     if (id) fetchData();
+    fetchCategories()
   }, [id]);
 
   const handleSubmit = async (e) => {
@@ -120,21 +133,26 @@ const EditCourse = () => {
     }));
   };
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/courses/get-course`
-        );
-        setCategories(response.data); // Assuming response contains an array of categories
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-    fetchCategories();
-  }, []);
+  // useEffect(() => {
+  //   const fetchCategories = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         `${import.meta.env.VITE_API_URL}/courses/get-course`
+  //       );
+  //       setCategories(response.data); // Assuming response contains an array of categories
+  //     } catch (error) {
+  //       console.error("Error fetching categories:", error);
+  //     }
+  //   };
+  //   fetchCategories();
+  // }, []);
+
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
+
+
+  console.log(categories , "Editcourse")
   return (
     <div className="w-full overflow-auto">
       <Header />

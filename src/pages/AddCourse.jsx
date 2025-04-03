@@ -93,6 +93,8 @@ const AddCourse = () => {
       );
     }
   };
+
+  console.log(categories , "addcourse")
   return (
     <div className="w-full overflow-y-auto">
       <Header />
@@ -170,7 +172,6 @@ const AddCourse = () => {
             )}
           </div>
 
-
           {/* Course Category */}
           <div className="mb-4">
             <label className="block text-gray-400 mb-2">Course Category*</label>
@@ -188,8 +189,6 @@ const AddCourse = () => {
               <span className="text-red-500">Course Category is required</span>
             )}
           </div>
-
-
 
           {/* Skill Level */}
           <div className="mb-4">
