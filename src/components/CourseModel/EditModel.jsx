@@ -46,7 +46,7 @@ const EditModel = () => {
           ? model.lectures
           : [{ lectureNumber: 1, title: "", content: "", topics: [""] }];
         setLectures(lectureData);
-        setShowLectures(lectureData.map(() => false)); // Closed by default
+        setShowLectures(lectureData.map(() => false));
 
         setTimeout(() => {
           setCourseId(model.courseId?._id || "");
@@ -76,15 +76,20 @@ const EditModel = () => {
       ...lectures,
       { lectureNumber: "", title: "", content: "", topics: [""] },
     ]);
-    setShowLectures([...showLectures, false]); // Closed by default
+    setShowLectures([...showLectures, false]);
   };
 
   const removeLecture = (index) => {
-    if (lectures.length === 1) return;
     const updatedLectures = lectures.filter((_, i) => i !== index);
     const updatedShowLectures = showLectures.filter((_, i) => i !== index);
-    setLectures(updatedLectures);
-    setShowLectures(updatedShowLectures);
+
+    if (updatedLectures.length === 0) {
+      setLectures([{ lectureNumber: "", title: "", content: "", topics: [""] }]);
+      setShowLectures([false]);
+    } else {
+      setLectures(updatedLectures);
+      setShowLectures(updatedShowLectures);
+    }
   };
 
   const addTopic = (lectureIndex) => {
@@ -128,12 +133,13 @@ const EditModel = () => {
   const filteredLectures = lectures.filter((lecture) => {
     const term = searchTerm.toLowerCase();
     return (
-      lecture.title.toLowerCase().includes(term) ||
-      lecture.content.toLowerCase().includes(term) ||
+      (lecture.lectureNumber?.toString().includes(term)) ||  // 🔥 Match lecture number
+      (lecture.title?.toLowerCase().includes(term)) ||
+      (lecture.content?.toLowerCase().includes(term)) ||
       lecture.topics.some((topic) => topic.toLowerCase().includes(term))
     );
   });
-
+  
   return (
     <div className="p-6 w-full mx-auto h-screen overflow-y-auto bg-black text-white">
       <h2 className="text-2xl font-bold mb-4">Edit Course Feature</h2>
@@ -201,21 +207,21 @@ const EditModel = () => {
                     ({isOpen ? "Hide" : "Show"})
                   </span>
                 </button>
-                {lectures.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeLecture(originalIndex)}
-                    className="text-red-500 text-sm ml-2"
-                  >
-                    🗑
-                  </button>
-                )}
+
+                <button
+                  type="button"
+                  onClick={() => removeLecture(originalIndex)}
+                  className="text-red-500 text-sm ml-2"
+                >
+                  🗑
+                </button>
               </div>
 
               {isOpen && (
                 <div className="space-y-2">
                   <input
                     type="number"
+                    readOnly
                     value={lecture.lectureNumber}
                     onChange={(e) =>
                       handleLectureChange(

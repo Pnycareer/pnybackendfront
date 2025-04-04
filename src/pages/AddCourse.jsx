@@ -38,7 +38,11 @@ const AddCourse = () => {
     fetchInstructors();
   }, []);
   const onSubmit = async (data) => {
-    console.log("Form Data before submission:", data); // Log the form data before sending
+    Object.keys(data).forEach((key) => {
+      if (typeof data[key] === "string") {
+        data[key] = data[key].trim();
+      }
+    });
     const formData = new FormData();
     formData.append("course_Name", data.course_Name);
     formData.append("url_Slug", data.url_Slug);
@@ -94,7 +98,7 @@ const AddCourse = () => {
     }
   };
 
-  console.log(categories , "addcourse")
+  console.log(categories, "addcourse");
   return (
     <div className="w-full overflow-y-auto">
       <Header />
