@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+
 
 const EditModel = () => {
   const { id } = useParams();
@@ -10,7 +13,7 @@ const EditModel = () => {
   const [courseList, setCourseList] = useState([]);
   const [courseId, setCourseId] = useState("");
   const [lectures, setLectures] = useState([
-    { lectureNumber: "", title: "", content: "", topics: [""] },
+    { lectureNumber: "", title: "", content: "", topics: "" },
   ]);
   const [showLectures, setShowLectures] = useState([false]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -44,7 +47,7 @@ const EditModel = () => {
 
         const lectureData = model.lectures.length
           ? model.lectures
-          : [{ lectureNumber: 1, title: "", content: "", topics: [""] }];
+          : [{ lectureNumber: 1, title: "", content: "", topics: "" }];
         setLectures(lectureData);
         setShowLectures(lectureData.map(() => false));
 
@@ -65,45 +68,53 @@ const EditModel = () => {
     setLectures(updatedLectures);
   };
 
-  const handleTopicChange = (lectureIndex, topicIndex, value) => {
-    const updatedLectures = [...lectures];
-    updatedLectures[lectureIndex].topics[topicIndex] = value;
-    setLectures(updatedLectures);
-  };
+ 
 
   const addLecture = () => {
     setLectures([
       ...lectures,
-      { lectureNumber: "", title: "", content: "", topics: [""] },
+      { lectureNumber: "", title: "", content: "", topics: ""},
     ]);
     setShowLectures([...showLectures, false]);
   };
 
-  const removeLecture = (index) => {
-    const updatedLectures = lectures.filter((_, i) => i !== index);
-    const updatedShowLectures = showLectures.filter((_, i) => i !== index);
-
-    if (updatedLectures.length === 0) {
-      setLectures([{ lectureNumber: "", title: "", content: "", topics: [""] }]);
-      setShowLectures([false]);
-    } else {
-      setLectures(updatedLectures);
-      setShowLectures(updatedShowLectures);
+  const removeLecture = async (index) => {
+    const lectureId = lectures[index]._id; // Get the lecture _id from MongoDB
+  
+    if (!lectureId) {
+      // If lecture is not saved yet, just remove locally
+      const updatedLectures = lectures.filter((_, i) => i !== index);
+      const updatedShowLectures = showLectures.filter((_, i) => i !== index);
+      setLectures(updatedLectures.length ? updatedLectures : [{ lectureNumber: "", title: "", content: "", topics: "" }]);
+      setShowLectures(updatedLectures.length ? updatedShowLectures : [false]);
+      return;
+    }
+  
+    // Confirm before deleting
+    if (!confirm("Are you sure you want to delete this lecture?")) return;
+  
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/coursemodel/coursemodel/${id}/${lectureId}`
+      );
+      alert("Lecture deleted successfully!");
+  
+      // Remove from local state after delete
+      const updatedLectures = lectures.filter((_, i) => i !== index);
+      const updatedShowLectures = showLectures.filter((_, i) => i !== index);
+      setLectures(updatedLectures.length ? updatedLectures : [{ lectureNumber: "", title: "", content: "", topics: "" }]);
+      setShowLectures(updatedLectures.length ? updatedShowLectures : [false]);
+  
+    } catch (error) {
+      console.error("Delete failed:", error);
+      alert("Failed to delete lecture.");
     }
   };
+  
 
-  const addTopic = (lectureIndex) => {
-    const updatedLectures = [...lectures];
-    updatedLectures[lectureIndex].topics.push("");
-    setLectures(updatedLectures);
-  };
+ 
 
-  const removeTopic = (lectureIndex, topicIndex) => {
-    const updatedLectures = [...lectures];
-    if (updatedLectures[lectureIndex].topics.length === 1) return;
-    updatedLectures[lectureIndex].topics.splice(topicIndex, 1);
-    setLectures(updatedLectures);
-  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -133,10 +144,10 @@ const EditModel = () => {
   const filteredLectures = lectures.filter((lecture) => {
     const term = searchTerm.toLowerCase();
     return (
-      (lecture.lectureNumber?.toString().includes(term)) ||  // 🔥 Match lecture number
-      (lecture.title?.toLowerCase().includes(term)) ||
-      (lecture.content?.toLowerCase().includes(term)) ||
-      lecture.topics.some((topic) => topic.toLowerCase().includes(term))
+      lecture.lectureNumber?.toString().includes(term) || // Match lecture number
+      lecture.title?.toLowerCase().includes(term) ||
+      lecture.content?.toLowerCase().includes(term) ||
+      (lecture.topics?.toLowerCase().includes(term)) // ✅ Fix here: topics is just a string now
     );
   });
   
@@ -203,9 +214,7 @@ const EditModel = () => {
                   }}
                 >
                   {`Lecture ${lecture.lectureNumber || originalIndex + 1}`}{" "}
-                  <span className="text-sm">
-                    ({isOpen ? "Hide" : "Show"})
-                  </span>
+                  <span className="text-sm">({isOpen ? "Hide" : "Show"})</span>
                 </button>
 
                 <button
@@ -221,7 +230,7 @@ const EditModel = () => {
                 <div className="space-y-2">
                   <input
                     type="number"
-                    readOnly
+                    
                     value={lecture.lectureNumber}
                     onChange={(e) =>
                       handleLectureChange(
@@ -238,7 +247,11 @@ const EditModel = () => {
                     type="text"
                     value={lecture.title}
                     onChange={(e) =>
-                      handleLectureChange(originalIndex, "title", e.target.value)
+                      handleLectureChange(
+                        originalIndex,
+                        "title",
+                        e.target.value
+                      )
                     }
                     placeholder="Lecture Title"
                     className="bg-zinc-900 border border-gray-700 p-2 w-full text-white"
@@ -247,44 +260,32 @@ const EditModel = () => {
                   <textarea
                     value={lecture.content}
                     onChange={(e) =>
-                      handleLectureChange(originalIndex, "content", e.target.value)
+                      handleLectureChange(
+                        originalIndex,
+                        "content",
+                        e.target.value
+                      )
                     }
                     placeholder="Lecture Content"
                     className="bg-zinc-900 border border-gray-700 p-2 w-full text-white"
                     required
                   />
 
-                  {lecture.topics.map((topic, tIndex) => (
-                    <div key={tIndex} className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={topic}
-                        onChange={(e) =>
-                          handleTopicChange(originalIndex, tIndex, e.target.value)
-                        }
-                        placeholder={`Topic ${tIndex + 1}`}
-                        className="bg-zinc-900 border border-gray-700 p-2 w-full text-white"
-                        required
-                      />
-                      {lecture.topics.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeTopic(originalIndex, tIndex)}
-                          className="text-red-500 text-sm"
-                        >
-                          ✕
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                  <div className="mt-2">
+                    <label className="block mb-1 text-sm text-gray-300">
+                      Lecture Topics:
+                    </label>
+                    <ReactQuill
+                      theme="snow"
+                      value={lecture.topics}
+                      onChange={(value) =>
+                        handleLectureChange(originalIndex, "topics", value)
+                      }
+                      className="bg-white text-black rounded-md"
+                    />
+                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => addTopic(originalIndex)}
-                    className="text-sm text-blue-400 hover:underline"
-                  >
-                    + Add Topic
-                  </button>
+                 
                 </div>
               )}
             </div>

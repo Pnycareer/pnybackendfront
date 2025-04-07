@@ -36,6 +36,7 @@ const EditCourse = () => {
   const [categories, setCategories] = useState([]);
   const [brochureFile, setBrochureFile] = useState(null);
   const [instructors, setInstructors] = useState([]);
+  const [courseType, setCourseType] = useState("normal"); // normal | city
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -49,20 +50,17 @@ const EditCourse = () => {
       console.error("Error fetching categories:", error);
     }
   };
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [courseResponse, instructorsResponse] =
-          await Promise.all([
-            axios.get(`${import.meta.env.VITE_API_URL}/courses/${id}`),
-            axios.get(
-              `${import.meta.env.VITE_API_URL}/api/instructors/get-instructor`
-            ),
-          ]);
+        const [courseResponse, instructorsResponse] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_URL}/courses/${id}`),
+          axios.get(
+            `${import.meta.env.VITE_API_URL}/api/instructors/get-instructor`
+          ),
+        ]);
         const fetchedCourse = courseResponse.data;
-
-        console.log(fetchedCourse , 'fetched')
         // Ensure all keys in the state exist in the fetched course
         const updatedCourse = { ...course };
         for (const key in updatedCourse) {
@@ -80,7 +78,7 @@ const EditCourse = () => {
       }
     };
     if (id) fetchData();
-    fetchCategories()
+    fetchCategories();
   }, [id]);
 
   const handleSubmit = async (e) => {
@@ -88,18 +86,27 @@ const EditCourse = () => {
     const formData = new FormData();
 
     for (const key in course) {
+      const value = course[key];
+
       if (key === "course_Category") {
         formData.append(
           key,
           course.course_Category._id || course.course_Category
         );
+      } else if (key === "course_Image") {
+        if (value instanceof File) {
+          // If the user selected a new file, upload it
+          formData.append(key, value);
+        }
+        // else do not append the old image URL
+        // (means image will stay same if user does not change it)
       } else if (
-        key === "course_Image" &&
-        course.course_Image instanceof File
+        value !== null &&
+        value !== undefined &&
+        value !== "" &&
+        !(typeof value === "object" && Object.keys(value).length === 0)
       ) {
-        formData.append(key, course.course_Image);
-      } else {
-        formData.append(key, course[key]);
+        formData.append(key, value);
       }
     }
 
@@ -147,12 +154,9 @@ const EditCourse = () => {
   //   fetchCategories();
   // }, []);
 
-
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
-
-  console.log(categories , "Editcourse")
   return (
     <div className="w-full overflow-auto">
       <Header />
@@ -169,7 +173,6 @@ const EditCourse = () => {
               name="course_Name"
               value={course.course_Name}
               onChange={handleChange}
-              required
               className="w-full p-2 rounded bg-gray-700 text-white"
             />
           </div>
@@ -182,7 +185,6 @@ const EditCourse = () => {
               name="url_Slug"
               value={course.url_Slug}
               onChange={handleChange}
-              required
               className="w-full p-2 rounded bg-gray-700 text-white"
             />
           </div>
@@ -236,23 +238,48 @@ const EditCourse = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-300">Course Category*</label>
+            <label className="block text-gray-300">Select Course Type</label>
+            <select
+              value={courseType}
+              onChange={(e) => setCourseType(e.target.value)}
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            >
+              <option value="normal">Normal Courses</option>
+              <option value="city">City Courses</option>
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-300">
+              {courseType === "city" ? "Select City" : "Course Category*"}
+            </label>
             <select
               name="course_Category"
               value={course.course_Category}
               onChange={handleChange}
-              required
               className="w-full p-2 rounded bg-gray-700 text-white"
             >
               <option value="" disabled>
-                Select Course Category
+                {courseType === "city"
+                  ? "Select a City"
+                  : "Select Course Category"}
               </option>
-              {categories.map((category) => (
-                <option key={category._id} value={category.url_Slug}>
-                  {category.Category_Name}{" "}
-                  {/* Adjust according to API response */}
-                </option>
-              ))}
+
+              {courseType === "city" ? (
+                <>
+                  <option value="multan">Multan</option>
+                  <option value="lahore">Lahore</option>
+                  <option value="rawalpindi">Rawalpindi</option>
+                  <option value="karachi">Karachi</option>
+                  <option value="islamabad">Islamabad</option>
+                </>
+              ) : (
+                categories.map((category) => (
+                  <option key={category._id} value={category.url_Slug}>
+                    {category.Category_Name}
+                  </option>
+                ))
+              )}
             </select>
           </div>
 
@@ -261,9 +288,8 @@ const EditCourse = () => {
             <label className="block text-gray-300">Skill Level</label>
             <select
               name="Skill_Level"
-              value={course.Skill_Level}
+              value={course?.Skill_Level}
               onChange={handleChange}
-              required
               className="w-full p-2 rounded bg-gray-700 text-white"
             >
               <option value="" disabled>

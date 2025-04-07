@@ -12,9 +12,11 @@ function App() {
   const [metaDescription, setMetaDescription] = useState("");
   const [instructorOptions, setInstructorOptions] = useState([]);
   const [courseOptions, setCourseOptions] = useState([]);
-  const [isLoading, setIsLoading] = useState(false); // For loader
+  const [isLoading, setIsLoading] = useState(false);
 
-  const slugOptions = [
+  const [courseType, setCourseType] = useState(""); // <-- NEW
+
+  const mainCourseOptions = [
     "diploma",
     "marketing",
     "development",
@@ -22,32 +24,33 @@ function App() {
     "business",
     "multimedia",
   ];
-  // -----------------------------
-  // 2. Courses (array)
-  // -----------------------------
+
+  const cityCourseOptions = [
+    "lahore",
+    "multan",
+    "karachi",
+    "islamabad",
+    "rawalpindi",
+  ];
+
   const [courses, setCourses] = useState([{ course_id: "" }]);
   const [instructors, setInstructors] = useState([{ instructor_id: "" }]);
 
-  // Add a new empty course
   const handleAddCourse = () => {
     setCourses((prev) => [...prev, { course_id: "" }]);
   };
 
-  // Remove a course by index
   const handleRemoveCourse = (index) => {
     setCourses((prev) => prev.filter((_, i) => i !== index));
   };
 
-
-  // Update a particular course field
- const handleCourseChange = (index, value) => {
+  const handleCourseChange = (index, value) => {
     setCourses((prev) => {
       const updatedCourses = [...prev];
       updatedCourses[index].course_id = value;
       return updatedCourses;
     });
   };
-
 
   const handleAddInstructor = () => {
     setInstructors((prev) => [...prev, { instructor_id: "" }]);
@@ -69,81 +72,77 @@ function App() {
     const selectedSlug = e.target.value;
     setUrlSlug(selectedSlug);
 
-    // Reset fields when a new slug is selected
+    // Reset fields
     setName("");
     setDescription("");
     setMetaTitle("");
     setMetaDescription("");
-    setCourses([{ course_id: "" }]);  // Reset courses
-    setInstructors([{ instructor_id: "" }]);  // Reset instructors
+    setCourses([{ course_id: "" }]);
+    setInstructors([{ instructor_id: "" }]);
 
     if (!selectedSlug) return;
 
-    setIsLoading(true); // Start loader
+    setIsLoading(true);
 
     try {
-        const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/api/v1/subCourse/getsubcourses/${selectedSlug}`
-        );
-        const data = await response.json();
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_API_URL
+        }/api/v1/subCourse/getsubcourses/${selectedSlug}`
+      );
+      const data = await response.json();
 
-        if (response.ok && data.name) {
-            // Populate fields if data is found
-            setName(data.name);
-            setDescription(data.description);
-            setMetaTitle(data.meta_title);
-            setMetaDescription(data.meta_description);
-        } else {
-            toast.success("Subcategory not found!", {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                transition: Zoom,
-            });
-        }
+      if (response.ok && data.name) {
+        setName(data.name);
+        setDescription(data.description);
+        setMetaTitle(data.meta_title);
+        setMetaDescription(data.meta_description);
+      } else {
+        toast.success("Subcategory not found!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+          transition: Zoom,
+        });
+      }
     } catch (error) {
-        console.error("Error fetching subcategory:", error);
-        toast("Failed to fetch subcategory.");
+      console.error("Error fetching subcategory:", error);
+      toast("Failed to fetch subcategory.");
     } finally {
-        setIsLoading(false); // Stop loader
+      setIsLoading(false);
     }
-};
+  };
 
-
- 
-
-useEffect(() => {
-  const fetchCourses = async () => {
+  useEffect(() => {
+    const fetchCourses = async () => {
       if (!urlSlug) {
-          setCourseOptions([]); // Reset course dropdown when no slug is selected
-          return;
+        setCourseOptions([]);
+        return;
       }
 
       try {
-          const response = await fetch(
-              `${import.meta.env.VITE_API_URL}/courses/getoncategory/${urlSlug}`
-          );
-          const data = await response.json();
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/courses/getoncategory/${urlSlug}`
+        );
+        const data = await response.json();
 
-          if (response.ok && data.length > 0) {
-              setCourseOptions(data); // Set course data if available
-          } else {
-              setCourseOptions([]); // Reset dropdown if no data found
-          }
+        if (response.ok && data.length > 0) {
+          setCourseOptions(data);
+        } else {
+          setCourseOptions([]);
+        }
       } catch (error) {
-          console.error("Failed to fetch course data:", error);
-          setCourseOptions([]); // Reset dropdown in case of an error
+        console.error("Failed to fetch course data:", error);
+        setCourseOptions([]);
       }
-  };
+    };
 
-  fetchCourses();
-}, [urlSlug]); // Runs every time urlSlug changes
-
+    fetchCourses();
+  }, [urlSlug]);
 
   useEffect(() => {
     const fetchInstructors = async () => {
@@ -165,7 +164,6 @@ useEffect(() => {
     fetchInstructors();
   }, []);
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -176,17 +174,23 @@ useEffect(() => {
       meta_title: metaTitle,
       meta_description: metaDescription,
       category_courses: courses,
-      category_instructors: instructors,
+      category_instructors: instructors.filter(
+        (instructor) =>
+          instructor.instructor_id && instructor.instructor_id !== ""
+      ),
     };
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/subCourse`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/v1/subCourse`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
@@ -198,8 +202,6 @@ useEffect(() => {
       console.error("Error submitting form:", error);
     }
   };
-
-  console.log(courseOptions)
 
   return (
     <div className="w-full mx-auto p-6 h-92 overflow-y-auto bg-gray-700">
@@ -221,15 +223,38 @@ useEffect(() => {
             />
           </div>
 
+          <div>
+            <label className="block font-semibold">Select Course Type:</label>
+            <select
+              className="border rounded w-full p-2 text-black"
+              value={courseType}
+              onChange={(e) => {
+                setCourseType(e.target.value);
+                setUrlSlug("");
+              }}
+              required
+            >
+              <option value="">Select a type</option>
+              <option value="main">Main Courses</option>
+              <option value="city">City Courses</option>
+            </select>
+          </div>
+
           <div className="relative">
             <label className="block font-semibold">Select Slug:</label>
             <select
               className="border rounded w-full p-2 text-black"
               value={urlSlug}
               onChange={handleSlugChange}
+              disabled={!courseType}
             >
-              <option value="">Select a subcategory</option>
-              {slugOptions.map((slug) => (
+              <option value="">Select a slug</option>
+              {(courseType === "main"
+                ? mainCourseOptions
+                : courseType === "city"
+                ? cityCourseOptions
+                : []
+              ).map((slug) => (
                 <option key={slug} value={slug}>
                   {slug}
                 </option>
@@ -269,7 +294,6 @@ useEffect(() => {
             className="border rounded w-full p-2 text-black"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            required
           />
         </div>
 
@@ -299,7 +323,7 @@ useEffect(() => {
         {/* =====================
             Courses Section
             ===================== */}
-       <div>
+        <div>
           <label className="block font-semibold">Select Course:</label>
           {courses.map((course, index) => (
             <div key={index} className="flex items-center gap-4 mb-2">
@@ -324,7 +348,11 @@ useEffect(() => {
               </button>
             </div>
           ))}
-          <button type="button" onClick={handleAddCourse} className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
+          <button
+            type="button"
+            onClick={handleAddCourse}
+            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
+          >
             Add Course
           </button>
         </div>
@@ -332,7 +360,7 @@ useEffect(() => {
         {/* =====================
             Instructors Section
             ===================== */}
-       <div>
+        <div>
           <label className="block font-semibold">Select Instructor:</label>
           {instructors.map((inst, index) => (
             <div key={index} className="flex items-center gap-4 mb-2">
@@ -357,15 +385,24 @@ useEffect(() => {
               </button>
             </div>
           ))}
-          <button type="button" onClick={handleAddInstructor} className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
+          <button
+            type="button"
+            onClick={handleAddInstructor}
+            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
+          >
             Add Instructor
           </button>
         </div>
 
-        <button type="submit" className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
+        <button
+          type="submit"
+          className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded"
+        >
           Submit
         </button>
       </form>
+
+      <ToastContainer />
     </div>
   );
 }

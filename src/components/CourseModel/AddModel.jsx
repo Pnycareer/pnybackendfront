@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+
 
 const AddModel = () => {
   const [slug, setSlug] = useState("marketing"); // Default slug
   const [courseList, setCourseList] = useState([]);
   const [courseId, setCourseId] = useState("");
   const [lectures, setLectures] = useState([
-    { lectureNumber: 1, title: "", content: "", topics: [""] },
+    { lectureNumber: 1, title: "", content: "", topics: "" },
   ]);
 
   // Fetch courses when slug changes
@@ -47,7 +50,7 @@ const AddModel = () => {
         lectureNumber: lectures.length + 1,
         title: "",
         content: "",
-        topics: [""],
+        topics: "",
       },
     ]);
   };
@@ -96,7 +99,7 @@ const AddModel = () => {
       alert("Course Feature Created!");
 
       setCourseId("");
-      setLectures([{ lectureNumber: 1, title: "", content: "", topics: [""] }]);
+      setLectures([{ lectureNumber: 1, title: "", content: "", topics: "" }]);
     } catch (error) {
       console.error("Error:", error);
       alert("Error submitting form.");
@@ -119,6 +122,7 @@ const AddModel = () => {
           <option value="development">Development</option>
           <option value="business">Business</option>
           <option value="multimedia">Multimedia</option>
+          <option value="lahore">lahore</option>
         </select>
 
         {/* Course Dropdown */}
@@ -191,30 +195,17 @@ const AddModel = () => {
               required
             />
 
-            {lecture.topics.map((topic, tIndex) => (
-              <div key={tIndex} className="flex items-center gap-2 mb-2">
-                <input
-                  type="text"
-                  value={topic}
-                  onChange={(e) =>
-                    handleTopicChange(index, tIndex, e.target.value)
-                  }
-                  placeholder={`Topic ${tIndex + 1}`}
-                  className="bg-zinc-900 border border-gray-700 p-2 w-full text-white placeholder-gray-400"
-                  required
-                />
-                {lecture.topics.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeTopic(index, tIndex)}
-                    className="text-red-500 text-sm"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-            ))}
-
+            <div className="mb-4">
+              <label className="block mb-2">Lecture Topics:</label>
+              <ReactQuill
+                theme="snow"
+                value={lecture.topics}
+                onChange={(value) =>
+                  handleLectureChange(index, "topics", value)
+                }
+                className="bg-white text-black"
+              />
+            </div>
             <button
               type="button"
               onClick={() => addTopic(index)}
