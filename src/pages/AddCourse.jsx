@@ -53,6 +53,15 @@ const AddCourse = () => {
         data[key] = data[key].trim();
       }
     });
+
+    if (data.url_Slug) {
+      data.url_Slug = data.url_Slug
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "") // remove special characters
+        .replace(/\s+/g, "-") // replace spaces with dash
+        .replace(/-+/g, "-"); // replace multiple dashes with single dash
+    }
     const formData = new FormData();
     formData.append("course_Name", data.course_Name);
     formData.append("url_Slug", data.url_Slug);

@@ -1,199 +1,342 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Search } from "lucide-react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
 
 const Blog = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredBlogs, setFilteredBlogs] = useState([]);
-  const [blogs, setBlogs] = useState([]);
-  const location = useLocation();
-  const navigate = useNavigate();
-  // const {id}= useParams();
-  console.log(filteredBlogs);
-  // Fetch blog posts from the API
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        const response = await axios.get(
-          "${import.meta.env.VITE_API_URL}/api/blogpost"
-        );
-        setBlogs(response.data); // Assuming API returns an array of blog posts
-        setFilteredBlogs(response.data);
-      } catch (error) {
-        console.error("Error fetching blog posts:", error);
-      }
-    };
+  const [formData, setFormData] = useState({
+    blogName: "",
+    shortDescription: "",
+    blogCategory: "",
+    blogDescription: "",
+    publishDate: "",
+    authorName: "",
+    authorBio: "",
+    tags: "",
+    metaTitle: "",
+    metaDescription: "",
+  });
 
-    fetchBlogs();
-  }, []);
+  const [blogImage, setBlogImage] = useState(null);
+  const [authorProfileImage, setAuthorProfileImage] = useState(null); // ✅
+  const [socialLinks, setSocialLinks] = useState([{ platform: "", url: "" }]);
 
-  // Handle search
-  const handleSearch = (e) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
-    const filtered = blogs.filter(
-      (blog) => blog.postTitle && blog.postTitle.toLowerCase().includes(term)
-    );
-    setFilteredBlogs(filtered);
+  const categories = [
+    "All",
+    "Technology",
+    "Marketing",
+    "Software",
+    "Education",
+    "Short Courses in Islamabad",
+    "Short Courses in Faisalabad",
+    "IT Softwares",
+    "SEO",
+    "Design",
+    "Photography",
+  ];
+
+  const generateSlug = (text) => {
+    return text
+      .toLowerCase()
+      .replace(/ /g, "-")
+      .replace(/[^\w-]+/g, "");
   };
 
-  // Handle Delete
-  // Handle Delete
-  const handleDelete = async (id) => {
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleBlogImageChange = (e) => {
+    setBlogImage(e.target.files[0]);
+  };
+
+  const handleAuthorImageChange = (e) => {
+    setAuthorProfileImage(e.target.files[0]);
+  };
+
+  const handleSocialLinkChange = (index, field, value) => {
+    const updatedLinks = [...socialLinks];
+    updatedLinks[index][field] = value;
+    setSocialLinks(updatedLinks);
+  };
+
+  const addSocialLink = () => {
+    setSocialLinks([...socialLinks, { platform: "", url: "" }]);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const data = new FormData();
+
+    // Trim all form fields
+    Object.keys(formData).forEach((key) => {
+      const value = formData[key];
+      if (typeof value === "string") {
+        data.append(key, value.trim());
+      } else {
+        data.append(key, value);
+      }
+    });
+
+    // Generate URL Slug from blogName
+    const urlSlug = generateSlug(formData.blogName);
+    data.append("url_slug", urlSlug);
+
+    if (blogImage) {
+      data.append("blogImage", blogImage);
+    }
+
+    if (authorProfileImage) {
+      data.append("authorProfileImage", authorProfileImage);
+    }
+
+    // Trim social links too
+    const socialLinksObject = {};
+    socialLinks.forEach(({ platform, url }) => {
+      const trimmedPlatform = platform.trim();
+      const trimmedUrl = url.trim();
+      if (trimmedPlatform && trimmedUrl) {
+        socialLinksObject[trimmedPlatform] = trimmedUrl;
+      }
+    });
+
+    data.append("socialLinks", JSON.stringify(socialLinksObject));
+
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/blogpost/${id}`);
-      // After deleting, filter out the deleted blog from the local state
-      setBlogs(blogs.filter((blog) => blog._id !== id));
-      setFilteredBlogs(filteredBlogs.filter((blog) => blog._id !== id));
-      toast.success("blog delete successfully");
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/blogs`, data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log(res.data);
+      alert("Blog posted successfully!");
+
+      // ===== Reset Form After Success =====
+      setFormData({
+        blogName: "",
+        shortDescription: "",
+        blogCategory: "",
+        blogDescription: "",
+        publishDate: "",
+        authorName: "",
+        authorBio: "",
+        tags: "",
+        metaTitle: "",
+        metaDescription: "",
+      });
+      setBlogImage(null);
+      setAuthorProfileImage(null);
+      setSocialLinks([{ platform: "", url: "" }]);
     } catch (error) {
-      toast.error("Error deleting blog post:", error);
+      console.error(error);
+      alert("Failed to post blog.");
     }
   };
 
-  // Handle Edit
-  const handleEdit = (id) => {
-    // Navigate to the edit page with the blog ID
-    navigate(`/editblog/${id}`);
-  };
-
-  const isAddBlogPage = location.pathname.includes("addblog");
-
   return (
-    <div className="flex-1 overflow-auto relative z-10">
-      <motion.div
-        className="w-full bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        {!isAddBlogPage && (
-          <>
-            <div className="items-center mb-6">
-              <h2 className="text-2xl text-center my-3 mb-6 font-semibold md:flex-row text-gray-100 cursor-pointer">
-                Blog Posts
-              </h2>
-              <hr className="w-full h-1 bg-slate-500 rounded-sm mb-4" />
-              <div className="flex justify-center lg:justify-between space-x-4 mt-6 md:mt-0">
-                <div className="relative hidden md:block">
-                  <input
-                    type="text"
-                    placeholder="Search blog posts..."
-                    className="bg-gray-700 md:flex-row text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={searchTerm}
-                    onChange={handleSearch}
-                  />
-                  <Search
-                    className="absolute left-3 top-2.5 text-gray-400"
-                    size={18}
-                  />
-                </div>
+    <div className="max-w-5xl mx-auto p-6">
+      <h2 className="text-3xl font-bold mb-6 text-center">Create a Blog</h2>
 
-                <Link to="/addblog">
-                  <button className="hidden md:block bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300">
-                    Add Blog
-                  </button>
-                </Link>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        {/* Blog Name */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Blog Name</label>
+          <input
+            type="text"
+            name="blogName"
+            value={formData.blogName}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+            required
+          />
+        </div>
 
-                <div className="md:hidden">
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    className="bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={searchTerm}
-                    onChange={handleSearch}
-                  />
-                  <Search
-                    className="absolute left-3 top-2.5 text-gray-400"
-                    size={18}
-                  />
-                </div>
-              </div>
+        {/* Short Description */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Short Description</label>
+          <input
+            type="text"
+            name="shortDescription"
+            value={formData.shortDescription}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+            required
+          />
+        </div>
+
+        {/* Blog Category */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Blog Category</label>
+          <select
+            name="blogCategory"
+            value={formData.blogCategory}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+            required
+          >
+            <option value="">Select Category</option>
+            {categories.map((cat, idx) => (
+              <option key={idx} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Blog Description */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Blog Description</label>
+          <textarea
+            name="blogDescription"
+            value={formData.blogDescription}
+            onChange={handleChange}
+            className="border p-2 rounded min-h-[120px] text-black"
+            required
+          />
+        </div>
+
+        {/* Publish Date */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Publish Date</label>
+          <input
+            type="date"
+            name="publishDate"
+            value={formData.publishDate}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+          />
+        </div>
+
+        {/* Author Details */}
+        <div className="flex flex-col gap-2">
+          <label className="font-semibold">Author Information</label>
+
+          <input
+            type="text"
+            name="authorName"
+            placeholder="Author Name"
+            value={formData.authorName}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+            required
+          />
+
+          <input
+            type="text"
+            name="authorBio"
+            placeholder="Author Bio"
+            value={formData.authorBio}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+          />
+
+          {/* Upload Author Profile Image */}
+          <input
+            type="file"
+            name="authorProfileImage"
+            onChange={handleAuthorImageChange}
+            className="border p-2 rounded text-black"
+          />
+        </div>
+
+        {/* Tags */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Tags (comma separated)</label>
+          <input
+            type="text"
+            name="tags"
+            value={formData.tags}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+          />
+        </div>
+
+        {/* Meta Title */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Meta Title</label>
+          <input
+            type="text"
+            name="metaTitle"
+            value={formData.metaTitle}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+            required
+          />
+        </div>
+
+        {/* Meta Description */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Meta Description</label>
+          <textarea
+            name="metaDescription"
+            value={formData.metaDescription}
+            onChange={handleChange}
+            className="border p-2 rounded min-h-[80px] text-black"
+            required
+          />
+        </div>
+
+        {/* Social Links */}
+        <div className="flex flex-col gap-2">
+          <label className="font-semibold">Social Links</label>
+
+          {socialLinks.map((link, index) => (
+            <div key={index} className="flex gap-3">
+              <input
+                type="text"
+                placeholder="Platform (e.g., Facebook)"
+                value={link.platform}
+                onChange={(e) =>
+                  handleSocialLinkChange(index, "platform", e.target.value)
+                }
+                className="border p-2 rounded flex-1 text-black"
+                required
+              />
+              <input
+                type="text"
+                placeholder="URL"
+                value={link.url}
+                onChange={(e) =>
+                  handleSocialLinkChange(index, "url", e.target.value)
+                }
+                className="border p-2 rounded flex-1 text-black"
+                required
+              />
             </div>
+          ))}
 
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-700 px-20">
-                <thead>
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      #
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Title
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Short Description
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Published Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Published Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-700">
-                  {filteredBlogs.map((blog, index) => (
-                    <motion.tr
-                      key={blog.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-100">
-                          {index + 1}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-100">
-                          {blog.postTitle}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-300">
-                          {blog.shortDescription.slice(0, 30)}...
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-300">
-                          {blog.isPublish ? "Published" : "Not Published"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-300">
-                          {new Date(blog.updatedAt).toLocaleDateString()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        <button
-                          className="text-indigo-400 hover:text-indigo-300 mr-2"
-                          onClick={() => handleEdit(blog._id)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="text-red-400 hover:text-red-300"
-                          onClick={() => handleDelete(blog._id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-        <Outlet /> {/* Nested routes will render here */}
-      </motion.div>
+          <button
+            type="button"
+            onClick={addSocialLink}
+            className="mt-2 text-blue-600 hover:underline self-start"
+          >
+            + Add More
+          </button>
+        </div>
+
+        {/* Blog Image Upload */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Blog Image</label>
+          <input
+            type="file"
+            name="blogImage"
+            onChange={handleBlogImageChange}
+            className="border p-2 rounded text-black"
+            required
+          />
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+        >
+          Post Blog
+        </button>
+      </form>
     </div>
   );
 };
