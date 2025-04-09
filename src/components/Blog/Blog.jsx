@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const Blog = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +15,10 @@ const Blog = () => {
     tags: "",
     metaTitle: "",
     metaDescription: "",
+    pageindex: "",
+    insitemap: true,
+    canonical: "",
+    inviewweb: true,
   });
 
   const [blogImage, setBlogImage] = useState(null);
@@ -20,17 +26,22 @@ const Blog = () => {
   const [socialLinks, setSocialLinks] = useState([{ platform: "", url: "" }]);
 
   const categories = [
-    "All",
-    "Technology",
-    "Marketing",
-    "Software",
-    "Education",
-    "Short Courses in Islamabad",
-    "Short Courses in Faisalabad",
-    "IT Softwares",
-    "SEO",
-    "Design",
-    "Photography",
+    { label: "Technology", value: "technology" },
+    { label: "Marketing", value: "marketing" },
+    { label: "Software", value: "software" },
+    { label: "Education", value: "education" },
+    {
+      label: "Short Courses in Islamabad",
+      value: "short-courses-in-islamabad",
+    },
+    {
+      label: "Short Courses in Faisalabad",
+      value: "short-courses-in-faisalabad",
+    },
+    { label: "IT Softwares", value: "it-softwares" },
+    { label: "SEO", value: "seo" },
+    { label: "Design", value: "design" },
+    { label: "Photography", value: "photography" },
   ];
 
   const generateSlug = (text) => {
@@ -105,11 +116,15 @@ const Blog = () => {
     data.append("socialLinks", JSON.stringify(socialLinksObject));
 
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/blogs`, data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/blogs`,
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       console.log(res.data);
       alert("Blog posted successfully!");
@@ -126,6 +141,7 @@ const Blog = () => {
         tags: "",
         metaTitle: "",
         metaDescription: "",
+        canonical: "",
       });
       setBlogImage(null);
       setAuthorProfileImage(null);
@@ -179,8 +195,8 @@ const Blog = () => {
           >
             <option value="">Select Category</option>
             {categories.map((cat, idx) => (
-              <option key={idx} value={cat}>
-                {cat}
+              <option key={idx} value={cat.value}>
+                {cat.label}
               </option>
             ))}
           </select>
@@ -189,12 +205,13 @@ const Blog = () => {
         {/* Blog Description */}
         <div className="flex flex-col">
           <label className="font-semibold">Blog Description</label>
-          <textarea
-            name="blogDescription"
+          <ReactQuill
+            theme="snow"
             value={formData.blogDescription}
-            onChange={handleChange}
-            className="border p-2 rounded min-h-[120px] text-black"
-            required
+            onChange={(content) =>
+              setFormData({ ...formData, blogDescription: content })
+            }
+            className="bg-white text-black rounded"
           />
         </div>
 
@@ -238,7 +255,7 @@ const Blog = () => {
             type="file"
             name="authorProfileImage"
             onChange={handleAuthorImageChange}
-            className="border p-2 rounded text-black"
+            className="border p-2 rounded text-white"
           />
         </div>
 
@@ -324,9 +341,63 @@ const Blog = () => {
             type="file"
             name="blogImage"
             onChange={handleBlogImageChange}
-            className="border p-2 rounded text-black"
+            className="border p-2 rounded text-white"
             required
           />
+        </div>
+
+        {/* Page Index */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Page Index</label>
+          <select
+            name="pageindex"
+            value={formData.pageindex}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
+        {/* In Sitemap */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Include in Sitemap?</label>
+          <select
+            name="insitemap"
+            value={formData.insitemap}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
+        {/* Canonical URL */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Canonical URL</label>
+          <input
+            type="text"
+            name="canonical"
+            value={formData.canonical}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+          />
+        </div>
+
+        {/* In View Web */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Show on Website?</label>
+          <select
+            name="inviewweb"
+            value={formData.inviewweb}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
         </div>
 
         {/* Submit Button */}
