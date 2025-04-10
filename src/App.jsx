@@ -57,6 +57,7 @@ import AddMainCat from "./components/Menu/AddMainCat";
 import Maincourse from "./components/Menu/Maincourse";
 import Addmaincourse from "./components/Menu/Addmaincourse";
 import Webbanner from "./pages/Webbanner";
+import Allblogs from "./components/Blog/Allblogs.jsx";
 
 function App() {
   return (
@@ -87,6 +88,7 @@ function App() {
         <Route path="/blog-post" element={<Mainblog />}>
           <Route path="addblogpost" element={<AddBlogPost />} />
         </Route>
+        <Route path="all-blogs" element={<Allblogs />} />
         <Route path="/eflayer" element={<MainEflyer />}></Route>
         <Route path="/addeflayer" element={<AddFlyers />} />
         <Route path="/editeflyer/:id" element={<EditEFlyer />} />

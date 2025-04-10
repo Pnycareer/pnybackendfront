@@ -1,256 +1,405 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { useParams } from "react-router-dom";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const EditBlog = () => {
-  const { id } = useParams(); // Get the blog ID from URL parameters
-  const navigate = useNavigate(); // Use to navigate back after editing
+  const { id } = useParams(); // 👈 Get ID from URL
   const [formData, setFormData] = useState({
-    postTitle: "",
-    urlSlug: "",
-    postCategory: "",
-    postThumbnailImage: "",
+    blogName: "",
     shortDescription: "",
-    postDescription: "",
-    isPublish: false,
-    featured: false,
+    urlSlug: "",
+    blogCategory: "",
+    blogDescription: "",
+    publishDate: "",
+    authorName: "",
+    authorBio: "",
+    tags: "",
     metaTitle: "",
     metaDescription: "",
-    inSitemap: false,
-    pageIndex: false,
-    customCanonicalUrl: "",
+    pageindex: "",
+    insitemap: true,
+    canonical: "",
+    inviewweb: true,
   });
 
-  // Fetch blog data
+  const [blogImage, setBlogImage] = useState(null);
+  const [authorProfileImage, setAuthorProfileImage] = useState(null);
+  const [socialLinks, setSocialLinks] = useState([{ platform: "", url: "" }]);
+
   useEffect(() => {
-    const fetchBlog = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/blogpost/${id}`
+    fetchBlogData();
+  }, []);
+
+  const fetchBlogData = async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/blogs/${id}`);
+      const blog = res.data;
+
+      setFormData({
+        blogName: blog.blogName || "",
+        shortDescription: blog.shortDescription || "",
+        urlSlug: blog.url_slug || "",
+        blogCategory: blog.blogCategory || "",
+        blogDescription: blog.blogDescription || "",
+        publishDate: blog.publishDate ? blog.publishDate.split("T")[0] : "",
+        authorName: blog.author?.name || "",
+        authorBio: blog.author?.bio || "",
+        tags: blog.tags ? blog.tags.join(", ") : "",
+        metaTitle: blog.metaTitle || "",
+        metaDescription: blog.metaDescription || "",
+        pageindex: blog.pageindex,
+        insitemap: blog.insitemap,
+        canonical: blog.canonical || "",
+        inviewweb: blog.inviewweb,
+      });
+
+      if (blog.socialLinks) {
+        const socialArray = Object.entries(blog.socialLinks).map(
+          ([platform, url]) => ({
+            platform,
+            url,
+          })
         );
-        const blog = response.data;
-        setFormData({
-          postTitle: blog.postTitle,
-          urlSlug: blog.urlSlug,
-          postCategory: blog.postCategory,
-          postThumbnailImage: blog.postThumbnailImage,
-          shortDescription: blog.shortDescription,
-          postDescription: blog.postDescription,
-          isPublish: blog.isPublish,
-          featured: blog.featured,
-          metaTitle: blog.metaTitle,
-          metaDescription: blog.metaDescription,
-          inSitemap: blog.inSitemap,
-          pageIndex: blog.pageIndex,
-          customCanonicalUrl: blog.customCanonicalUrl,
-        });
-      } catch (error) {
-        console.error("Error fetching blog:", error);
+        setSocialLinks(socialArray);
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch blog:", error);
+    }
+  };
 
-    fetchBlog();
-  }, [id]);
-
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
     }));
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setFormData((prevData) => ({
-      ...prevData,
-      postThumbnailImage: file,
-    }));
+  const handleBlogImageChange = (e) => {
+    setBlogImage(e.target.files[0]);
+  };
+
+  const handleAuthorImageChange = (e) => {
+    setAuthorProfileImage(e.target.files[0]);
+  };
+
+  const handleSocialLinkChange = (index, field, value) => {
+    const updatedLinks = [...socialLinks];
+    updatedLinks[index][field] = value;
+    setSocialLinks(updatedLinks);
+  };
+
+  const addSocialLink = () => {
+    setSocialLinks([...socialLinks, { platform: "", url: "" }]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const updatedBlogData = new FormData();
 
+    const data = new FormData();
+
+    // Append all fields
     Object.keys(formData).forEach((key) => {
-      updatedBlogData.append(key, formData[key]);
+      let fieldName = key;
+      if (key === "urlSlug") {
+        fieldName = "url_slug"; // Map urlSlug -> url_slug
+      }
+      const value = formData[key];
+      if (typeof value === "string") {
+        data.append(fieldName, value.trim());
+      } else {
+        data.append(fieldName, value);
+      }
     });
+    
+
+    if (blogImage) {
+      data.append("blogImage", blogImage);
+    }
+
+    if (authorProfileImage) {
+      data.append("authorProfileImage", authorProfileImage);
+    }
+
+    const socialLinksObject = {};
+    socialLinks.forEach(({ platform, url }) => {
+      if (platform && url) {
+        socialLinksObject[platform.trim()] = url.trim();
+      }
+    });
+    data.append("socialLinks", JSON.stringify(socialLinksObject));
 
     try {
-      await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/blogpost/${id}`,
-        updatedBlogData,
+      const res = await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/blogs/${id}`,
+        data,
         {
-          headers: {
-            "Content-Type": "multipart/form-data", // Important for file upload
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         }
       );
 
-      // Redirect after successful edit
-      navigate("/blog-post");
-      // Change this to your desired route
-      toast.success("blog updated successfully");
+      alert("Blog updated successfully!");
     } catch (error) {
-      toast.error("Error updating blog:", error);
+      console.error("Failed to update blog:", error);
+      alert("Failed to update blog!");
     }
   };
 
-  const handleCancel = () => {
-    navigate("/blog-post");
-  };
-
   return (
-    <div className="p-6 bg-gray-800 rounded-lg w-full overflow-auto">
-      <h2 className="text-2xl font-bold mb-4">Edit Blog Post</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white">Title</label>
+    <div className="w-full mx-auto p-6 overflow-y-auto min-h-screen">
+      <h2 className="text-3xl font-bold mb-6 text-center">Edit Blog</h2>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        {/* Form fields same as your Blog post form */}
+
+        {/* Blog Name */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Blog Name</label>
           <input
             type="text"
-            name="postTitle"
-            className="w-full px-3 py-2 border text-black rounded-md"
-            value={formData.postTitle}
-            onChange={handleInputChange}
+            name="blogName"
+            value={formData.blogName}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
             required
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white">
-            URL Slug
-          </label>
+
+        {/* Short Description */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Short Description</label>
+          <textarea
+            name="shortDescription"
+            value={formData.shortDescription}
+            onChange={handleChange}
+            className="border p-2 rounded min-h-[52px] text-black"
+            required
+          />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="font-semibold">URL Slug</label>
           <input
             type="text"
             name="urlSlug"
-            className="w-full px-3 py-2 border text-black rounded-md"
             value={formData.urlSlug}
-            onChange={handleInputChange}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
             required
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white">
-            Category
-          </label>
+
+        {/* Blog Description */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Blog Description</label>
+          <ReactQuill
+            theme="snow"
+            value={formData.blogDescription}
+            onChange={(content) =>
+              setFormData({ ...formData, blogDescription: content })
+            }
+            className="bg-white text-black rounded"
+          />
+        </div>
+
+        {/* Publish Date */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Publish Date</label>
+          <input
+            type="date"
+            name="publishDate"
+            value={formData.publishDate}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+          />
+        </div>
+
+        {/* Author Details */}
+        <div className="flex flex-col gap-2">
+          <label className="font-semibold">Author Information</label>
+
           <input
             type="text"
-            name="postCategory"
-            className="w-full px-3 py-2 border text-black rounded-md"
-            value={formData.postCategory}
-            onChange={handleInputChange}
+            name="authorName"
+            placeholder="Author Name"
+            value={formData.authorName}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
             required
           />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white">
-            Short Description
-          </label>
+
           <textarea
-            name="shortDescription"
-            className="w-full px-3 py-2 border rounded-md text-black"
-            value={formData.shortDescription}
-            onChange={handleInputChange}
-            required
+            name="authorBio"
+            placeholder="Author Bio"
+            value={formData.authorBio}
+            onChange={handleChange}
+            className="border p-2 rounded min-h-[100px] text-black"
           />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white">
-            Post Description
-          </label>
-          <textarea
-            name="postDescription"
-            className="w-full px-3 py-2 border rounded-md text-black"
-            value={formData.postDescription}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white">
-            Publish Status
-          </label>
+
+          {/* Upload Author Profile Image */}
           <input
-            type="checkbox"
-            name="isPublish"
-            checked={formData.isPublish}
-            onChange={(e) =>
-              setFormData({ ...formData, isPublish: e.target.checked })
-            }
+            type="file"
+            name="authorProfileImage"
+            onChange={handleAuthorImageChange}
+            className="border p-2 rounded text-white"
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white">
-            Featured Status
-          </label>
+
+        <div className="flex flex-col">
+          <label className="font-semibold">Tags (comma separated)</label>
           <input
-            type="checkbox"
-            name="featured"
-            checked={formData.featured}
-            onChange={(e) =>
-              setFormData({ ...formData, featured: e.target.checked })
-            }
+            type="text"
+            name="tags"
+            value={formData.tags}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white">
-            Meta Title
-          </label>
+
+        {/* Meta Title */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Meta Title</label>
           <input
             type="text"
             name="metaTitle"
-            className="w-full px-3 py-2 border text-black rounded-md"
             value={formData.metaTitle}
-            onChange={handleInputChange}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+            required
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white">
-            Meta Description
-          </label>
+
+        {/* Meta Description */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Meta Description</label>
           <textarea
             name="metaDescription"
-            className="w-full px-3 py-2 border rounded-md text-black"
             value={formData.metaDescription}
-            onChange={handleInputChange}
+            onChange={handleChange}
+            className="border p-2 rounded min-h-[80px] text-black"
+            required
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white">
-            Canonical URL
-          </label>
-          <input
-            type="text"
-            name="customCanonicalUrl"
-            className="w-full px-3 py-2 border text-black rounded-md"
-            value={formData.customCanonicalUrl}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-white">
-            Thumbnail Image
-          </label>
-          <input
-            type="file"
-            name="postThumbnailImage"
-            className="w-full px-3 py-2 border text-black rounded-md"
-            onChange={handleFileChange}
-          />
-        </div>
-        <div className="flex justify-between">
-          <button type="submit" className="px-4 py-2 bg-blue-600 rounded-md">
-            Update Blog
-          </button>
+
+        {/* Social Links */}
+        <div className="flex flex-col gap-2">
+          <label className="font-semibold">Social Links</label>
+
+          {socialLinks.map((link, index) => (
+            <div key={index} className="flex gap-3">
+              <select
+                value={link.platform}
+                onChange={(e) =>
+                  handleSocialLinkChange(index, "platform", e.target.value)
+                }
+                className="border p-2 rounded flex-1 text-black"
+                required
+              >
+                <option value="">Select Platform</option>
+                <option value="facebook">Facebook</option>
+                <option value="twitter">Twitter</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="instagram">Instagram</option>
+                <option value="website">Website</option>
+              </select>
+
+              <input
+                type="text"
+                placeholder="URL"
+                value={link.url}
+                onChange={(e) =>
+                  handleSocialLinkChange(index, "url", e.target.value)
+                }
+                className="border p-2 rounded flex-1 text-black"
+                required
+              />
+            </div>
+          ))}
 
           <button
             type="button"
-            onClick={handleCancel}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 focus:outline-none"
+            onClick={addSocialLink}
+            className="mt-2 text-blue-600 hover:underline self-start"
           >
-            Cancel
+            + Add More
           </button>
         </div>
+
+        {/* Blog Image Upload */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Blog Image</label>
+          <input
+            type="file"
+            name="blogImage"
+            onChange={handleBlogImageChange}
+            className="border p-2 rounded text-white"
+            
+          />
+        </div>
+
+        {/* Page Index */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Page Index</label>
+          <select
+            name="pageindex"
+            value={formData.pageindex}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
+        {/* In Sitemap */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Include in Sitemap?</label>
+          <select
+            name="insitemap"
+            value={formData.insitemap}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
+        {/* Canonical URL */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Canonical URL</label>
+          <input
+            type="text"
+            name="canonical"
+            value={formData.canonical}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+          />
+        </div>
+
+        {/* In View Web */}
+        <div className="flex flex-col">
+          <label className="font-semibold">Show on Website?</label>
+          <select
+            name="inviewweb"
+            value={formData.inviewweb}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+        >
+          Update Blog
+        </button>
       </form>
     </div>
   );

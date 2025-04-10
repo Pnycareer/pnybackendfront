@@ -42,7 +42,8 @@ const SIDEBAR_ITEMS = [
 		color: "#EC4899",
 		href: "#",
 		dropdown: [
-			{ name: "Blog Post", icon: BookAIcon, color: "#EC4899", href: "/blog-post" }
+			{ name: "Blog Post", icon: BookAIcon, color: "#EC4899", href: "/blog-post" },
+			{ name: "All Blogs", icon: BookAIcon, color: "#EC4899", href: "/all-blogs" }
 		]
 	},
 	{

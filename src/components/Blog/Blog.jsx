@@ -7,6 +7,7 @@ const Blog = () => {
   const [formData, setFormData] = useState({
     blogName: "",
     shortDescription: "",
+    urlSlug: "",
     blogCategory: "",
     blogDescription: "",
     publishDate: "",
@@ -81,8 +82,9 @@ const Blog = () => {
 
     const data = new FormData();
 
-    // Trim all form fields
+    // Append fields except socialLinks
     Object.keys(formData).forEach((key) => {
+      if (key === "socialLinks") return; // 👈 Skip socialLinks here
       const value = formData[key];
       if (typeof value === "string") {
         data.append(key, value.trim());
@@ -91,29 +93,28 @@ const Blog = () => {
       }
     });
 
-    // Generate URL Slug from blogName
-    const urlSlug = generateSlug(formData.blogName);
-    data.append("url_slug", urlSlug);
+    const socialLinksObject = {};
+    socialLinks.forEach(({ platform, url }) => {
+      const key = platform.trim().toLowerCase(); // <- make it lowercase
+      const val = url.trim();
+      if (key && val) {
+        socialLinksObject[key] = val;
+      }
+    });
+
+    
+
+    data.append("socialLinks", JSON.stringify(socialLinksObject));
 
     if (blogImage) {
       data.append("blogImage", blogImage);
     }
 
+    data.append("url_slug", formData.urlSlug.trim());
+
     if (authorProfileImage) {
       data.append("authorProfileImage", authorProfileImage);
     }
-
-    // Trim social links too
-    const socialLinksObject = {};
-    socialLinks.forEach(({ platform, url }) => {
-      const trimmedPlatform = platform.trim();
-      const trimmedUrl = url.trim();
-      if (trimmedPlatform && trimmedUrl) {
-        socialLinksObject[trimmedPlatform] = trimmedUrl;
-      }
-    });
-
-    data.append("socialLinks", JSON.stringify(socialLinksObject));
 
     try {
       const res = await axios.post(
@@ -129,7 +130,7 @@ const Blog = () => {
       console.log(res.data);
       alert("Blog posted successfully!");
 
-      // ===== Reset Form After Success =====
+      // Reset form
       setFormData({
         blogName: "",
         shortDescription: "",
@@ -140,6 +141,7 @@ const Blog = () => {
         authorBio: "",
         tags: "",
         metaTitle: "",
+        urlSlug: "",
         metaDescription: "",
         canonical: "",
       });
@@ -173,12 +175,11 @@ const Blog = () => {
         {/* Short Description */}
         <div className="flex flex-col">
           <label className="font-semibold">Short Description</label>
-          <input
-            type="text"
+          <textarea
             name="shortDescription"
             value={formData.shortDescription}
             onChange={handleChange}
-            className="border p-2 rounded text-black"
+            className="border p-2 rounded min-h-[52px] text-black"
             required
           />
         </div>
@@ -200,6 +201,19 @@ const Blog = () => {
               </option>
             ))}
           </select>
+        </div>
+
+        {/* URL Slug */}
+        <div className="flex flex-col">
+          <label className="font-semibold">URL Slug</label>
+          <input
+            type="text"
+            name="urlSlug"
+            value={formData.urlSlug}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+            required
+          />
         </div>
 
         {/* Blog Description */}
@@ -241,13 +255,12 @@ const Blog = () => {
             required
           />
 
-          <input
-            type="text"
+          <textarea
             name="authorBio"
             placeholder="Author Bio"
             value={formData.authorBio}
             onChange={handleChange}
-            className="border p-2 rounded text-black"
+            className="border p-2 rounded min-h-[100px] text-black"
           />
 
           {/* Upload Author Profile Image */}
@@ -302,16 +315,22 @@ const Blog = () => {
 
           {socialLinks.map((link, index) => (
             <div key={index} className="flex gap-3">
-              <input
-                type="text"
-                placeholder="Platform (e.g., Facebook)"
+              <select
                 value={link.platform}
                 onChange={(e) =>
                   handleSocialLinkChange(index, "platform", e.target.value)
                 }
                 className="border p-2 rounded flex-1 text-black"
                 required
-              />
+              >
+                <option value="">Select Platform</option>
+                <option value="facebook">Facebook</option>
+                <option value="twitter">Twitter</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="instagram">Instagram</option>
+                <option value="website">Website</option>
+              </select>
+
               <input
                 type="text"
                 placeholder="URL"
