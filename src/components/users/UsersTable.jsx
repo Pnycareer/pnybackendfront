@@ -15,8 +15,9 @@ const UsersTable = () => {
   useEffect(() => {
     const fetchInstructors = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/instructors/get-instructor`);
-        console.log(response.data); // Log fetched users
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/instructors/get-instructor`
+        );
         setUsers(response.data);
         setFilteredUsers(response.data);
       } catch (error) {
@@ -25,7 +26,7 @@ const UsersTable = () => {
     };
 
     fetchInstructors();
-  }, []);
+  }, [location]);
 
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
@@ -42,7 +43,9 @@ const UsersTable = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/instructors/${id}`);
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/instructors/${id}`
+      );
       setFilteredUsers(filteredUsers.filter((user) => user._id !== id));
     } catch (error) {
       console.error("Failed to delete user", error);
@@ -78,7 +81,10 @@ const UsersTable = () => {
                   value={searchTerm}
                   onChange={handleSearch}
                 />
-                <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                <Search
+                  className="absolute left-3 top-2.5 text-gray-400"
+                  size={18}
+                />
               </div>
               <Link to="adduser">
                 <button className="bg-blue-600 hover:bg-blue-500 hidden sm:block text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300">
@@ -126,8 +132,10 @@ const UsersTable = () => {
                         <img
                           src={
                             user.photo
-                              ? `${import.meta.env.VITE_API_URL}/${user.photo.replace(/\\/g, '/')}`
-                              : 'path/to/default-image.jpg' // Use a fallback image here
+                              ? `${
+                                  import.meta.env.VITE_API_URL
+                                }/${user.photo.replace(/\\/g, "/")}`
+                              : "path/to/default-image.jpg" // Use a fallback image here
                           }
                           alt="User profile"
                           className="h-full w-full object-cover rounded-full"

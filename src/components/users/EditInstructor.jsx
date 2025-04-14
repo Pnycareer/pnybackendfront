@@ -50,7 +50,7 @@ const EditInstructor = () => {
         }
       );
       toast.success("Instructor updated successfully!");
-      navigate("/users");
+      navigate("/instructors");
     } catch (error) {
       console.error(
         "Error updating instructor:",

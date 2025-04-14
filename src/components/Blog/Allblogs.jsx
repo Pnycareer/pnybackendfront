@@ -42,19 +42,24 @@ const Allblogs = () => {
 
   const handleDelete = async (blogId) => {
     try {
+      // Make delete API request
       await axios.delete(`${import.meta.env.VITE_API_URL}/api/blogs/${blogId}`);
+      
+      // Remove the blog from UI (locally update)
       setCategories((prevCategories) =>
         prevCategories.map((cat) => ({
           ...cat,
           blogs: cat.blogs.filter((blog) => blog._id !== blogId),
         }))
       );
+  
       toast.success("Blog deleted successfully!");
     } catch (error) {
       console.error("Error deleting blog:", error);
       toast.error("Failed to delete blog!");
     }
   };
+  
 
   const handleEdit = (blogId) => {
     navigate(`/editblog/${blogId}`);
@@ -152,7 +157,9 @@ const Allblogs = () => {
       ) : filteredCategories.length === 0 ? (
         <NoResult />
       ) : (
-        filteredCategories.map((category) => (
+        filteredCategories
+        .filter((category) => category.blogs.length > 0) // ✨
+        .map((category) => (
           <div key={category._id} className="mb-10">
             <h2 className="text-2xl font-semibold text-blue-400 mb-4 capitalize">
               {category.blogCategory}
