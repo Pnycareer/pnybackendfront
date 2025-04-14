@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
 import { useInView } from "react-intersection-observer";
+import { Link } from "react-router-dom";
 
 const Allblogs = () => {
   const [categories, setCategories] = useState([]);
@@ -113,9 +114,9 @@ const Allblogs = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-white">All Blogs</h1>
         <div className="flex gap-4 items-center">
-          <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+          <Link to='/blog-post' className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
             Add Blog
-          </button>
+          </Link>
         </div>
       </div>
 
