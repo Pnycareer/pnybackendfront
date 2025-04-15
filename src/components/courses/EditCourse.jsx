@@ -83,23 +83,27 @@ const EditCourse = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const formData = new FormData();
 
     for (const key in course) {
       const value = course[key];
 
+      // 1️⃣  Course category (Object or id string)
       if (key === "course_Category") {
         formData.append(
           key,
           course.course_Category._id || course.course_Category
         );
+
+        // 2️⃣  course_Image – only send if the user picked a *new* file
       } else if (key === "course_Image") {
-        if (value instanceof File) {
-          // If the user selected a new file, upload it
-          formData.append(key, value);
-        }
-        // else do not append the old image URL
-        // (means image will stay same if user does not change it)
+        if (value instanceof File) formData.append(key, value);
+
+        // 3️⃣  Brochure – never send the old path, it will be added below if new
+      } else if (key === "Brochure") {
+        /* skip */
+        // 4️⃣  Everything else – send if it has a meaningful value
       } else if (
         value !== null &&
         value !== undefined &&
@@ -110,21 +114,21 @@ const EditCourse = () => {
       }
     }
 
+    // 5️⃣  Add brochure file only when user selected a new one
     if (brochureFile) formData.append("Brochure", brochureFile);
 
     try {
       await axios.put(
         `${import.meta.env.VITE_API_URL}/courses/update/${id}`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
+        formData
       );
       toast.success("Course updated successfully!");
       navigate("/courses");
-    } catch (error) {
-      console.error("Error updating course:", error);
-      alert("Failed to update course");
+    } catch (err) {
+      console.error("Error updating course:", err);
+      const errorMsg =
+        err?.response?.data?.message || "Failed to update course";
+      toast.error(errorMsg);
     }
   };
 
@@ -237,19 +241,19 @@ const EditCourse = () => {
             />
           </div>
 
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block text-gray-300">Select Course Type</label>
             <select
               value={courseType}
               onChange={(e) => setCourseType(e.target.value)}
               className="w-full p-2 rounded bg-gray-700 text-white"
             >
-              <option value="normal">Normal Courses</option>
+              <option value="normal">Main Courses</option>
               <option value="city">City Courses</option>
             </select>
-          </div>
+          </div> */}
 
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block text-gray-300">
               {courseType === "city" ? "Select City" : "Course Category*"}
             </label>
@@ -281,7 +285,7 @@ const EditCourse = () => {
                 ))
               )}
             </select>
-          </div>
+          </div> */}
 
           {/* Skill Level */}
           <div className="mb-4">
@@ -414,10 +418,22 @@ const EditCourse = () => {
             <label className="block text-gray-300">Upload Brochure</label>
             <input
               type="file"
+              name="Brochure"
+              accept=".pdf"
               onChange={(e) => setBrochureFile(e.target.files[0])}
               className="w-full p-2 rounded bg-gray-700 text-white"
             />
           </div>
+          {course.Brochure && (
+            <a
+              href={`${import.meta.env.VITE_API_URL}/${course.Brochure}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 underline"
+            >
+              View Existing Brochure
+            </a>
+          )}
 
           <div className="mb-4">
             <label className="block text-gray-300">Status</label>

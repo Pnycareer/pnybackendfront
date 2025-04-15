@@ -68,6 +68,7 @@ const AddCourse = () => {
     formData.append("featured_Option", data.featured_Option);
     formData.append("video_Id", data.video_Id);
     formData.append("course_Category", data.course_Category); // Ensure it's a valid ObjectId
+    formData.append("category_Description", data.category_Description || "");
     formData.append("Skill_Level", data.Skill_Level);
     formData.append("Short_Description", data.Short_Description);
     formData.append("Course_Description", courseDescription); // From ReactQuill
@@ -222,6 +223,18 @@ const AddCourse = () => {
                     </option>
                   ))}
             </select>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-400 mb-2">
+              Category Description (Optional)
+            </label>
+            <input
+              type="text"
+              {...register("category_Description")}
+              className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+              placeholder="Enter description for the category"
+            />
           </div>
 
           {courseType === "main" && (

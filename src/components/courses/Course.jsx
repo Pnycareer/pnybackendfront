@@ -1,26 +1,34 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown, Search } from "lucide-react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+
 const Courses = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [courses, setCourses] = useState([]);
-  const [filteredCourses, setFilteredCourses] = useState([]);
+  const [categoriesWithCourses, setCategoriesWithCourses] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [openCategoryId, setOpenCategoryId] = useState(null);
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
-  // Fetch courses from the API
+
   const fetchCourses = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/courses/get-course`, {
-        withCredentials: true,
-      });
-      setCourses(response.data);
-      setFilteredCourses(response.data);
+      setLoading(true);
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/courses/get-course`,
+        { withCredentials: true }
+      );
+      const grouped = response.data.data;
+      setCategoriesWithCourses(grouped);
+      setFilteredData(grouped);
     } catch (error) {
       console.error("Error fetching courses:", error);
       toast.error("Failed to load courses.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -28,26 +36,40 @@ const Courses = () => {
     fetchCourses();
   }, [location.pathname]);
 
-  // Delete a course
+  const handleSearch = (e) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+
+    if (!term) return setFilteredData(categoriesWithCourses);
+
+    const filtered = categoriesWithCourses
+      .map((cat) => {
+        const matchedCourses = cat.courses.filter((course) =>
+          course.course_Name?.toLowerCase().includes(term)
+        );
+        return matchedCourses.length
+          ? { ...cat, courses: matchedCourses }
+          : null;
+      })
+      .filter(Boolean);
+
+    setFilteredData(filtered);
+  };
+
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/courses/delete/${id}`, {
-        withCredentials: true,
-      });
-      const updatedCourses = filteredCourses.filter(
-        (course) => course._id !== id
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/courses/delete/${id}`,
+        { withCredentials: true }
       );
-      setFilteredCourses(updatedCourses);
       toast.success("Course deleted successfully!");
+      fetchCourses();
     } catch (error) {
-      console.error(
-        "Error deleting course:",
-        error.response ? error.response.data : error.message
-      );
+      console.error("Error deleting course:", error);
       toast.error("Failed to delete course.");
     }
   };
-  // Toggle the status of a course
+
   const updateStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === "Active" ? "Inactive" : "Active";
     try {
@@ -56,35 +78,20 @@ const Courses = () => {
         { status: newStatus },
         { withCredentials: true }
       );
-      const updatedCourses = filteredCourses.map((course) =>
-        course._id === id ? { ...course, status: newStatus } : course
-      );
-      setFilteredCourses(updatedCourses);
       toast.success(`Status updated to ${newStatus}`);
+      fetchCourses();
     } catch (error) {
-      console.error(
-        "Error updating status:",
-        error.response ? error.response.data : error.message
-      );
+      console.error("Error updating status:", error);
       toast.error("Failed to update status.");
     }
   };
-  // Search functionality
-  const handleSearch = (e) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
-    const filtered = courses.filter(
-      (course) =>
-        (course.course_Name &&
-          course.course_Name.toLowerCase().includes(term)) ||
-        (course.email && course.email.toLowerCase().includes(term))
-    );
-    setFilteredCourses(filtered);
-  };
 
-  // Navigate to edit course page
   const handleEdit = (courseId) => {
     navigate(`/editcourse/${courseId}`);
+  };
+
+  const toggleCategory = (id) => {
+    setOpenCategoryId((prev) => (prev === id ? null : id));
   };
 
   const isAddCoursePage = location.pathname.includes("addcourse");
@@ -99,8 +106,8 @@ const Courses = () => {
       {!isAddCoursePage && (
         <>
           <div className="text-center items-center mb-6">
-            <h2 className="text-2xl font-semibold text-gray-100 mb-5 cursor-pointer">
-              Courses
+            <h2 className="text-2xl font-semibold text-gray-100 mb-5">
+              Courses by Category
             </h2>
             <hr className="w-full h-1 bg-slate-500 rounded-sm" />
             <div className="my-5 flex justify-center lg:justify-between items-center space-x-4">
@@ -124,124 +131,158 @@ const Courses = () => {
               </Link>
             </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-700">
-              <thead>
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Sr. No.
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Course
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Description
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Image
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Monthly Fee
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Admission Fee
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-700">
-                {filteredCourses.length > 0 ? (
-                  filteredCourses.map((course, index) => (
-                    <motion.tr
-                      key={course._id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-100">
-                          {index + 1}
-                        </div>
-                      </td>
-                      <div className="text-sm font-medium text-gray-100">
-                        {course.course_Name
-                          ? course.course_Name.slice(0, 20)
-                          : "N/A"}
-                      </div>
-                      <div className="text-sm text-gray-300">
-                        {course.Short_Description
-                          ? course.Short_Description.slice(0, 20)
-                          : "N/A"}
-                      </div>
 
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <img
-                          src={
-                            course.course_Image
-                              ? `${
-                                  import.meta.env.VITE_API_URL
-                                }/${course.course_Image.replace(/\\/g, "/")}`
-                              : "https://via.placeholder.com/50"
-                          }
-                          alt="Course"
-                          className="h-14 w-14"
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-300">
-                          {course.Monthly_Fee || "N/A"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-300">
-                          {course.Admission_Fee || "N/A"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          onClick={() =>
-                            updateStatus(course._id, course.status)
-                          }
-                          className={`px-2 py-1 text-xs font-semibold rounded ${
-                            course.status === "Active"
-                              ? "bg-green-800 text-green-100"
-                              : "bg-red-800 text-red-100"
-                          }`}
-                        >
-                          {course.status}
-                        </button>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        <button
-                          className="text-indigo-400 hover:text-indigo-300 mr-2"
-                          onClick={() => handleEdit(course._id)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="text-red-400 hover:text-red-300"
-                          onClick={() => handleDelete(course._id)}
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </motion.tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="8" className="text-center text-gray-400">
-                      No courses found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          {loading ? (
+            <div className="flex flex-col items-center justify-center h-60">
+              <motion.div
+                className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 1,
+                  ease: "linear",
+                }}
+              />
+              <p className="text-gray-300 mt-3">Loading courses...</p>
+            </div>
+          ) : filteredData.length > 0 ? (
+            filteredData.map((category) => (
+              <div key={category._id} className="mb-6 border rounded-lg bg-gray-900 border-gray-700">
+                <button
+                  onClick={() => toggleCategory(category._id)}
+                  className="w-full flex justify-between items-center px-6 py-4 text-left bg-gray-800 hover:bg-gray-700 transition-all"
+                >
+                  <h3 className="text-lg font-semibold text-white">
+                    {category.category_Name.charAt(0).toUpperCase() +
+                      category.category_Name.slice(1)}
+                  </h3>
+                  <motion.div
+                    animate={{
+                      rotate: openCategoryId === category._id ? 180 : 0,
+                    }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ChevronDown className="text-gray-300" />
+                  </motion.div>
+                </button>
+
+                <AnimatePresence>
+                  {openCategoryId === category._id && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden"
+                    >
+                      
+
+                      <div className="overflow-x-auto px-6 pb-4">
+                        <table className="min-w-full divide-y divide-gray-700">
+                          <thead>
+                            <tr>
+                              <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider py-2">
+                                Course
+                              </th>
+                              {/* <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider py-2">
+                                Description
+                              </th> */}
+                              <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider py-2">
+                                Image
+                              </th>
+                              <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider py-2">
+                                Monthly Fee
+                              </th>
+                              <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider py-2">
+                                Admission Fee
+                              </th>
+                              <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider py-2">
+                                Status
+                              </th>
+                              <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider py-2">
+                                Actions
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-700">
+                            {category.courses.map((course) => (
+                              <motion.tr
+                                key={course._id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
+                              >
+                                <td className="py-2 text-gray-100">
+                                  {course.course_Name}
+                                </td>
+                                {/* <td className="py-2 text-gray-300">
+                                  {course.Short_Description
+                                    ? course.Short_Description.slice(0, 50)
+                                    : "N/A"}
+                                </td> */}
+                                <td className="py-2">
+                                  <img
+                                    src={
+                                      course.course_Image
+                                        ? `${
+                                            import.meta.env.VITE_API_URL
+                                          }/${course.course_Image.replace(
+                                            /\\/g,
+                                            "/"
+                                          )}`
+                                        : "https://via.placeholder.com/50"
+                                    }
+                                    alt="Course"
+                                    className="h-14 w-14 rounded"
+                                  />
+                                </td>
+                                <td className="py-2 text-gray-300">
+                                  {course.Monthly_Fee || "N/A"}
+                                </td>
+                                <td className="py-2 text-gray-300">
+                                  {course.Admission_Fee || "N/A"}
+                                </td>
+                                <td className="py-2">
+                                  <button
+                                    onClick={() =>
+                                      updateStatus(course._id, course.status)
+                                    }
+                                    className={`px-2 py-1 text-xs font-semibold rounded ${
+                                      course.status === "Active"
+                                        ? "bg-green-800 text-green-100"
+                                        : "bg-red-800 text-red-100"
+                                    }`}
+                                  >
+                                    {course.status}
+                                  </button>
+                                </td>
+                                <td className="py-2 text-sm text-gray-300">
+                                  <button
+                                    className="text-indigo-400 hover:text-indigo-300 mr-2"
+                                    onClick={() => handleEdit(course._id)}
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    className="text-red-400 hover:text-red-300"
+                                    onClick={() => handleDelete(course._id)}
+                                  >
+                                    Delete
+                                  </button>
+                                </td>
+                              </motion.tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-400">No courses found.</p>
+          )}
         </>
       )}
       <Outlet />
