@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 import Header from "../components/common/Header";
 import StatCard from "../components/common/StatCard";
-import Course from "../components/courses/Course";
+import Course from "./Courses/Course";
 
 const userStats = {
 	totalUsers: 152845,

@@ -6,8 +6,7 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import SettingsPage from "./pages/SettingsPage";
 import AddInstructor from "./pages/AddInstructor";
 import Courses from "./pages/Courses";
-import AddCourse from "./pages/AddCourse";
-import CourseCateg from "./pages/CourseCateg";
+import AddCourse from "./pages/Courses/AddCourse.jsx";
 import Blog from "./components/Blog/Blog";
 import AddBlog from "./pages/AddBlog";
 import AddBlogCate from "./pages/AddBlogCate";
@@ -22,20 +21,18 @@ import MainFaqs from "./components/Faqs/MainFaqs";
 import AddSpecialbp from "./components/SP-CBlogPost/AddSpecialbp";
 import Mainblog from "./components/Blog/Mainblog";
 import Mainblogcat from "./components/Blog/Mainblogcat";
-import EditCourse from "./components/courses/EditCourse";
+import EditCourse from "./components/courses/Getcourse/EditCourse.jsx";
 import EditInstructor from "./components/users/EditInstructor";
 import EditBlog from "./components/Blog/EditBlog";
 import EditBlogcat from "./components/Blog/EditBlogcat";
 import EditSpecialcat from "./components/SP-C Categories/EditSpecialcat";
 import Editspecialbp from "./components/SP-C Categories/Editspecialbp";
 import EditEFlyer from "./components/Eflyer/EditEFlyer";
-import EditCourseCategory from "./components/courses/EditCourseCategory";
 import AddFaq from "./components/Faqs/AddFaq";
 import EditFaq from "./components/Faqs/Editfaq";
 import MainFaqsquestion from "./components/faqQuestions/MainFaqsquestion";
 import Editfaquestion from "./components/faqQuestions/Editfaquestion";
 import MainGallery from "./components/Gallery/MainGallery";
-
 import AddGallery from "./components/Gallery/AddGallery";
 import MainFreeTrail from "./components/freetrailquerry/MainFreeTrail";
 import EditGallery from "./components/Gallery/EditGallery";
@@ -75,10 +72,7 @@ function App() {
         <Route path="/courses" element={<Courses />}></Route>
         <Route path="/addcourse" element={<AddCourse />} />
         <Route path="/editcourse/:id" element={<EditCourse />} />
-        <Route path="/course-categories" element={<CourseCateg />}>
-          <Route path="addcategory" element={<AddCategory />} />
-        </Route>
-        <Route path="/editcoursecat/:id" element={<EditCourseCategory />} />
+
         <Route path="/blog" element={<Blog />}></Route>
         <Route path="/addblog" element={<AddBlog />} />
         <Route path="/editblog/:id" element={<EditBlog />} />

@@ -1,35 +1,53 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
-
 const AddModel = () => {
-  const [slug, setSlug] = useState("marketing"); // Default slug
-  const [courseList, setCourseList] = useState([]);
-  const [courseId, setCourseId] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [courses, setCourses] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCourseId, setSelectedCourseId] = useState("");
   const [lectures, setLectures] = useState([
     { lectureNumber: 1, title: "", content: "", topics: "" },
   ]);
+  const [message, setMessage] = useState("");
 
-  // Fetch courses when slug changes
+  // Fetch categories on page load
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchCategories = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/courses/getoncategory/${slug}`
+          `${import.meta.env.VITE_API_URL}/api/v1/categories`
         );
         const data = await res.json();
-        setCourseList(data);
-        setCourseId(data[0]?._id || ""); // Auto-select first course
+        setCategories(data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Fetch courses when category is selected
+  useEffect(() => {
+    const fetchCourses = async () => {
+      if (!selectedCategory) return;
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/courses/getoncategory/${selectedCategory}`
+        );
+        setCourses(res.data.courses || []);
+        setSelectedCourseId("");
       } catch (err) {
-        console.error("Failed to fetch courses:", err);
+        console.error("Error fetching courses:", err);
+        setCourses([]);
       }
     };
 
     fetchCourses();
-  }, [slug]);
-
-  // --- rest of your lecture-handling functions (no changes) ---
+  }, [selectedCategory]);
 
   const handleLectureChange = (index, field, value) => {
     const updatedLectures = [...lectures];
@@ -37,13 +55,7 @@ const AddModel = () => {
     setLectures(updatedLectures);
   };
 
-  const handleTopicChange = (lectureIndex, topicIndex, value) => {
-    const updatedLectures = [...lectures];
-    updatedLectures[lectureIndex].topics[topicIndex] = value;
-    setLectures(updatedLectures);
-  };
-
-  const addLecture = () => {
+  const addLectureField = () => {
     setLectures([
       ...lectures,
       {
@@ -55,182 +67,155 @@ const AddModel = () => {
     ]);
   };
 
-  const removeLecture = (index) => {
-    if (lectures.length === 1) return;
-    const updatedLectures = lectures.filter((_, i) => i !== index);
-    setLectures(updatedLectures);
-  };
-
-  const addTopic = (lectureIndex) => {
-    const updatedLectures = [...lectures];
-    updatedLectures[lectureIndex].topics.push("");
-    setLectures(updatedLectures);
-  };
-
-  const removeTopic = (lectureIndex, topicIndex) => {
-    const updatedLectures = [...lectures];
-    if (updatedLectures[lectureIndex].topics.length === 1) return;
-    updatedLectures[lectureIndex].topics.splice(topicIndex, 1);
-    setLectures(updatedLectures);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const data = {
-      courseId,
-      lectures,
-    };
+    if (!selectedCourseId) {
+      setMessage("❌ Please select a course");
+      return;
+    }
 
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/coursemodel`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        }
-      );
-
-      const result = await res.json();
-      console.log("Response:", result);
-      alert("Course Feature Created!");
-
-      setCourseId("");
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/coursemodel`, {
+        courseId: selectedCourseId,
+        lectures,
+      });
+      setMessage("✅ Module added successfully!");
+      setSelectedCourseId("");
       setLectures([{ lectureNumber: 1, title: "", content: "", topics: "" }]);
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Error submitting form.");
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Error adding module");
     }
   };
 
   return (
-    <div className="p-6 w-full mx-auto h-screen overflow-y-auto bg-black text-white">
-      <h2 className="text-2xl font-bold mb-4">Add Course Feature</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Slug Dropdown */}
-        <select
-          value={slug}
-          onChange={(e) => setSlug(e.target.value)}
-          className="bg-zinc-900 border border-gray-700 p-2 w-full text-white"
-        >
-          <option value="marketing">Marketing</option>
-          <option value="designing">Designing</option>
-          <option value="diploma">Diploma</option>
-          <option value="development">Development</option>
-          <option value="business">Business</option>
-          <option value="multimedia">Multimedia</option>
-          <option value="lahore">lahore</option>
-        </select>
+    <div className="min-h-screen overflow-y-auto w-full bg-gray-100 flex justify-center items-start p-4 md:p-10">
+      <div className="w-full max-w-4xl bg-white shadow-lg rounded-2xl p-6 md:p-10">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+          Add Course Module
+        </h2>
 
-        {/* Course Dropdown */}
-        <select
-          value={courseId}
-          onChange={(e) => setCourseId(e.target.value)}
-          className="bg-zinc-900 border border-gray-700 p-2 w-full text-white"
-          required
-        >
-          <option value="">Select a Course</option>
-          {courseList.map((course) => (
-            <option key={course._id} value={course._id}>
-              {course.course_Name}
-            </option>
-          ))}
-        </select>
+        {message && (
+          <div className="mb-4 text-center text-sm font-medium text-green-600">
+            {message}
+          </div>
+        )}
 
-        {/* Lectures UI (same as before) */}
-        {lectures.map((lecture, index) => (
-          <div
-            key={index}
-            className="border border-gray-700 p-4 rounded bg-zinc-800"
-          >
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="font-semibold text-white">
-                Lecture {lecture.lectureNumber}
-              </h3>
-              {lectures.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeLecture(index)}
-                  className="text-red-500 text-sm"
-                >
-                  🗑 Remove Lecture
-                </button>
-              )}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Category Selector */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-gray-700 font-medium mb-1">
+                Select Category
+              </label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md text-black"
+                required
+              >
+                <option value="">-- Choose Category --</option>
+                {categories.map((cat) => (
+                  <option key={cat.slug} value={cat.url_Slug}>
+                    {cat.Category_Name}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            <input
-              type="number"
-              value={lecture.lectureNumber}
-              onChange={(e) =>
-                handleLectureChange(
-                  index,
-                  "lectureNumber",
-                  parseInt(e.target.value)
-                )
-              }
-              placeholder="Lecture Number"
-              className="bg-zinc-900 border border-gray-700 p-2 w-full mb-2 text-white placeholder-gray-400"
-              required
-            />
-            <input
-              type="text"
-              value={lecture.title}
-              onChange={(e) =>
-                handleLectureChange(index, "title", e.target.value)
-              }
-              placeholder="Lecture Title"
-              className="bg-zinc-900 border border-gray-700 p-2 w-full mb-2 text-white placeholder-gray-400"
-              required
-            />
-            <textarea
-              value={lecture.content}
-              onChange={(e) =>
-                handleLectureChange(index, "content", e.target.value)
-              }
-              placeholder="Lecture Content"
-              className="bg-zinc-900 border border-gray-700 p-2 w-full mb-2 text-white placeholder-gray-400"
-              required
-            />
-
-            <div className="mb-4">
-              <label className="block mb-2">Lecture Topics:</label>
-              <ReactQuill
-                theme="snow"
-                value={lecture.topics}
-                onChange={(value) =>
-                  handleLectureChange(index, "topics", value)
-                }
-                className="bg-white text-black"
-              />
+            {/* Course Selector */}
+            <div>
+              <label className="block text-gray-700 font-medium mb-1">
+                Select Course
+              </label>
+              <select
+                value={selectedCourseId}
+                onChange={(e) => setSelectedCourseId(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md text-black"
+                required
+              >
+                <option value="">-- Choose Course --</option>
+                {courses.map((course) => (
+                  <option key={course._id} value={course._id}>
+                    {course.course_Name}
+                  </option>
+                ))}
+              </select>
             </div>
+          </div>
+
+          {/* Lectures */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+              Lectures
+            </h3>
+            {lectures.map((lecture, index) => (
+              <div
+                key={index}
+                className="border border-gray-200 p-4 rounded-lg mb-4 bg-gray-50"
+              >
+                <p className="font-medium mb-2 text-gray-600">
+                  Lecture #{index + 1}
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    placeholder="Title"
+                    value={lecture.title}
+                    onChange={(e) =>
+                      handleLectureChange(index, "title", e.target.value)
+                    }
+                    required
+                    className="px-4 py-2 border border-gray-300 rounded-md text-black"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Content"
+                    value={lecture.content}
+                    onChange={(e) =>
+                      handleLectureChange(index, "content", e.target.value)
+                    }
+                    required
+                    className="px-4 py-2 border border-gray-300 rounded-md text-black"
+                  />
+                  <div className="md:col-span-2">
+                    <label className="block text-gray-700 font-medium mb-1">
+                      Topics
+                    </label>
+                    <ReactQuill
+                      theme="snow"
+                      value={lecture.topics}
+                      onChange={(value) =>
+                        handleLectureChange(index, "topics", value)
+                      }
+                      className="text-black bg-white rounded-md"
+                      placeholder="Write topics or key points here..."
+                      style={{ height: "200px", marginBottom: "2rem" }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
             <button
               type="button"
-              onClick={() => addTopic(index)}
-              className="text-sm text-blue-400 hover:underline"
+              onClick={addLectureField}
+              className="mt-2 text-blue-600 hover:underline text-sm font-medium"
             >
-              + Add Topic
+              + Add another lecture
             </button>
           </div>
-        ))}
 
-        <button
-          type="button"
-          onClick={addLecture}
-          className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600"
-        >
-          + Add Lecture
-        </button>
-
-        <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Submit
-        </button>
-      </form>
+          {/* Submit */}
+          <div className="text-center">
+            <button
+              type="submit"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+            >
+              Submit Module
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

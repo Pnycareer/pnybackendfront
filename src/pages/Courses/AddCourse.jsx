@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/common/Header";
+import Header from "../../components/common/Header";
 import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -12,6 +12,7 @@ const AddCourse = () => {
   const [selectedCourseImage, setSelectedCourseImage] = useState(null); // State for course image file
   const [selectedBrochure, setSelectedBrochure] = useState(null); // State for brochure file
   const [courseType, setCourseType] = useState("main"); // default is "main"
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const cityOptions = [
     "lahore",
@@ -28,7 +29,6 @@ const AddCourse = () => {
   } = useForm();
   const navigate = useNavigate();
   const [courseDescription, setCourseDescription] = useState(""); // State for course description
-  const [brochure, setBrochure] = useState(null); // State for brochure file
   // Fetch categories
   const fetchCategories = () => {
     fetch(`${import.meta.env.VITE_API_URL}/api/v1/categories`)
@@ -48,6 +48,7 @@ const AddCourse = () => {
     fetchInstructors();
   }, []);
   const onSubmit = async (data) => {
+    setIsSubmitting(true); // start loader
     Object.keys(data).forEach((key) => {
       if (typeof data[key] === "string") {
         data[key] = data[key].trim();
@@ -115,6 +116,8 @@ const AddCourse = () => {
         "Error adding course:",
         error.response?.data || error.message
       );
+    } finally {
+      setIsSubmitting(false); // stop loader
     }
   };
 
@@ -210,7 +213,11 @@ const AddCourse = () => {
             <select
               {...register("course_Category", { required: true })}
               className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+              defaultValue="" // <- forces validation until user selects
             >
+              <option value="" disabled>
+                Select Category
+              </option>
               {courseType === "main"
                 ? categories.map((cat) => (
                     <option key={cat._id} value={cat.url_Slug}>
@@ -223,6 +230,9 @@ const AddCourse = () => {
                     </option>
                   ))}
             </select>
+            {errors.course_Category && (
+              <span className="text-red-500">Course Category is required</span>
+            )}
           </div>
 
           <div className="mb-4">
@@ -245,13 +255,17 @@ const AddCourse = () => {
                 <select
                   {...register("Skill_Level", { required: true })}
                   className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+                  defaultValue="" // important for validation
                 >
+                  <option value="" disabled>
+                    Select Skill
+                  </option>
                   <option value="Beginner">Beginner</option>
                   <option value="Intermediate">Intermediate</option>
                   <option value="Advanced">Advanced</option>
                   <option value="all">Appropriate for All</option>
                 </select>
-                {errors.skillLevel && (
+                {errors.Skill_Level && (
                   <span className="text-red-500">Skill Level is required</span>
                 )}
               </div>
@@ -261,9 +275,13 @@ const AddCourse = () => {
           <div className="mb-4">
             <label className="block text-gray-400 mb-2">Instructor*</label>
             <select
-              {...register("instructor", { required: true })} // Changed "Instructor" to "instructor"
+              {...register("instructor", { required: true })}
               className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+              defaultValue="" // <- important for validation to work with the placeholder
             >
+              <option value="" disabled>
+                Select Instructor
+              </option>
               {instructors.map((instructor) => (
                 <option key={instructor._id} value={instructor._id}>
                   {instructor.name}
@@ -513,12 +531,39 @@ const AddCourse = () => {
           </div>
 
           {/* Submit Button */}
-          <div className="text-center">
+          <div className="flex justify-center">
             <button
               type="submit"
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
+              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none flex items-center justify-center gap-2 disabled:opacity-50"
+              disabled={isSubmitting}
             >
-              Add Course
+              {isSubmitting ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8z"
+                    />
+                  </svg>
+                  <span>Submitting...</span>
+                </>
+              ) : (
+                "Add Course"
+              )}
             </button>
           </div>
         </form>

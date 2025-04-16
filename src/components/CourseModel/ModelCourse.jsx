@@ -1,149 +1,89 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import axios from "axios";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
-const ModelCourse = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+const CourseModulesTable = () => {
   const [modules, setModules] = useState([]);
-  const [filteredModules, setFilteredModules] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const API_URL = `${import.meta.env.VITE_API_URL}/api/coursemodel`;
-
-  // Fetch Course Modules
   useEffect(() => {
-    axios
-      .get(API_URL)
-      .then((response) => {
-        setModules(response.data);
-        setFilteredModules(response.data);
-      })
-      .catch((error) => console.error("Error fetching course modules:", error));
+    const fetchModules = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/coursemodel`);
+        setModules(res.data);
+      } catch (err) {
+        console.error('Failed to fetch modules:', err);
+      }
+    };
+
+    fetchModules();
   }, []);
 
-  // Search Handler
-  const handleSearch = (e) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
-    filterData(term);
-  };
-
-  const filterData = (search) => {
-    const filtered = modules.filter((module) => {
-      const courseName = module.courseId?.course_Name?.toLowerCase() || "";
-      const editorText = module.textEditor?.toLowerCase() || "";
-      return courseName.includes(search) || editorText.includes(search);
-    });
-
-    setFilteredModules(filtered);
-  };
-
-  // Delete Course Module
-  const handleDelete = async (moduleId) => {
-    try {
-      await axios.delete(`${API_URL}/${moduleId}`);
-      const updatedModules = modules.filter((item) => item._id !== moduleId);
-      setModules(updatedModules);
-      setFilteredModules(updatedModules);
-    } catch (error) {
-      console.error("Error deleting course module:", error);
-    }
-  };
+  const filteredModules = modules.filter((module) =>
+    module.courseName.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <motion.div
-      className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-    >
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-gray-100">
-          Manage Course Modules
-        </h2>
-        <Link to="/addcoursemodel">
-          <button className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300">
-            Add New Module
-          </button>
-        </Link>
-      </div>
+    <div className="p-6">
+      <h2 className="text-2xl font-semibold text-white mb-4">All Course Modules</h2>
 
-      <div className="text-center mb-6">
+      {/* Search Input */}
+      <div className="mb-4">
         <input
           type="text"
-          placeholder="Search by Course Name or Module"
-          className="bg-gray-700 text-white rounded-lg py-2 px-4 mb-4"
-          value={searchTerm}
-          onChange={handleSearch}
+          placeholder="Search by course name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-md text-black"
         />
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-700">
-          <thead>
+      <div className="overflow-x-auto rounded-lg shadow-md">
+        <table className="min-w-full table-auto bg-[#0f172a] text-white">
+          <thead className="bg-[#0f172a] border-b border-gray-700 text-sm text-left">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                #SL
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                Course Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                Module Description
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                Position
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                Action
-              </th>
+              <th className="px-4 py-3">COURSE</th>
+              <th className="px-4 py-3">LECTURES</th>
+              <th className="px-4 py-3">STATUS</th>
+              <th className="px-4 py-3">ACTIONS</th>
             </tr>
           </thead>
-
-          <tbody className="divide-y divide-gray-700">
-            {filteredModules.map((module, index) => (
-              <motion.tr
-                key={module._id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <td className="px-6 py-4 whitespace-nowrap">{index + 1}</td>
-
-                {/* ✅ Course Name */}
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {module.courseId?.course_Name || "N/A"}
+          <tbody>
+            {filteredModules.length === 0 ? (
+              <tr>
+                <td colSpan="4" className="text-center py-6 text-gray-300">
+                  No matching modules found.
                 </td>
-
-                {/* ✅ Module TextEditor Description */}
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {module.textEditor || "N/A"}
-                </td>
-
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {module.courseModulePosition || "-"}
-                </td>
-
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                  <Link to={`/editmodel/${module._id}`}>
-                    <button className="text-indigo-400 hover:text-indigo-300 mr-2">
-                      View
-                    </button>
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(module._id)}
-                    className="text-red-400 hover:text-red-300"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </motion.tr>
-            ))}
+              </tr>
+            ) : (
+              filteredModules.map((module, index) => (
+                <motion.tr
+                  key={module._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  className="border-b border-gray-700 hover:bg-gray-800 transition-all"
+                >
+                  <td className="px-4 py-3">{module.courseName}</td>
+                  <td className="px-4 py-3">{module.lectures.length}</td>
+                  <td className="px-4 py-3">
+                    <span className="bg-green-600 text-white text-xs px-3 py-1 rounded-full">
+                      Active
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 space-x-2">
+                    <Link to={`/editmodel/${module._id}`} className="text-blue-400 hover:underline text-sm">Edit</Link>
+                    <button className="text-red-400 hover:underline text-sm">Delete</button>
+                  </td>
+                </motion.tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
-export default ModelCourse;
+export default CourseModulesTable;

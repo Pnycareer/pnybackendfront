@@ -44,12 +44,6 @@ const Mainmodel= () => {
 
 			   <ModelCourse/>
 
-				{/* USER CHARTS */}
-				{/* <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
-					<UserGrowthChart />
-					<UserActivityHeatmap />
-					<UserDemographicsChart />
-				</div> */}
 			</main>
 		</div>
 	);
