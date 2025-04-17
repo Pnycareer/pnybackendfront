@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { motion, AnimatePresence } from "framer-motion";
 
 const EditModel = () => {
   const { id } = useParams(); // This is your featureId
@@ -10,22 +11,56 @@ const EditModel = () => {
   const [moduleData, setModuleData] = useState(null);
   const [lectures, setLectures] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [originalLectures, setOriginalLectures] = useState([]);
+  const [expandedLecture, setExpandedLecture] = useState(null);
 
   useEffect(() => {
     const fetchModule = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/coursemodel/${id}`);
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/coursemodel/${id}`
+        );
         setModuleData(res.data);
         setLectures(res.data.lectures);
+        setOriginalLectures(res.data.lectures); // Store unfiltered list
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching module:', err);
+        console.error("Error fetching module:", err);
       }
     };
 
     fetchModule();
   }, [id]);
+
+  const handleAddLecture = () => {
+    // Collect used lecture numbers
+    const usedNumbers = lectures.map((lec) => lec.lectureNumber);
+
+    // Find the smallest missing number
+    let lectureNumber = 1;
+    while (usedNumbers.includes(lectureNumber)) {
+      lectureNumber++;
+    }
+
+    const newLecture = {
+      lectureNumber,
+      title: "",
+      content: "",
+      topics: "",
+    };
+
+    // Add and sort the lectures
+    const updatedLectures = [...lectures, newLecture].sort(
+      (a, b) => a.lectureNumber - b.lectureNumber
+    );
+
+    setLectures(updatedLectures);
+
+    // 🔥 Auto-expand the newly added lecture
+    setExpandedLecture(lectureNumber);
+  };
 
   const handleLectureChange = (index, field, value) => {
     const updatedLectures = [...lectures];
@@ -34,86 +69,200 @@ const EditModel = () => {
   };
 
   const handleDeleteLecture = async (lectureId) => {
-    const confirm = window.confirm('Are you sure you want to delete this lecture?');
+    const confirm = window.confirm(
+      "Are you sure you want to delete this lecture?"
+    );
     if (!confirm) return;
 
     try {
-      const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/coursemodel/${id}/${lectureId}`);
+      const res = await axios.delete(
+        `${
+          import.meta.env.VITE_API_URL
+        }/api/coursemodel/coursemodel/${id}/${lectureId}`
+      );
       setLectures(res.data.courseFeature.lectures); // Update with new lectures list
-      setMessage('✅ Lecture deleted successfully!');
+      setMessage("✅ Lecture deleted successfully!");
     } catch (err) {
-      console.error('Error deleting lecture:', err.response?.data || err.message);
-      setMessage('❌ Failed to delete lecture');
+      console.error(
+        "Error deleting lecture:",
+        err.response?.data || err.message
+      );
+      setMessage("❌ Failed to delete lecture");
     }
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+
+    // Auto-assign lecture numbers based on index
+    // const updatedLectures = lectures.map((lecture, index) => ({
+    //   ...lecture,
+    //   lectureNumber: index + 1,
+    // }));
+
+    const updatedLectures = lectures;
+
     try {
       await axios.put(`${import.meta.env.VITE_API_URL}/api/coursemodel/${id}`, {
         courseId: moduleData.courseId._id || moduleData.courseId,
-        lectures,
+        lectures: updatedLectures,
       });
-      setMessage('✅ Module updated successfully!');
-      setTimeout(() => navigate('/coursemodel'), 1500);
+      setMessage("✅ Module updated successfully!");
+      setTimeout(() => navigate("/coursemodel"), 1500);
     } catch (err) {
-      console.error('Error updating module:', err.response?.data || err.message);
-      setMessage('❌ Failed to update module');
+      console.error(
+        "Error updating module:",
+        err.response?.data || err.message
+      );
+      setMessage("❌ Failed to update module");
     }
   };
 
-  if (loading) return <div className="text-center text-white py-10">Loading...</div>;
+  if (loading)
+    return <div className="text-center text-white py-10">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gray-100 p-6 md:p-10 mx-auto overflow-y-auto w-full">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Edit Module for: {moduleData.courseName}</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">
+          Edit Module for: {moduleData.courseName}
+        </h2>
 
         {message && (
-          <div className="mb-4 text-center text-sm font-medium text-green-600">{message}</div>
+          <div className="mb-4 text-center text-sm font-medium text-green-600">
+            {message}
+          </div>
         )}
 
-        <form onSubmit={handleUpdate} className="space-y-6">
-          {lectures.map((lecture, index) => (
-            <div key={lecture._id} className="border border-gray-300 p-4 rounded-md bg-gray-50 mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <p className="font-semibold text-gray-600">Lecture #{index + 1}</p>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteLecture(lecture._id)}
-                  className="text-red-500 text-sm hover:underline"
-                >
-                  Delete
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  className="text-black px-3 py-2 border rounded-md"
-                  placeholder="Title"
-                  value={lecture.title}
-                  onChange={(e) => handleLectureChange(index, 'title', e.target.value)}
-                />
-                <input
-                  type="text"
-                  className="text-black px-3 py-2 border rounded-md"
-                  placeholder="Content"
-                  value={lecture.content}
-                  onChange={(e) => handleLectureChange(index, 'content', e.target.value)}
-                />
-              </div>
-              <div className="mt-4">
-                <label className="block text-gray-700 mb-1">Topics</label>
-                <ReactQuill
-                  theme="snow"
-                  value={lecture.topics}
-                  onChange={(value) => handleLectureChange(index, 'topics', value)}
-                  className="bg-white text-black"
-                />
-              </div>
-            </div>
-          ))}
+        <div className="mb-6 max-w-xs">
+          <input
+            type="number"
+            min="1"
+            className="w-full px-4 py-2 border rounded-md text-black"
+            placeholder="Search by lecture number..."
+            value={searchQuery}
+            onChange={(e) => {
+              const value = e.target.value;
+              setSearchQuery(value);
 
+              if (!value) {
+                setLectures(originalLectures);
+                setExpandedLecture(null);
+              } else {
+                const number = parseInt(value, 10);
+                const filtered = originalLectures.filter(
+                  (lecture) => lecture.lectureNumber === number
+                );
+                setLectures(filtered);
+                if (filtered.length > 0) {
+                  setExpandedLecture(filtered[0].lectureNumber);
+                } else {
+                  setExpandedLecture(null);
+                }
+              }
+            }}
+          />
+        </div>
+
+        <form onSubmit={handleUpdate} className="space-y-6">
+          {lectures.map((lecture, index) => {
+            const isOpen = expandedLecture === lecture.lectureNumber;
+
+            return (
+              <div
+                key={lecture._id || lecture.lectureNumber}
+                className="border border-gray-300 rounded-md bg-gray-50 mb-4"
+              >
+                <div
+                  onClick={() =>
+                    setExpandedLecture(isOpen ? null : lecture.lectureNumber)
+                  }
+                  className="flex justify-between items-center px-4 py-3 cursor-pointer bg-gray-200 hover:bg-gray-300 rounded-t-md"
+                >
+                  <p className="font-semibold text-gray-700">
+                    Lecture #{lecture.lectureNumber}
+                  </p>
+                  <span className="text-sm text-blue-600">
+                    {isOpen ? "▲ Collapse" : "▼ Expand"}
+                  </span>
+                </div>
+
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.div
+                      key="content"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden px-4 pb-4 pt-2"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <input
+                          type="text"
+                          className="text-black px-3 py-2 border rounded-md"
+                          placeholder="Title"
+                          value={lecture.title}
+                          onChange={(e) =>
+                            handleLectureChange(index, "title", e.target.value)
+                          }
+                        />
+                        <input
+                          type="text"
+                          className="text-black px-3 py-2 border rounded-md"
+                          placeholder="Content"
+                          value={lecture.content}
+                          onChange={(e) =>
+                            handleLectureChange(
+                              index,
+                              "content",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </div>
+                      <div className="mt-2">
+                        <label className="block text-gray-700 mb-1">
+                          Topics
+                        </label>
+                        <ReactQuill
+                          theme="snow"
+                          value={lecture.topics}
+                          onChange={(value) =>
+                            handleLectureChange(index, "topics", value)
+                          }
+                          className="bg-white text-black"
+                        />
+                      </div>
+                      <div className="mt-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDeleteLecture(
+                              lecture._id || lecture.lectureNumber
+                            )
+                          }
+                          className="text-red-500 text-sm hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+
+          <div className="mb-6">
+            <button
+              type="button"
+              onClick={handleAddLecture}
+              className="px-4 py-2 rounded-md text-blue-500"
+            >
+              + Add Lecture
+            </button>
+          </div>
           <div className="text-center">
             <button
               type="submit"

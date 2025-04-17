@@ -36,7 +36,9 @@ const AddModel = () => {
       if (!selectedCategory) return;
       try {
         const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/courses/getoncategory/${selectedCategory}`
+          `${
+            import.meta.env.VITE_API_URL
+          }/courses/getoncategory/${selectedCategory}`
         );
         setCourses(res.data.courses || []);
         setSelectedCourseId("");
@@ -67,6 +69,12 @@ const AddModel = () => {
     ]);
   };
 
+  const removeLectureField = (index) => {
+    const updatedLectures = [...lectures];
+    updatedLectures.splice(index, 1);
+    setLectures(updatedLectures);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedCourseId) {
@@ -75,10 +83,13 @@ const AddModel = () => {
     }
 
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/coursemodel`, {
-        courseId: selectedCourseId,
-        lectures,
-      });
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/coursemodel`,
+        {
+          courseId: selectedCourseId,
+          lectures,
+        }
+      );
       setMessage("✅ Module added successfully!");
       setSelectedCourseId("");
       setLectures([{ lectureNumber: 1, title: "", content: "", topics: "" }]);
@@ -154,9 +165,21 @@ const AddModel = () => {
                 key={index}
                 className="border border-gray-200 p-4 rounded-lg mb-4 bg-gray-50"
               >
+                <div className="text-end">
+                  {lectures.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeLectureField(index)}
+                      className="text-red-500 text-sm hover:underline"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
                 <p className="font-medium mb-2 text-gray-600">
                   Lecture #{index + 1}
                 </p>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <input
                     type="text"

@@ -9,7 +9,7 @@ const Courses = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoriesWithCourses, setCategoriesWithCourses] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [openCategoryId, setOpenCategoryId] = useState(null);
+  const [openCategories, setOpenCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
@@ -40,7 +40,11 @@ const Courses = () => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
 
-    if (!term) return setFilteredData(categoriesWithCourses);
+    if (!term) {
+      setFilteredData(categoriesWithCourses);
+      setOpenCategories([]); // Collapse all when cleared
+      return;
+    }
 
     const filtered = categoriesWithCourses
       .map((cat) => {
@@ -54,6 +58,16 @@ const Courses = () => {
       .filter(Boolean);
 
     setFilteredData(filtered);
+
+    // Open all matching category IDs
+    const matchedIds = filtered.map((cat) => cat._id);
+    setOpenCategories(matchedIds);
+  };
+
+  const toggleCategory = (id) => {
+    setOpenCategories((prev) =>
+      prev.includes(id) ? prev.filter((catId) => catId !== id) : [...prev, id]
+    );
   };
 
   const handleDelete = async (id) => {
@@ -88,10 +102,6 @@ const Courses = () => {
 
   const handleEdit = (courseId) => {
     navigate(`/editcourse/${courseId}`);
-  };
-
-  const toggleCategory = (id) => {
-    setOpenCategoryId((prev) => (prev === id ? null : id));
   };
 
   const isAddCoursePage = location.pathname.includes("addcourse");
@@ -147,7 +157,10 @@ const Courses = () => {
             </div>
           ) : filteredData.length > 0 ? (
             filteredData.map((category) => (
-              <div key={category._id} className="mb-6 border rounded-lg bg-gray-900 border-gray-700">
+              <div
+                key={category._id}
+                className="mb-6 border rounded-lg bg-gray-900 border-gray-700"
+              >
                 <button
                   onClick={() => toggleCategory(category._id)}
                   className="w-full flex justify-between items-center px-6 py-4 text-left bg-gray-800 hover:bg-gray-700 transition-all"
@@ -158,7 +171,7 @@ const Courses = () => {
                   </h3>
                   <motion.div
                     animate={{
-                      rotate: openCategoryId === category._id ? 180 : 0,
+                      rotate: openCategories.includes(category._id) ? 180 : 0,
                     }}
                     transition={{ duration: 0.3 }}
                   >
@@ -167,7 +180,7 @@ const Courses = () => {
                 </button>
 
                 <AnimatePresence>
-                  {openCategoryId === category._id && (
+                  {openCategories.includes(category._id) && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
@@ -175,8 +188,6 @@ const Courses = () => {
                       transition={{ duration: 0.3 }}
                       className="overflow-hidden"
                     >
-                      
-
                       <div className="overflow-x-auto px-6 pb-4">
                         <table className="min-w-full divide-y divide-gray-700">
                           <thead>
@@ -184,9 +195,6 @@ const Courses = () => {
                               <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider py-2">
                                 Course
                               </th>
-                              {/* <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider py-2">
-                                Description
-                              </th> */}
                               <th className="text-left text-xs font-medium text-gray-400 uppercase tracking-wider py-2">
                                 Image
                               </th>
@@ -215,11 +223,6 @@ const Courses = () => {
                                 <td className="py-2 text-gray-100">
                                   {course.course_Name}
                                 </td>
-                                {/* <td className="py-2 text-gray-300">
-                                  {course.Short_Description
-                                    ? course.Short_Description.slice(0, 50)
-                                    : "N/A"}
-                                </td> */}
                                 <td className="py-2">
                                   <img
                                     src={

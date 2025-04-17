@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { useNavigate } from "react-router-dom";
 
 const Blog = () => {
   const [formData, setFormData] = useState({
@@ -10,7 +11,7 @@ const Blog = () => {
     urlSlug: "",
     blogCategory: "",
     blogDescription: "",
-    publishDate: "",
+    publishDate: new Date().toISOString().split("T")[0], // ✅ today's date
     authorName: "",
     authorBio: "",
     tags: "",
@@ -21,10 +22,11 @@ const Blog = () => {
     canonical: "",
     inviewweb: true,
   });
-
+  const navigate = useNavigate();
   const [blogImage, setBlogImage] = useState(null);
   const [authorProfileImage, setAuthorProfileImage] = useState(null); // ✅
   const [socialLinks, setSocialLinks] = useState([{ platform: "", url: "" }]);
+  const [loading, setLoading] = useState(false);
 
   const categories = [
     { label: "Technology", value: "technology" },
@@ -44,13 +46,6 @@ const Blog = () => {
     { label: "Design", value: "design" },
     { label: "Photography", value: "photography" },
   ];
-
-  const generateSlug = (text) => {
-    return text
-      .toLowerCase()
-      .replace(/ /g, "-")
-      .replace(/[^\w-]+/g, "");
-  };
 
   const handleChange = (e) => {
     setFormData({
@@ -79,6 +74,7 @@ const Blog = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true); // ✅ Start loader
 
     const data = new FormData();
 
@@ -102,15 +98,21 @@ const Blog = () => {
       }
     });
 
-    
-
     data.append("socialLinks", JSON.stringify(socialLinksObject));
 
     if (blogImage) {
       data.append("blogImage", blogImage);
     }
+    const finalSlug = formData.urlSlug
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
 
-    data.append("url_slug", formData.urlSlug.trim());
+    data.append("url_slug", finalSlug);
+
+    // data.append("url_slug", formData.urlSlug.trim());
 
     if (authorProfileImage) {
       data.append("authorProfileImage", authorProfileImage);
@@ -127,8 +129,9 @@ const Blog = () => {
         }
       );
 
-      console.log(res.data);
+      setLoading(false); // ✅ Stop loader
       alert("Blog posted successfully!");
+      navigate("/all-blogs");
 
       // Reset form
       setFormData({
@@ -422,9 +425,40 @@ const Blog = () => {
         {/* Submit Button */}
         <button
           type="submit"
-          className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+          disabled={loading}
+          className={`py-2 rounded w-full transition-all flex items-center justify-center ${
+            loading
+              ? "bg-blue-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+          } text-white`}
         >
-          Post Blog
+          {loading ? (
+            <>
+              <svg
+                className="animate-spin h-5 w-5 mr-2 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                ></path>
+              </svg>
+              Posting...
+            </>
+          ) : (
+            "Post Blog"
+          )}
         </button>
       </form>
     </div>

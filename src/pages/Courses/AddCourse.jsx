@@ -16,10 +16,27 @@ const AddCourse = () => {
 
   const cityOptions = [
     "lahore",
-    "multan",
-    "karachi",
-    "islamabad",
     "rawalpindi",
+    "karachi",
+    "multan",
+    "sialkot",
+    "faisalabad",
+    "gujranwala",
+    "azad-Kashmir",
+    "islamabad",
+    "sargodha",
+  ];
+  const shortcourseOptions = [
+    "short course lahore",
+    "short course rawalpindi",
+    "short course karachi",
+    "short course multan",
+    "short course sialkot",
+    "short course faisalabad",
+    "short course gujranwala",
+    "short course azad-Kashmir",
+    "short course islamabad",
+    "short course sargodha",
   ];
 
   const {
@@ -142,6 +159,7 @@ const AddCourse = () => {
             >
               <option value="main">Main Course</option>
               <option value="city">City Course</option>
+              <option value="short">Short Course</option>
             </select>
           </div>
 
@@ -213,22 +231,34 @@ const AddCourse = () => {
             <select
               {...register("course_Category", { required: true })}
               className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
-              defaultValue="" // <- forces validation until user selects
+              defaultValue=""
             >
               <option value="" disabled>
                 Select Category
               </option>
-              {courseType === "main"
-                ? categories.map((cat) => (
-                    <option key={cat._id} value={cat.url_Slug}>
-                      {cat.Category_Name}
-                    </option>
-                  ))
-                : cityOptions.map((city) => (
-                    <option key={city} value={city}>
-                      {city.charAt(0).toUpperCase() + city.slice(1)}
-                    </option>
-                  ))}
+
+              {courseType === "main" &&
+                categories.map((cat) => (
+                  <option key={cat._id} value={cat.url_Slug}>
+                    {cat.Category_Name}
+                  </option>
+                ))}
+
+              {courseType === "city" &&
+                cityOptions.map((city) => (
+                  <option key={city} value={city}>
+                    {city.charAt(0).toUpperCase() + city.slice(1)}
+                  </option>
+                ))}
+
+              {courseType === "short" &&
+                shortcourseOptions.map((city) => (
+                  <option key={city} value={city}>
+                    {`${city
+                      .replace(/-/g, " ")
+                      .replace(/\b\w/g, (c) => c.toUpperCase())}`}
+                  </option>
+                ))}
             </select>
             {errors.course_Category && (
               <span className="text-red-500">Course Category is required</span>

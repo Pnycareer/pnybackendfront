@@ -47,6 +47,16 @@ const AddBlog = () => {
         return;
       }
 
+      // ✅ Fix slug formatting
+      if (data.urlSlug) {
+        data.urlSlug = data.urlSlug
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .replace(/-+/g, "-");
+      }
+
       const formData = new FormData();
       formData.append("postTitle", data.postTitle);
       formData.append("urlSlug", data.urlSlug);
