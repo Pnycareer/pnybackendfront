@@ -55,6 +55,7 @@ import Maincourse from "./components/Menu/Maincourse";
 import Addmaincourse from "./components/Menu/Addmaincourse";
 import Webbanner from "./pages/Webbanner";
 import Allblogs from "./components/Blog/Allblogs.jsx";
+import Addtermsandconditions from "./pages/Termsandconditions/Addtermsandconditions.jsx";
 
 function App() {
   return (
@@ -119,6 +120,7 @@ function App() {
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/web-banner" element={<Webbanner />} />
+        <Route path="/termsandconditions" element={<Addtermsandconditions/>} />
       </Routes>
       <ToastContainer />
     </div>
