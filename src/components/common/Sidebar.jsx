@@ -67,6 +67,8 @@ const SIDEBAR_ITEMS = [
             { name: "E-Flyers", icon: BiCategory, color: "#8B5CF6", href: "/eflayer" }
 		]
 	 },
+	{ name: "Brouchure Data", icon: MdFolderSpecial, color: "#F59E0B", href: "/brouchuredata",
+	 },
 	 { name: "SubCategory", icon:MdCategory, color: "#F59E0B", href: "#",
 		dropdown: [
             { name: "Subcate", icon:TbCategory, color: "#8B5CF6", href: "/subcat" }
