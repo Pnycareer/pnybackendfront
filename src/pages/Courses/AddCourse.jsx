@@ -83,7 +83,6 @@ const AddCourse = () => {
     const formData = new FormData();
     formData.append("course_Name", data.course_Name);
     formData.append("url_Slug", data.url_Slug);
-    formData.append("featured_Option", data.featured_Option);
     formData.append("video_Id", data.video_Id);
     formData.append("course_Category", data.course_Category); // Ensure it's a valid ObjectId
     formData.append("category_Description", data.category_Description || "");
@@ -100,6 +99,7 @@ const AddCourse = () => {
     formData.append("Status", data.Status);
     formData.append("View_On_Web", data.View_On_Web);
     formData.append("In_Sitemap", data.In_Sitemap);
+    formData.append("priority", data.priority);
     formData.append("Page_Index", data.Page_Index);
     formData.append("Custom_Canonical_Url", data.Custom_Canonical_Url);
     // Append files if they exist
@@ -129,10 +129,7 @@ const AddCourse = () => {
       navigate("/courses");
     } catch (error) {
       console.error("Error adding course:", error.response || error.message);
-      toast.error(
-        "Error adding course:",
-        error.response?.data || error.message
-      );
+      toast.error(error.response?.data?.message || "Something went wrong!");
     } finally {
       setIsSubmitting(false); // stop loader
     }
@@ -193,23 +190,6 @@ const AddCourse = () => {
 
           {courseType === "main" && (
             <>
-              {/* Featured Option */}
-              <div className="mb-4">
-                <label className="block text-gray-400 mb-2">Featured*</label>
-                <select
-                  {...register("featured_Option", { required: true })}
-                  className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
-                >
-                  <option value="yes">Yes</option>
-                  <option value="no">No</option>
-                </select>
-                {errors.featured && (
-                  <span className="text-red-500">
-                    Featured option is required
-                  </span>
-                )}
-              </div>
-
               {/* Video ID */}
               <div className="mb-4">
                 <label className="block text-gray-400 mb-2">Video ID*</label>
@@ -452,6 +432,22 @@ const AddCourse = () => {
             </select>
             {errors.inSitemap && (
               <span className="text-red-500">Selection is required</span>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-400 mb-2">Priority</label>
+            <input
+              type="number"
+              step="0.1" // Allow decimals
+              min="0.0"
+              max="0.9"
+              {...register("priority", { required: false })}
+              className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+              placeholder="Enter priority"
+            />
+            {errors.durationDays && (
+              <span className="text-red-500">Duration in Days is required</span>
             )}
           </div>
 

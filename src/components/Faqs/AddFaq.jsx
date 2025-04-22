@@ -1,137 +1,123 @@
-import { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import Header from "../common/Header";
-import { toast } from "react-toastify";
+// src/components/FaqPostPage.jsx
+import React, { useState } from "react";
+import { motion } from "framer-motion";
 
-const AddFaq = () => {
-  const [categoryName, setCategoryName] = useState("");
-  const [urlSlug, setUrlSlug] = useState("");
-  const [categoryDescription, setCategoryDescription] = useState("");
-  const [categoryImage, setCategoryImage] = useState(null);
-  const [metaTitle, setMetaTitle] = useState("");
-  const [metaDescription, setMetaDescription] = useState("");
-  const [inSitemap, setInSitemap] = useState(false);
-  const [indexPage, setIndexPage] = useState(false);
-  const [customCanonicalUrl, setCustomCanonicalUrl] = useState("");
-  const navigate = useNavigate();
+export default function FaqPostPage() {
+  const [category, setCategory] = useState({ name: ""});
+  const [faqs, setFaqs] = useState([{ question: "", answer: "" }]);
+  const [faqImage, setFaqImage] = useState(null);
 
-  const handleFileChange = (e) => {
-    setCategoryImage(e.target.files[0]);
+  const handleChange = (i, key, val) => {
+    const updated = [...faqs];
+    updated[i][key] = val;
+    setFaqs(updated);
   };
+
+  const addFaq = () => setFaqs([...faqs, { question: "", answer: "" }]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const formData = new FormData();
-    formData.append("categoryName", categoryName);
-    formData.append("urlSlug", urlSlug);
-    formData.append("categoryDescription", categoryDescription);
-    formData.append("categoryImage", categoryImage);
-    formData.append("metaTitle", metaTitle);
-    formData.append("metaDescription", metaDescription);
-    formData.append("inSitemap", inSitemap);
-    formData.append("indexPage", indexPage);
-    formData.append("customCanonicalUrl", customCanonicalUrl);
+    formData.append("category", JSON.stringify(category));
+    formData.append("faqs", JSON.stringify(faqs));
+    if (faqImage) formData.append("faqImage", faqImage);
 
     try {
-      await axios.post("${import.meta.env.VITE_API_URL}/api/faqcat", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/faqs`, {
+        method: "POST",
+        body: formData,
       });
-      navigate("/faqs"); // Redirect after successful submission
-      toast.success("faq submitted successfully");
-    } catch (error) {
-      console.error("Error adding FAQ category:", error);
+
+      if (!res.ok) throw new Error("Failed to post FAQ");
+      alert("FAQ posted!");
+      setCategory({ name: "", url_slug: "" });
+      setFaqs([{ question: "", answer: "" }]);
+      setFaqImage(null);
+    } catch (err) {
+      alert("Error: " + err.message);
     }
   };
 
   return (
-    <div className="overflow-auto w-full">
-      <Header />
-      <div className="bg-gray-800 bg-opacity-50  mx-auto backdrop-blur-md shadow-lg my-6 rounded-xl p-6 border w-full border-gray-700 overflow-auto">
-        <h2 className="text-2xl font-semibold text-gray-100 mb-5">
-          Add FAQ Category
-        </h2>
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="w-full mx-auto p-6 bg-gray-100  shadow-lg space-y-6 overflow-y-auto min-h-screen"
+    >
+      <h2 className="text-2xl font-bold text-gray-800">Create a FAQ</h2>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+          <input
+            type="text"
+            placeholder="Category Name"
+            value={category.name}
+            onChange={(e) => setCategory({ ...category, name: e.target.value })}
+            className="input input-bordered w-full p-3 rounded-lg border border-gray-300"
+            required
+          />
+          {/* <input
+            type="text"
+            placeholder="Slug"
+            value={category.url_slug}
+            onChange={(e) =>
+              setCategory({ ...category, url_slug: e.target.value })
+            }
+            className="input input-bordered w-full p-3 rounded-lg border border-gray-300"
+            required
+          /> */}
+        </div>
+
+        <input
+          type="file"
+          onChange={(e) => setFaqImage(e.target.files[0])}
+          accept="image/*"
+          className="block w-full mt-2"
+        />
+
+        {faqs.map((faq, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="border p-4 rounded-lg"
+          >
             <input
               type="text"
-              placeholder="Category Name"
-              className="w-full p-3 bg-gray-700 text-white placeholder-gray-400 rounded-lg"
-              value={categoryName}
-              onChange={(e) => setCategoryName(e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="URL Slug"
-              className="w-full p-3 bg-gray-700 text-white placeholder-gray-400 rounded-lg"
-              value={urlSlug}
-              onChange={(e) => setUrlSlug(e.target.value)}
+              placeholder="Question"
+              value={faq.question}
+              onChange={(e) => handleChange(i, "question", e.target.value)}
+              className="w-full mb-2 p-2 border border-gray-300 rounded"
               required
             />
             <textarea
-              placeholder="Category Description"
-              className="w-full p-3 bg-gray-700 text-white placeholder-gray-400 rounded-lg"
-              value={categoryDescription}
-              onChange={(e) => setCategoryDescription(e.target.value)}
-              rows="4"
+              placeholder="Answer"
+              value={faq.answer}
+              onChange={(e) => handleChange(i, "answer", e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded"
+              rows="3"
+              required
             />
-            <input
-              type="file"
-              className="w-full p-3 bg-gray-700 text-white placeholder-gray-400 rounded-lg"
-              onChange={handleFileChange}
-            />
-            <input
-              type="text"
-              placeholder="Meta Title"
-              className="w-full p-3 bg-gray-700 text-white placeholder-gray-400 rounded-lg"
-              value={metaTitle}
-              onChange={(e) => setMetaTitle(e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="Meta Description"
-              className="w-full p-3 bg-gray-700 text-white placeholder-gray-400 rounded-lg"
-              value={metaDescription}
-              onChange={(e) => setMetaDescription(e.target.value)}
-            />
-            <label className="flex items-center text-gray-300">
-              <input
-                type="checkbox"
-                checked={inSitemap}
-                onChange={(e) => setInSitemap(e.target.checked)}
-                className="mr-2"
-              />
-              Include in Sitemap
-            </label>
-            <label className="flex items-center text-gray-300">
-              <input
-                type="checkbox"
-                checked={indexPage}
-                onChange={(e) => setIndexPage(e.target.checked)}
-                className="mr-2"
-              />
-              Index Page
-            </label>
-            <input
-              type="text"
-              placeholder="Custom Canonical URL"
-              className="w-full p-3 bg-gray-700 text-white placeholder-gray-400 rounded-lg"
-              value={customCanonicalUrl}
-              onChange={(e) => setCustomCanonicalUrl(e.target.value)}
-            />
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg"
-            >
-              Add Category
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
+          </motion.div>
+        ))}
 
-export default AddFaq;
+        <button
+          type="button"
+          onClick={addFaq}
+          className="text-blue-600 underline mt-2"
+        >
+          + Add another FAQ
+        </button>
+
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-all"
+        >
+          Submit FAQ
+        </button>
+      </form>
+    </motion.div>
+  );
+}

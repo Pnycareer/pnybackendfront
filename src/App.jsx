@@ -17,7 +17,6 @@ import AddCategory from "./pages/AddCate";
 import Mainspc from "./components/SP-CBlogPost/Mainspc";
 import MainspcCate from "./components/SP-C Categories/MainspcCate";
 import MainEflyer from "./components/Eflyer/MainEflyer";
-import MainFaqs from "./components/Faqs/MainFaqs";
 import AddSpecialbp from "./components/SP-CBlogPost/AddSpecialbp";
 import Mainblog from "./components/Blog/Mainblog";
 import Mainblogcat from "./components/Blog/Mainblogcat";
@@ -29,7 +28,6 @@ import EditSpecialcat from "./components/SP-C Categories/EditSpecialcat";
 import Editspecialbp from "./components/SP-C Categories/Editspecialbp";
 import EditEFlyer from "./components/Eflyer/EditEFlyer";
 import AddFaq from "./components/Faqs/AddFaq";
-import EditFaq from "./components/Faqs/Editfaq";
 import MainFaqsquestion from "./components/faqQuestions/MainFaqsquestion";
 import Editfaquestion from "./components/faqQuestions/Editfaquestion";
 import MainGallery from "./components/Gallery/MainGallery";
@@ -68,8 +66,7 @@ function App() {
           <Route path="adduser" element={<AddInstructor />} />
         </Route>
         <Route path="/users/:userId" element={<EditInstructor />} />
-        <Route path="/faqs" element={<MainFaqs />} />
-        <Route path="/editfaq/:id" element={<EditFaq />} />
+        <Route path="/faqs" element={<AddFaq />} />
         <Route path="/addfaq" element={<AddFaq />} />
         <Route path="/courses" element={<Courses />}></Route>
         <Route path="/addcourse" element={<AddCourse />} />

@@ -21,6 +21,7 @@ const EditCourse = () => {
     Duration_Day: "",
     Duration_Months: "",
     In_Sitemap: false,
+    priority: "",
     Instructor: "",
     Meta_Description: "",
     Meta_Title: "",
@@ -193,27 +194,6 @@ const EditCourse = () => {
             />
           </div>
 
-          {/* Featured Option */}
-          <div className="mb-4">
-            <label className="block text-gray-300">
-              Enable Featured Option?
-            </label>
-            <select
-              name="featured_Option"
-              value={course.featured_Option ? "yes" : "no"}
-              onChange={(e) =>
-                setCourse((prev) => ({
-                  ...prev,
-                  featured_Option: e.target.value === "yes",
-                }))
-              }
-              className="w-full p-2 rounded bg-gray-700 text-white"
-            >
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
-          </div>
-
           {/* Course Image */}
           <div className="mb-4">
             <label className="block text-gray-300">Upload Course Image</label>
@@ -240,52 +220,6 @@ const EditCourse = () => {
               onChange={handleChange}
             />
           </div>
-
-          {/* <div className="mb-4">
-            <label className="block text-gray-300">Select Course Type</label>
-            <select
-              value={courseType}
-              onChange={(e) => setCourseType(e.target.value)}
-              className="w-full p-2 rounded bg-gray-700 text-white"
-            >
-              <option value="normal">Main Courses</option>
-              <option value="city">City Courses</option>
-            </select>
-          </div> */}
-
-          {/* <div className="mb-4">
-            <label className="block text-gray-300">
-              {courseType === "city" ? "Select City" : "Course Category*"}
-            </label>
-            <select
-              name="course_Category"
-              value={course.course_Category}
-              onChange={handleChange}
-              className="w-full p-2 rounded bg-gray-700 text-white"
-            >
-              <option value="" disabled>
-                {courseType === "city"
-                  ? "Select a City"
-                  : "Select Course Category"}
-              </option>
-
-              {courseType === "city" ? (
-                <>
-                  <option value="multan">Multan</option>
-                  <option value="lahore">Lahore</option>
-                  <option value="rawalpindi">Rawalpindi</option>
-                  <option value="karachi">Karachi</option>
-                  <option value="islamabad">Islamabad</option>
-                </>
-              ) : (
-                categories.map((category) => (
-                  <option key={category._id} value={category.url_Slug}>
-                    {category.Category_Name}
-                  </option>
-                ))
-              )}
-            </select>
-          </div> */}
 
           {/* Skill Level */}
           <div className="mb-4">
@@ -471,6 +405,20 @@ const EditCourse = () => {
               onChange={(e) =>
                 setCourse({ ...course, In_Sitemap: e.target.checked })
               }
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-300">Priority</label>
+            <input
+              type="number"
+              step="0.1" // Allow decimals
+              min="0.0"
+              max="0.9"
+              name="priority"
+              value={course.priority}
+              onChange={handleChange}
+              className="w-full p-2 rounded bg-gray-700 text-white"
             />
           </div>
 
