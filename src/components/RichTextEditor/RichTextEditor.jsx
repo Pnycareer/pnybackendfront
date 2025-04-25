@@ -72,7 +72,7 @@ const RichTextEditor = ({ value, onChange, height = "300px" }) => {
   };
 
   return (
-    <div className="bg-white text-black rounded-md">
+    <div className="bg-white text-black rounded-md hover:text-white">
       <ReactQuill
         ref={quillRef}
         value={value}
