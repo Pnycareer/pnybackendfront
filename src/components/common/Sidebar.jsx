@@ -107,9 +107,15 @@ const SIDEBAR_ITEMS = [
 			{ name: "EventPost", icon:MdEventRepeat, color: "#8B5CF6", href: "/event-post" },
 		]
 	},
+	{ name: "Other", icon:MdEventNote, color: "#F59E0B", href: "#" ,
+		dropdown: [
+			{ name: "Terms & Conditions", icon: TrendingUp, color: "#3B82F6", href: "/termsandconditions"},
+			{ name: "Privacy Policy", icon: TrendingUp, color: "#3B82F6", href: "/privacypolicy"},
+		]
+	},
 	
 	{ name: "Analytics", icon: TrendingUp, color: "#3B82F6", href: "/analytics" },
-	{ name: "Terms & Conditions", icon: TrendingUp, color: "#3B82F6", href: "/termsandconditions"},
+	
 	{ name: "Settings", icon: Settings, color: "#6EE7B7", href: "/settings" },
 ];
 

@@ -55,6 +55,9 @@ import Webbanner from "./pages/Webbanner";
 import Allblogs from "./components/Blog/Allblogs.jsx";
 import Addtermsandconditions from "./pages/Termsandconditions/Addtermsandconditions.jsx";
 import Brouchuredata from "./pages/Brouchuredata/Brouchuredata.jsx";
+import Faqs from "./components/Faqs/Faqs.jsx";
+import EditFaq from "./components/Faqs/Editfaq.jsx";
+import Privacypolicy from "./pages/Privacypolicy/Privacypolicy.jsx";
 
 function App() {
   return (
@@ -66,7 +69,7 @@ function App() {
           <Route path="adduser" element={<AddInstructor />} />
         </Route>
         <Route path="/users/:userId" element={<EditInstructor />} />
-        <Route path="/faqs" element={<AddFaq />} />
+        <Route path="/addfaqs" element={<AddFaq />} />
         <Route path="/addfaq" element={<AddFaq />} />
         <Route path="/courses" element={<Courses />}></Route>
         <Route path="/addcourse" element={<AddCourse />} />
@@ -119,7 +122,11 @@ function App() {
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/web-banner" element={<Webbanner />} />
         <Route path="/termsandconditions" element={<Addtermsandconditions/>} />
+        <Route path="/privacypolicy" element={<Privacypolicy/>} />
         <Route path="/brouchuredata" element={<Brouchuredata/>} />
+        <Route path="/faqs" element={<Faqs/>} />
+        <Route path="/editfaq/:id" element={<EditFaq/>} />
+        <Route path="/course-categories" element={<AddCategory/>} />
       </Routes>
       <ToastContainer />
     </div>

@@ -2,10 +2,13 @@ import axios from "axios";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/common/Header";
-import { useEffect, useState } from "react";
-import ReactQuill from "react-quill";
+import { useEffect, useState, useRef } from "react";
+import ReactQuill from "react-quill"; // still same import
+import Quill from "quill";
 import "react-quill/dist/quill.snow.css";
 import { toast } from "react-toastify";
+import RichTextEditor from "../../components/RichTextEditor/RichTextEditor";
+
 const AddCourse = () => {
   const [categories, setCategories] = useState([]);
   const [instructors, setInstructors] = useState([]);
@@ -13,6 +16,9 @@ const AddCourse = () => {
   const [selectedBrochure, setSelectedBrochure] = useState(null); // State for brochure file
   const [courseType, setCourseType] = useState("main"); // default is "main"
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const quillRef = useRef();
+
+  // Register custom YouTube icon once
 
   const cityOptions = [
     "lahore",
@@ -25,6 +31,7 @@ const AddCourse = () => {
     "azad-Kashmir",
     "islamabad",
     "sargodha",
+    "other",
   ];
   const shortcourseOptions = [
     "short course lahore",
@@ -135,7 +142,46 @@ const AddCourse = () => {
     }
   };
 
-  console.log(categories, "addcourse");
+  const insertYouTubeVideo = () => {
+    const videoId = prompt("Enter YouTube Video ID");
+
+    if (videoId) {
+      const embedUrl = `https://www.youtube.com/embed/${videoId.trim()}`;
+      const editor = quillRef.current.getEditor();
+      const range = editor.getSelection(true);
+      editor.insertEmbed(range.index, "video", embedUrl);
+      editor.setSelection(range.index + 1);
+    }
+  };
+
+  const handleImageUpload = () => {
+    const input = document.createElement("input");
+    input.setAttribute("type", "file");
+    input.setAttribute("accept", "image/*");
+    input.click();
+
+    input.onchange = async () => {
+      const file = input.files[0];
+      const formData = new FormData();
+      formData.append("editorImage", file);
+
+      try {
+        const response = await axios.post(
+          `${import.meta.env.VITE_API_URL}/upload/upload-editor-image`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        const imageUrl = response.data.url;
+        const quill = quillRef.current.getEditor();
+        const range = quill.getSelection();
+        quill.insertEmbed(range.index, "image", imageUrl);
+      } catch (error) {
+        console.error("Image upload failed:", error);
+      }
+    };
+  };
+
   return (
     <div className="w-full overflow-y-auto">
       <Header />
@@ -515,12 +561,11 @@ const AddCourse = () => {
             <label className="block text-gray-300 mb-2">
               Course Description*
             </label>
-            <ReactQuill
+            <RichTextEditor
               value={courseDescription}
               onChange={setCourseDescription}
-              theme="snow"
-              className="bg-white text-black rounded-md"
             />
+
             {errors.courseDescription && (
               <span className="text-red-500">
                 Course Description is required
