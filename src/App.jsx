@@ -30,10 +30,7 @@ import EditEFlyer from "./components/Eflyer/EditEFlyer";
 import AddFaq from "./components/Faqs/AddFaq";
 import MainFaqsquestion from "./components/faqQuestions/MainFaqsquestion";
 import Editfaquestion from "./components/faqQuestions/Editfaquestion";
-import MainGallery from "./components/Gallery/MainGallery";
-import AddGallery from "./components/Gallery/AddGallery";
 import MainFreeTrail from "./components/freetrailquerry/MainFreeTrail";
-import EditGallery from "./components/Gallery/EditGallery";
 import MainEventcat from "./components/eventCategory/MainEventcat";
 import EditeventCat from "./components/eventCategory/EditeventCat";
 import AddEventsCategory from "./components/eventCategory/AddEventsCategory";
@@ -58,6 +55,11 @@ import Brouchuredata from "./pages/Brouchuredata/Brouchuredata.jsx";
 import Faqs from "./components/Faqs/Faqs.jsx";
 import EditFaq from "./components/Faqs/Editfaq.jsx";
 import Privacypolicy from "./pages/Privacypolicy/Privacypolicy.jsx";
+import Addnews from "./pages/News/Addnews.jsx";
+import News from "./components/News/GetNews.jsx";
+import EditNews from "./components/News/Edit.jsx";
+import Addgallery from "./pages/Gallery/Addgallery.jsx";
+import GalleryList from "./components/Gallery/Gallery.jsx";
 
 function App() {
   return (
@@ -95,9 +97,6 @@ function App() {
         <Route path="/sp-c-blog-post" element={<Mainspc />} />
         <Route path="/sp-c-blog-post/:id" element={<Editspecialbp />} />
         <Route path="/faquestion" element={<MainFaqsquestion />} />
-        <Route path="/gallery" element={<MainGallery />}></Route>
-        <Route path="/editgallery/:id" element={<EditGallery />} />
-        <Route path="/addgallery" element={<AddGallery />} />
         <Route path="/eventcat" element={<MainEventcat />} />
         <Route path="/editeventcat/:id" element={<EditeventCat />} />
         <Route path="/addevent" element={<AddEventsCategory />} />
@@ -121,12 +120,17 @@ function App() {
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/web-banner" element={<Webbanner />} />
-        <Route path="/termsandconditions" element={<Addtermsandconditions/>} />
-        <Route path="/privacypolicy" element={<Privacypolicy/>} />
-        <Route path="/brouchuredata" element={<Brouchuredata/>} />
-        <Route path="/faqs" element={<Faqs/>} />
-        <Route path="/editfaq/:id" element={<EditFaq/>} />
-        <Route path="/course-categories" element={<AddCategory/>} />
+        <Route path="/termsandconditions" element={<Addtermsandconditions />} />
+        <Route path="/privacypolicy" element={<Privacypolicy />} />
+        <Route path="/brouchuredata" element={<Brouchuredata />} />
+        <Route path="/faqs" element={<Faqs />} />
+        <Route path="/editfaq/:id" element={<EditFaq />} />
+        <Route path="/course-categories" element={<AddCategory />} />
+        <Route path="/addnews" element={<Addnews />} />
+        <Route path="/news" element={<News />} />
+        <Route path="/editnews/:id" element={<EditNews />} />
+        <Route path="/gallery" element={<GalleryList />} />
+        <Route path="/addgallery" element={<Addgallery />} />
       </Routes>
       <ToastContainer />
     </div>

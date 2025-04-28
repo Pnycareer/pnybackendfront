@@ -3,8 +3,6 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/common/Header";
 import { useEffect, useState, useRef } from "react";
-import ReactQuill from "react-quill"; // still same import
-import Quill from "quill";
 import "react-quill/dist/quill.snow.css";
 import { toast } from "react-toastify";
 import RichTextEditor from "../../components/RichTextEditor/RichTextEditor";

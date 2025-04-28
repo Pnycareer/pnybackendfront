@@ -17,7 +17,6 @@ const RichTextEditor = ({ value, onChange, height = "300px" }) => {
     }
   }, []);
 
-
   const handleImageUpload = () => {
     const input = document.createElement("input");
     input.setAttribute("type", "file");
@@ -61,6 +60,7 @@ const RichTextEditor = ({ value, onChange, height = "300px" }) => {
       container: [
         [{ header: [1, 2, 3, false] }],
         ["bold", "italic", "underline"],
+        [{ align: [] }],  // <<== ADD ALIGNMENT BUTTONS
         ["link", "image", "video", "youtube"],
         [{ list: "ordered" }, { list: "bullet" }],
       ],
@@ -71,6 +71,12 @@ const RichTextEditor = ({ value, onChange, height = "300px" }) => {
     },
   };
 
+  const formats = [
+    "header", "bold", "italic", "underline", 
+    "link", "image", "video", "list", "bullet",
+    "align" // <<== IMPORTANT: ADD align in formats
+  ];
+
   return (
     <div className="bg-white text-black rounded-md hover:text-white">
       <ReactQuill
@@ -79,6 +85,7 @@ const RichTextEditor = ({ value, onChange, height = "300px" }) => {
         onChange={onChange}
         theme="snow"
         modules={modules}
+        formats={formats}
         className="text-black"
         style={{ minHeight: height }}
       />

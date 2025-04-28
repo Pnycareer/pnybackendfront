@@ -111,6 +111,7 @@ const SIDEBAR_ITEMS = [
 		dropdown: [
 			{ name: "Terms & Conditions", icon: TrendingUp, color: "#3B82F6", href: "/termsandconditions"},
 			{ name: "Privacy Policy", icon: TrendingUp, color: "#3B82F6", href: "/privacypolicy"},
+			{ name: "News", icon: TrendingUp, color: "#3B82F6", href: "/news"},
 		]
 	},
 	

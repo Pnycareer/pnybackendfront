@@ -34,7 +34,9 @@ const EditBlog = () => {
 
   const fetchBlogData = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/blogs/${id}`);
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/blogs/${id}`
+      );
       const blog = res.data;
 
       setFormData({
@@ -104,7 +106,13 @@ const EditBlog = () => {
     Object.keys(formData).forEach((key) => {
       let fieldName = key;
       if (key === "urlSlug") {
-        fieldName = "url_slug"; // Map urlSlug -> url_slug
+        const finalSlug = formData.urlSlug
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .replace(/-+/g, "-");
+        data.append("url_slug", finalSlug);
       }
       const value = formData[key];
       if (typeof value === "string") {
@@ -113,7 +121,6 @@ const EditBlog = () => {
         data.append(fieldName, value);
       }
     });
-    
 
     if (blogImage) {
       data.append("blogImage", blogImage);
@@ -166,6 +173,8 @@ const EditBlog = () => {
             required
           />
         </div>
+
+        
 
         {/* Short Description */}
         <div className="flex flex-col">
@@ -335,7 +344,6 @@ const EditBlog = () => {
             name="blogImage"
             onChange={handleBlogImageChange}
             className="border p-2 rounded text-white"
-            
           />
         </div>
 
