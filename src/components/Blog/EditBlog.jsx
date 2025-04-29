@@ -4,6 +4,22 @@ import { useParams } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
+const categories = [
+  { label: "Technology", value: "technology" },
+  { label: "Marketing", value: "marketing" },
+  { label: "Software", value: "software" },
+  { label: "Education", value: "education" },
+  { label: "Short Courses in Islamabad", value: "short-courses-in-islamabad" },
+  {
+    label: "Short Courses in Faisalabad",
+    value: "short-courses-in-faisalabad",
+  },
+  { label: "IT Softwares", value: "it-softwares" },
+  { label: "SEO", value: "seo" },
+  { label: "Design", value: "design" },
+  { label: "Photography", value: "photography" },
+];
+
 const EditBlog = () => {
   const { id } = useParams(); // 👈 Get ID from URL
   const [formData, setFormData] = useState({
@@ -130,6 +146,9 @@ const EditBlog = () => {
       data.append("authorProfileImage", authorProfileImage);
     }
 
+    data.append("newCategory", formData.blogCategory);
+
+
     const socialLinksObject = {};
     socialLinks.forEach(({ platform, url }) => {
       if (platform && url) {
@@ -161,6 +180,24 @@ const EditBlog = () => {
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         {/* Form fields same as your Blog post form */}
 
+        <div className="flex flex-col">
+          <label className="font-semibold">Blog Category</label>
+          <select
+            name="blogCategory"
+            value={formData.blogCategory}
+            onChange={handleChange}
+            className="border p-2 rounded text-black"
+            required
+          >
+            <option value="">Select Category</option>
+            {categories.map((cat) => (
+              <option key={cat.value} value={cat.value}>
+                {cat.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Blog Name */}
         <div className="flex flex-col">
           <label className="font-semibold">Blog Name</label>
@@ -173,8 +210,6 @@ const EditBlog = () => {
             required
           />
         </div>
-
-        
 
         {/* Short Description */}
         <div className="flex flex-col">
