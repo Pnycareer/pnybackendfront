@@ -13,7 +13,7 @@ import AddBlogCate from "./pages/AddBlogCate";
 import AddBlogPost from "./pages/AddBlogPost";
 import AddFlyers from "./pages/AddFlyers";
 import AddSpcategories from "./components/SP-C Categories/AddSpcategories";
-import AddCategory from "./pages/AddCate";
+import AddCategory from "./pages/Category/AddCate.jsx";
 import Mainspc from "./components/SP-CBlogPost/Mainspc";
 import MainspcCate from "./components/SP-C Categories/MainspcCate";
 import MainEflyer from "./components/Eflyer/MainEflyer";
@@ -60,6 +60,8 @@ import News from "./components/News/GetNews.jsx";
 import EditNews from "./components/News/Edit.jsx";
 import Addgallery from "./pages/Gallery/Addgallery.jsx";
 import GalleryList from "./components/Gallery/Gallery.jsx";
+import CategoryTable from "./components/category/CategoryTable.jsx";
+import EditCategory from "./components/category/Editcategory.jsx";
 
 function App() {
   return (
@@ -125,7 +127,9 @@ function App() {
         <Route path="/brouchuredata" element={<Brouchuredata />} />
         <Route path="/faqs" element={<Faqs />} />
         <Route path="/editfaq/:id" element={<EditFaq />} />
-        <Route path="/course-categories" element={<AddCategory />} />
+        <Route path="/course-categories" element={<CategoryTable />} />
+        <Route path="/add-categories" element={<AddCategory />} />
+        <Route path="/edit-category/:id" element={<EditCategory />} />
         <Route path="/addnews" element={<Addnews />} />
         <Route path="/news" element={<News />} />
         <Route path="/editnews/:id" element={<EditNews />} />
