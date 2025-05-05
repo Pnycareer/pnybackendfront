@@ -3,6 +3,7 @@ import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
+import RichTextEditor from "../RichTextEditor/RichTextEditor";
 
 const Blog = () => {
   const [formData, setFormData] = useState({
@@ -25,7 +26,6 @@ const Blog = () => {
   const navigate = useNavigate();
   const [blogImage, setBlogImage] = useState(null);
   const [authorProfileImage, setAuthorProfileImage] = useState(null); // ✅
-  const [socialLinks, setSocialLinks] = useState([{ platform: "", url: "" }]);
   const [loading, setLoading] = useState(false);
 
   const categories = [
@@ -62,25 +62,14 @@ const Blog = () => {
     setAuthorProfileImage(e.target.files[0]);
   };
 
-  const handleSocialLinkChange = (index, field, value) => {
-    const updatedLinks = [...socialLinks];
-    updatedLinks[index][field] = value;
-    setSocialLinks(updatedLinks);
-  };
-
-  const addSocialLink = () => {
-    setSocialLinks([...socialLinks, { platform: "", url: "" }]);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true); // ✅ Start loader
 
     const data = new FormData();
 
-    // Append fields except socialLinks
+    // Append fields
     Object.keys(formData).forEach((key) => {
-      if (key === "socialLinks") return; // 👈 Skip socialLinks here
       const value = formData[key];
       if (typeof value === "string") {
         data.append(key, value.trim());
@@ -88,17 +77,6 @@ const Blog = () => {
         data.append(key, value);
       }
     });
-
-    const socialLinksObject = {};
-    socialLinks.forEach(({ platform, url }) => {
-      const key = platform.trim().toLowerCase(); // <- make it lowercase
-      const val = url.trim();
-      if (key && val) {
-        socialLinksObject[key] = val;
-      }
-    });
-
-    data.append("socialLinks", JSON.stringify(socialLinksObject));
 
     if (blogImage) {
       data.append("blogImage", blogImage);
@@ -150,7 +128,6 @@ const Blog = () => {
       });
       setBlogImage(null);
       setAuthorProfileImage(null);
-      setSocialLinks([{ platform: "", url: "" }]);
     } catch (error) {
       console.error(error);
       alert("Failed to post blog.");
@@ -221,17 +198,17 @@ const Blog = () => {
 
         {/* Blog Description */}
         <div className="flex flex-col">
-          <label className="font-semibold">Blog Description</label>
-          <ReactQuill
-            theme="snow"
+          <label className="font-semibold mb-2">Blog Description</label>
+          <RichTextEditor
             value={formData.blogDescription}
             onChange={(content) =>
               setFormData({ ...formData, blogDescription: content })
             }
-            className="bg-white text-black rounded"
+            height="300px"
           />
         </div>
 
+        
         {/* Publish Date */}
         <div className="flex flex-col">
           <label className="font-semibold">Publish Date</label>
@@ -310,50 +287,6 @@ const Blog = () => {
             className="border p-2 rounded min-h-[80px] text-black"
             required
           />
-        </div>
-
-        {/* Social Links */}
-        <div className="flex flex-col gap-2">
-          <label className="font-semibold">Social Links</label>
-
-          {socialLinks.map((link, index) => (
-            <div key={index} className="flex gap-3">
-              <select
-                value={link.platform}
-                onChange={(e) =>
-                  handleSocialLinkChange(index, "platform", e.target.value)
-                }
-                className="border p-2 rounded flex-1 text-black"
-                required
-              >
-                <option value="">Select Platform</option>
-                <option value="facebook">Facebook</option>
-                <option value="twitter">Twitter</option>
-                <option value="linkedin">LinkedIn</option>
-                <option value="instagram">Instagram</option>
-                <option value="website">Website</option>
-              </select>
-
-              <input
-                type="text"
-                placeholder="URL"
-                value={link.url}
-                onChange={(e) =>
-                  handleSocialLinkChange(index, "url", e.target.value)
-                }
-                className="border p-2 rounded flex-1 text-black"
-                required
-              />
-            </div>
-          ))}
-
-          <button
-            type="button"
-            onClick={addSocialLink}
-            className="mt-2 text-blue-600 hover:underline self-start"
-          >
-            + Add More
-          </button>
         </div>
 
         {/* Blog Image Upload */}
