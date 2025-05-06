@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { useNavigate } from "react-router-dom";
+
 
 const AddModel = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -12,6 +14,8 @@ const AddModel = () => {
     { lectureNumber: 1, title: "", content: "", topics: "" },
   ]);
   const [message, setMessage] = useState("");
+
+  const navigate = useNavigate()
 
   // Fetch categories on page load
   useEffect(() => {
@@ -90,12 +94,15 @@ const AddModel = () => {
           lectures,
         }
       );
-      setMessage("✅ Module added successfully!");
+      setMessage(res.data.message || "✅ Module added successfully!");
       setSelectedCourseId("");
       setLectures([{ lectureNumber: 1, title: "", content: "", topics: "" }]);
+      navigate('/coursemodel')
     } catch (err) {
-      console.error(err);
-      setMessage("❌ Error adding module");
+      const errorMsg =
+        err.response?.data?.message ||
+        "❌ Something went wrong. Please try again.";
+      setMessage(`❌ ${errorMsg}`);
     }
   };
 

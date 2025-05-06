@@ -105,6 +105,7 @@ const AddCourse = () => {
     formData.append("View_On_Web", data.View_On_Web);
     formData.append("In_Sitemap", data.In_Sitemap);
     formData.append("priority", data.priority);
+    formData.append("bootcamp", data.bootcamp === "true");
     formData.append("Page_Index", data.Page_Index);
     formData.append("Custom_Canonical_Url", data.Custom_Canonical_Url);
     // Append files if they exist
@@ -201,6 +202,18 @@ const AddCourse = () => {
               <option value="main">Main Course</option>
               <option value="city">City Course</option>
               <option value="short">Short Course</option>
+            </select>
+          </div>
+
+          {/* Bootcamp Field */}
+          <div className="mb-4">
+            <label className="block text-gray-400 mb-2">Is Bootcamp?*</label>
+            <select
+              {...register("bootcamp", { required: true })}
+              className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+            >
+              <option value="false">No</option>
+              <option value="true">Yes</option>
             </select>
           </div>
 

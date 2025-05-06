@@ -35,6 +35,7 @@ const EditCourse = () => {
     video_Id: "",
     course_Category: "",
     featured_Option: "",
+    bootcamp: false,
   });
   const [categories, setCategories] = useState([]);
   const [brochureFile, setBrochureFile] = useState(null);
@@ -447,6 +448,24 @@ const EditCourse = () => {
                 setCourse({ ...course, View_On_Web: e.target.checked })
               }
             />
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-300">Is Bootcamp?</label>
+            <select
+              name="bootcamp"
+              value={course.bootcamp ? "true" : "false"}
+              onChange={(e) =>
+                setCourse((prev) => ({
+                  ...prev,
+                  bootcamp: e.target.value === "true",
+                }))
+              }
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            >
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
           </div>
 
           <div className="my-2">

@@ -71,7 +71,7 @@ const AddCategory = () => {
           <label className='block text-gray-400 mb-2'>Position</label>
           <input
             type='text'
-            {...register("position", { required: "Position is required" })}
+            {...register("position",)}
             className='w-full px-4 py-2 bg-gray-700 text-white rounded-md'
             placeholder="Enter position"
           />
