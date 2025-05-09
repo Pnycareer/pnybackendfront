@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Header from "../common/Header";
 import { toast } from "react-toastify";
+import Select from "react-select";
 
 const EditInstructor = () => {
   const { userId } = useParams();
@@ -10,6 +11,8 @@ const EditInstructor = () => {
   const [instructor, setInstructor] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
   useEffect(() => {
     const fetchInstructor = async () => {
@@ -19,7 +22,15 @@ const EditInstructor = () => {
         );
         const data = response.data.data;
         setInstructor(data);
-        setImagePreview(data.photo); // Set the current image as the initial preview
+        setImagePreview(`${import.meta.env.VITE_API_URL}/${data.photo}`);
+
+        // Set the existing categories as selected
+        setSelectedCategories(
+          data.categories.map((category) => ({
+            value: category,
+            label: category,
+          }))
+        );
       } catch (error) {
         console.error(
           "Error fetching instructor:",
@@ -27,7 +38,26 @@ const EditInstructor = () => {
         );
       }
     };
+
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/v1/categories`
+        );
+
+        // Format for react-select
+        const options = response.data.map((category) => ({
+          value: category.url_Slug,
+          label: category.Category_Name,
+        }));
+        setCategories(options);
+      } catch (error) {
+        toast.error("Error fetching categories: " + error.message);
+      }
+    };
+
     fetchInstructor();
+    fetchCategories();
   }, [userId]);
 
   const handleSubmit = async (e) => {
@@ -35,9 +65,14 @@ const EditInstructor = () => {
 
     const formData = new FormData();
     formData.append("name", instructor.name);
-    formData.append("photo", selectedImage || instructor.photo); // Use new image if selected
+    formData.append("photo", selectedImage || instructor.photo);
     formData.append("other_info", instructor.other_info);
-    formData.append("in_View", instructor.in_View === "Yes");
+    formData.append("in_View", instructor.in_View);
+
+    // Append each selected category separately
+    selectedCategories.forEach((category) => {
+      formData.append("categories[]", category.value);
+    });
 
     try {
       await axios.put(
@@ -84,71 +119,98 @@ const EditInstructor = () => {
   };
 
   if (!instructor) {
-    return <p>Loading...</p>;
+    return <p className="text-black">Loading...</p>;
   }
 
   return (
     <div className="overflow-auto mx-auto w-full">
       <Header />
-      <div className="bg-gray-800 bg-opacity-50 my-6 backdrop-blur-md shadow-lg rounded-xl p-6 border mx-auto border-gray-700 w-full">
-        <h2 className="text-2xl font-semibold text-gray-100 mb-5">
+      <div className="bg-opacity-80 my-6 backdrop-blur-md shadow-lg rounded-xl p-6 border mx-auto border-gray-300 w-full">
+        <h2 className="text-2xl font-semibold text-white mb-5">
           Edit Instructor
         </h2>
         <form onSubmit={handleSubmit}>
+          {/* Instructor Name */}
           <div className="mb-4">
-            <label className="block text-gray-300">Instructor Name</label>
+            <label className="block text-white">Instructor Name</label>
             <input
               type="text"
               name="name"
               value={instructor.name || ""}
               onChange={handleInputChange}
               required
-              className="w-full p-2 rounded bg-gray-700 text-white"
+              className="w-full p-2 rounded bg-gray-100 text-black border"
             />
           </div>
 
+          {/* Category Multi-Select */}
           <div className="mb-4">
-            <label className="block text-gray-300">Upload Image</label>
+            <label className="block text-white">Categories</label>
+            <Select
+              options={categories}
+              isMulti
+              value={selectedCategories}
+              onChange={(selected) => setSelectedCategories(selected)}
+              className="w-full bg-gray-100 text-black"
+              placeholder="Select one or more categories"
+            />
+          </div>
+
+          {/* Image Upload */}
+          <div className="mb-4">
+            <label className="block text-white">Upload Image</label>
             <input
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="w-full p-2 rounded bg-gray-700 text-white"
+              className="w-full p-2 rounded bg-gray-100 text-black border"
             />
             {imagePreview && (
-              <div className="mt-4 w-20">
+              <div className="mt-4 w-32">
                 <img
                   src={imagePreview}
                   alt="Selected"
-                  className="w-full h-auto rounded-md border border-gray-600"
+                  className="w-full h-auto rounded-md border border-gray-400"
                 />
               </div>
             )}
           </div>
 
+          {/* Instructor Profile */}
           <div className="mb-4">
-            <label className="block text-gray-300">Instructor Profile</label>
+            <label className="block text-white">Instructor Profile</label>
             <textarea
               name="other_info"
               value={instructor.other_info || ""}
               onChange={handleInputChange}
-              className="w-full p-2 rounded bg-gray-700 text-white"
+              className="w-full p-2 rounded bg-gray-100 text-black border"
               placeholder="Write profile description"
               required
             />
           </div>
+
+          {/* View on Web */}
           <div className="mb-4">
-            <label className="block text-gray-300">Is View on Web?</label>
-            <select
-              name="in_View"
-              value={instructor.in_View || "No"}
-              onChange={handleInputChange}
-              className="w-full p-2 rounded bg-gray-700 text-white"
-            >
-              <option value="Yes">Yes</option>
-              <option value="No">No</option>
-            </select>
+          
+            <div className="mb-4">
+              <label className="block text-white">Is View on Web?</label>
+              <select
+                name="in_View"
+                value={instructor.in_View ? "Yes" : "No"}
+                onChange={(e) =>
+                  setInstructor((prevInstructor) => ({
+                    ...prevInstructor,
+                    in_View: e.target.value === "Yes",
+                  }))
+                }
+                className="w-full p-2 rounded bg-gray-100 text-black border"
+              >
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+            </div>
           </div>
+
           <button
             type="submit"
             className="bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded-lg"

@@ -1,36 +1,72 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Select from "react-select";
 
 const AddInstructor = () => {
   const [instructorName, setInstructorName] = useState("");
   const [instructorImage, setInstructorImage] = useState(null);
   const [profileDescription, setProfileDescription] = useState("");
   const [viewOnWeb, setViewOnWeb] = useState("No");
+  const [categories, setCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const navigate = useNavigate();
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/v1/categories`
+        );
+        // Format for react-select
+        const options = response.data.map((category) => ({
+          value: category.url_Slug,
+          label: category.Category_Name,
+        }));
+        setCategories(options);
+      } catch (error) {
+        toast.error("Error fetching categories: " + error.message);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const formData = new FormData();
     formData.append("name", instructorName);
     formData.append("photo", instructorImage);
     formData.append("other_info", profileDescription);
-    formData.append("in_View", viewOnWeb === "Yes"); // Convert to boolean
+    formData.append("in_View", viewOnWeb);
+
+    // Append each selected category as an individual entry
+    selectedCategories.forEach((category) => {
+      formData.append("categories[]", category.value);
+    });
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/instructors/add-instructor`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/instructors/add-instructor`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       console.log("Instructor Added:", response.data);
       navigate("/instructors");
-      toast.success("instructor added successfully")
+      toast.success("Instructor added successfully");
     } catch (error) {
-      toast.error("Error adding instructor:", error);
+      console.error("Error adding instructor:", error.message);
+      toast.error("Error adding instructor: " + error.message);
     }
   };
+
 
   return (
     <div className="p-6 bg-gray-800 rounded-lg shadow-md w-full mx-auto">
@@ -38,6 +74,7 @@ const AddInstructor = () => {
         Add Instructor
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Instructor Name */}
         <div className="mb-4">
           <label className="block text-gray-400 mb-2" htmlFor="instructorName">
             Instructor Name
@@ -53,6 +90,23 @@ const AddInstructor = () => {
           />
         </div>
 
+        {/* Category Multi-Select */}
+        <div className="mb-4">
+          <label className="block text-gray-400 mb-2" htmlFor="categories">
+            Categories
+          </label>
+          <Select
+            id="categories"
+            options={categories}
+            isMulti
+            value={selectedCategories}
+            onChange={(selected) => setSelectedCategories(selected)}
+            className="w-full bg-gray-700 text-black rounded-md"
+            placeholder="Select one or more categories"
+          />
+        </div>
+
+        {/* Image Upload */}
         <div className="mb-4">
           <label className="block text-gray-400 mb-2" htmlFor="instructorImage">
             Upload Image
@@ -67,8 +121,12 @@ const AddInstructor = () => {
           />
         </div>
 
+        {/* Profile Description */}
         <div className="mb-4">
-          <label className="block text-gray-400 mb-2" htmlFor="profileDescription">
+          <label
+            className="block text-gray-400 mb-2"
+            htmlFor="profileDescription"
+          >
             Instructor Profile
           </label>
           <textarea
@@ -81,21 +139,26 @@ const AddInstructor = () => {
           />
         </div>
 
+        {/* View on Web */}
         <div className="mb-4">
-          <label className="block text-gray-400 mb-2" htmlFor="viewOnWeb">
-            Is View on Web?
-          </label>
-          <select
-            id="viewOnWeb"
-            value={viewOnWeb}
-            onChange={(e) => setViewOnWeb(e.target.value)}
-            className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
-          >
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-          </select>
+          <div className="mb-4">
+            <label className="block text-gray-400 mb-2" htmlFor="viewOnWeb">
+              Is View on Web?
+            </label>
+            <select
+              id="viewOnWeb"
+              value={viewOnWeb ? "true" : "false"}
+              onChange={(e) => setViewOnWeb(e.target.value === "true")}
+              className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+            >
+              <option>--Select--</option>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
         </div>
 
+        {/* Submit Button */}
         <button
           type="submit"
           className="w-full py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition duration-200"

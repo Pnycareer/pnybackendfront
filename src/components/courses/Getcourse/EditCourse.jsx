@@ -98,29 +98,92 @@ const EditCourse = () => {
     fetchCategories();
   }, [id]);
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   const formData = new FormData();
+
+  //   for (const key in course) {
+  //     const value = course[key];
+
+  //     // 1️⃣  Course category (Object or id string)
+  //     if (key === "course_Category") {
+  //       formData.append(
+  //         key,
+  //         course.course_Category._id || course.course_Category
+  //       );
+
+  //       // 2️⃣  course_Image – only send if the user picked a *new* file
+  //     } else if (key === "course_Image") {
+  //       if (value instanceof File) formData.append(key, value);
+
+  //       // 3️⃣  Brochure – never send the old path, it will be added below if new
+  //     } else if (key === "Brochure") {
+  //       /* skip */
+  //       // 4️⃣  Everything else – send if it has a meaningful value
+  //     } else if (
+  //       value !== null &&
+  //       value !== undefined &&
+  //       value !== "" &&
+  //       !(typeof value === "object" && Object.keys(value).length === 0)
+  //     ) {
+  //       formData.append(key, value);
+  //     }
+  //   }
+
+  //   // 5️⃣  Add brochure file only when user selected a new one
+  //   if (brochureFile) formData.append("Brochure", brochureFile);
+
+  //   try {
+  //     await axios.put(
+  //       `${import.meta.env.VITE_API_URL}/courses/update/${id}`,
+  //       formData
+  //     );
+  //     toast.success("Course updated successfully!");
+  //     navigate("/courses");
+  //   } catch (err) {
+  //     console.error("Error updating course:", err);
+  //     const errorMsg =
+  //       err?.response?.data?.message || "Failed to update course";
+  //     toast.error(errorMsg);
+  //   }
+  // };
+
+  const slugify = (text) => {
+    return text
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
+      .replace(/\s+/g, "-") // Replace spaces with dash
+      .replace(/-+/g, "-"); // Replace multiple dashes with single dash
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const formData = new FormData();
-
+  
     for (const key in course) {
-      const value = course[key];
-
-      // 1️⃣  Course category (Object or id string)
+      let value = course[key];
+  
+      // ✅ Apply slugify to the url_Slug directly in the form data
+      if (key === "url_Slug" && value) {
+        value = slugify(value);
+      }
+  
+      // 1️⃣ Course category (Object or id string)
       if (key === "course_Category") {
-        formData.append(
-          key,
-          course.course_Category._id || course.course_Category
-        );
-
-        // 2️⃣  course_Image – only send if the user picked a *new* file
+        formData.append(key, value._id || value);
+  
+      // 2️⃣ course_Image – only send if the user picked a *new* file
       } else if (key === "course_Image") {
         if (value instanceof File) formData.append(key, value);
-
-        // 3️⃣  Brochure – never send the old path, it will be added below if new
+  
+      // 3️⃣ Brochure – never send the old path, it will be added below if new
       } else if (key === "Brochure") {
         /* skip */
-        // 4️⃣  Everything else – send if it has a meaningful value
+      
+      // 4️⃣ Everything else – send if it has a meaningful value
       } else if (
         value !== null &&
         value !== undefined &&
@@ -130,10 +193,10 @@ const EditCourse = () => {
         formData.append(key, value);
       }
     }
-
-    // 5️⃣  Add brochure file only when user selected a new one
+  
+    // 5️⃣ Add brochure file only when user selected a new one
     if (brochureFile) formData.append("Brochure", brochureFile);
-
+  
     try {
       await axios.put(
         `${import.meta.env.VITE_API_URL}/courses/update/${id}`,
@@ -148,7 +211,8 @@ const EditCourse = () => {
       toast.error(errorMsg);
     }
   };
-
+  
+  
   const handleCancel = () => {
     navigate("/courses");
   };
@@ -164,59 +228,12 @@ const EditCourse = () => {
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
-  const handleImageUpload = () => {
-    const input = document.createElement("input");
-    input.setAttribute("type", "file");
-    input.setAttribute("accept", "image/*");
-    input.click();
+ 
 
-    input.onchange = async () => {
-      const file = input.files[0];
-      const formData = new FormData();
-      formData.append("editorImage", file);
 
-      try {
-        const res = await axios.post(
-          `${import.meta.env.VITE_API_URL}/upload/upload-editor-image`,
-          formData
-        );
-        const imageUrl = res.data.url;
-        const editor = quillRef.current.getEditor();
-        const range = editor.getSelection();
-        editor.insertEmbed(range.index, "image", imageUrl);
-      } catch (error) {
-        console.error("Image upload failed", error);
-      }
-    };
-  };
 
-  const insertYouTubeVideo = () => {
-    const videoId = prompt("Enter YouTube video ID:");
-    if (videoId) {
-      const editor = quillRef.current.getEditor();
-      const range = editor.getSelection();
-      editor.insertEmbed(
-        range.index,
-        "video",
-        `https://www.youtube.com/embed/${videoId}`
-      );
-    }
-  };
-
-  const modules = {
-    toolbar: {
-      container: [
-        [{ header: [1, 2, 3, false] }],
-        ["bold", "italic", "underline"],
-        ["link", "image", "video", "youtube"],
-        [{ list: "ordered" }, { list: "bullet" }],
-      ],
-      handlers: {
-        image: handleImageUpload,
-        youtube: insertYouTubeVideo,
-      },
-    },
-  };
+ 
+  
 
   return (
     <div className="w-full overflow-auto">
