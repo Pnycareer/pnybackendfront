@@ -52,16 +52,16 @@ const SIDEBAR_ITEMS = [
 		color: "#10B981",
 		href: "/instructors",
 	},
-	{
-		name: "Special Blog",
-		icon: MdFolderSpecial,
-		color: "#F59E0B",
-		href: "#",
-		dropdown: [
-			{ name: "SP-C Categories", icon: MdFolderSpecial, color: "#F59E0B", href: "/sp-c-categories" },
-			{ name: "SP-C Blog Post", icon: MdFolderSpecial, color: "#F59E0B", href: "/sp-c-blog-post" }
-		]
-	},
+	// {
+	// 	name: "Special Blog",
+	// 	icon: MdFolderSpecial,
+	// 	color: "#F59E0B",
+	// 	href: "#",
+	// 	dropdown: [
+	// 		{ name: "SP-C Categories", icon: MdFolderSpecial, color: "#F59E0B", href: "/sp-c-categories" },
+	// 		{ name: "SP-C Blog Post", icon: MdFolderSpecial, color: "#F59E0B", href: "/sp-c-blog-post" }
+	// 	]
+	// },
 	{ name: "E-Flyers", icon: MdFolderSpecial, color: "#F59E0B", href: "#",
 		dropdown: [
             { name: "E-Flyers", icon: BiCategory, color: "#8B5CF6", href: "/eflayer" }
@@ -69,44 +69,44 @@ const SIDEBAR_ITEMS = [
 	 },
 	{ name: "Brouchure Data", icon: MdFolderSpecial, color: "#F59E0B", href: "/brouchuredata",
 	 },
-	 { name: "SubCategory", icon:MdCategory, color: "#F59E0B", href: "#",
-		dropdown: [
-            { name: "Subcate", icon:TbCategory, color: "#8B5CF6", href: "/subcat" }
-		]
-	 },
-	 { name: "SubCourse", icon:SiConcourse, color: "#F59E0B", href: "#",
-		dropdown: [
-            { name: "Subcourse", icon:SiConcourse, color: "#8B5CF6", href: "/maincourse" }
-		]
-	 },
+	//  { name: "SubCategory", icon:MdCategory, color: "#F59E0B", href: "#",
+	// 	dropdown: [
+    //         { name: "Subcate", icon:TbCategory, color: "#8B5CF6", href: "/subcat" }
+	// 	]
+	//  },
+	//  { name: "SubCourse", icon:SiConcourse, color: "#F59E0B", href: "#",
+	// 	dropdown: [
+    //         { name: "Subcourse", icon:SiConcourse, color: "#8B5CF6", href: "/maincourse" }
+	// 	]
+	//  },
 	{ name: "Faqs", icon: FaQq, color: "#F59E0B", href: "#" ,
 		dropdown: [
             { name: "Faqs", icon: BiCategory, color: "#8B5CF6", href: "/faqs" },
    
 		]
 	},
-	{ name: "Faquestion", icon:BsQuestion, color: "#F59E0B", href: "#" ,
-		dropdown: [
-            { name: "Faquestion", icon:FcQuestions, color: "#8B5CF6", href: "/faquestion" },
+	// { name: "Faquestion", icon:BsQuestion, color: "#F59E0B", href: "#" ,
+	// 	dropdown: [
+    //         { name: "Faquestion", icon:FcQuestions, color: "#8B5CF6", href: "/faquestion" },
    
-		]
-	},
+	// 	]
+	// },
 	{ name: "Gallery", icon:GrGallery, color: "#F59E0B", href: "#" ,
 		dropdown: [
             { name: "Gallery", icon:FcGallery, color: "#8B5CF6", href: "/gallery" },
 		]
 	},
-	{ name: "FreeTrial", icon:MdQueryStats, color: "#F59E0B", href: "#" ,
-		dropdown: [
-            { name: "FreeTrialQ", icon:MdQueryBuilder, color: "#8B5CF6", href: "/freetrail" },
-		]
-	},
-	{ name: "Event", icon:MdEventNote, color: "#F59E0B", href: "#" ,
-		dropdown: [
-            { name: "EventCat", icon:MdEvent, color: "#8B5CF6", href: "/eventcat" },
-			{ name: "EventPost", icon:MdEventRepeat, color: "#8B5CF6", href: "/event-post" },
-		]
-	},
+	// { name: "FreeTrial", icon:MdQueryStats, color: "#F59E0B", href: "#" ,
+	// 	dropdown: [
+    //         { name: "FreeTrialQ", icon:MdQueryBuilder, color: "#8B5CF6", href: "/freetrail" },
+	// 	]
+	// },
+	// { name: "Event", icon:MdEventNote, color: "#F59E0B", href: "#" ,
+	// 	dropdown: [
+    //         { name: "EventCat", icon:MdEvent, color: "#8B5CF6", href: "/eventcat" },
+	// 		{ name: "EventPost", icon:MdEventRepeat, color: "#8B5CF6", href: "/event-post" },
+	// 	]
+	// },
 	{ name: "Other", icon:MdEventNote, color: "#F59E0B", href: "#" ,
 		dropdown: [
 			{ name: "Terms & Conditions", icon: TrendingUp, color: "#3B82F6", href: "/termsandconditions"},
@@ -115,9 +115,9 @@ const SIDEBAR_ITEMS = [
 		]
 	},
 	
-	{ name: "Analytics", icon: TrendingUp, color: "#3B82F6", href: "/analytics" },
+	// { name: "Analytics", icon: TrendingUp, color: "#3B82F6", href: "/analytics" },
 	
-	{ name: "Settings", icon: Settings, color: "#6EE7B7", href: "/settings" },
+	// { name: "Settings", icon: Settings, color: "#6EE7B7", href: "/settings" },
 ];
 
 const Sidebar = () => {
