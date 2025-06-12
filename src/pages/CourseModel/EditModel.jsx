@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { motion, AnimatePresence } from "framer-motion";
+import useCourseModel from "../../hooks/useCourseModel";
 
 const EditModel = () => {
   const { id } = useParams(); // This is your featureId
@@ -11,28 +11,30 @@ const EditModel = () => {
   const [moduleData, setModuleData] = useState(null);
   const [lectures, setLectures] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [originalLectures, setOriginalLectures] = useState([]);
   const [expandedLecture, setExpandedLecture] = useState(null);
+  const {
+  getModuleById,
+  updateCourseModel,
+  deleteLectureFromModel,
+} = useCourseModel();
 
   useEffect(() => {
-    const fetchModule = async () => {
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/coursemodel/${id}`
-        );
-        setModuleData(res.data);
-        setLectures(res.data.lectures);
-        setOriginalLectures(res.data.lectures); // Store unfiltered list
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching module:", err);
-      }
-    };
+  const fetchModule = async () => {
+    try {
+      const data = await getModuleById(id);
+      setModuleData(data);
+      setLectures(data.lectures);
+      setOriginalLectures(data.lectures);
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+    }
+  };
+  fetchModule();
+}, [id]);
 
-    fetchModule();
-  }, [id]);
 
   const handleAddLecture = () => {
     // Collect used lecture numbers
@@ -68,55 +70,34 @@ const EditModel = () => {
     setLectures(updatedLectures);
   };
 
-  const handleDeleteLecture = async (lectureId) => {
-    const confirm = window.confirm(
-      "Are you sure you want to delete this lecture?"
-    );
-    if (!confirm) return;
+const handleDeleteLecture = async (lectureId) => {
+  const confirm = window.confirm("Are you sure you want to delete this lecture?");
+  if (!confirm) return;
 
-    try {
-      const res = await axios.delete(
-        `${
-          import.meta.env.VITE_API_URL
-        }/api/coursemodel/coursemodel/${id}/${lectureId}`
-      );
-      setLectures(res.data.courseFeature.lectures); // Update with new lectures list
-      setMessage("✅ Lecture deleted successfully!");
-    } catch (err) {
-      console.error(
-        "Error deleting lecture:",
-        err.response?.data || err.message
-      );
-      setMessage("❌ Failed to delete lecture");
-    }
-  };
+  try {
+    const updatedLectures = await deleteLectureFromModel(id, lectureId);
+    setLectures(updatedLectures);
+    setOriginalLectures(updatedLectures);
+  } catch (err) {
+    // toast already triggered
+  }
+};
+
 
   const handleUpdate = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    // Auto-assign lecture numbers based on index
-    // const updatedLectures = lectures.map((lecture, index) => ({
-    //   ...lecture,
-    //   lectureNumber: index + 1,
-    // }));
+  try {
+    await updateCourseModel(id, {
+      courseId: moduleData.courseId._id || moduleData.courseId,
+      lectures,
+    });
+    setTimeout(() => navigate("/coursemodel"), 1500);
+  } catch (err) {
+    // No need to set message manually, it's handled by toast
+  }
+};
 
-    const updatedLectures = lectures;
-
-    try {
-      await axios.put(`${import.meta.env.VITE_API_URL}/api/coursemodel/${id}`, {
-        courseId: moduleData.courseId._id || moduleData.courseId,
-        lectures: updatedLectures,
-      });
-      setMessage("✅ Module updated successfully!");
-      setTimeout(() => navigate("/coursemodel"), 1500);
-    } catch (err) {
-      console.error(
-        "Error updating module:",
-        err.response?.data || err.message
-      );
-      setMessage("❌ Failed to update module");
-    }
-  };
 
   if (loading)
     return <div className="text-center text-white py-10">Loading...</div>;
@@ -128,11 +109,7 @@ const EditModel = () => {
           Edit Module for: {moduleData.courseName}
         </h2>
 
-        {message && (
-          <div className="mb-4 text-center text-sm font-medium text-green-600">
-            {message}
-          </div>
-        )}
+       
 
         <div className="mb-6 max-w-xs">
           <input

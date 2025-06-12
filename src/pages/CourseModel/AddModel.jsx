@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
-
+import useCourseModel from "../../hooks/useCourseModel";
 
 const AddModel = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -14,45 +13,33 @@ const AddModel = () => {
     { lectureNumber: 1, title: "", content: "", topics: "" },
   ]);
   const [message, setMessage] = useState("");
+  const { fetchCategories, fetchCoursesByCategory,  submitCourseModel } =
+    useCourseModel();
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   // Fetch categories on page load
   useEffect(() => {
-    const fetchCategories = async () => {
+    const loadCategories = async () => {
       try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/v1/categories`
-        );
-        const data = await res.json();
+        const data = await fetchCategories();
         setCategories(data);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
+      } catch (err) {
+        console.error(err);
       }
     };
-
-    fetchCategories();
+    loadCategories();
   }, []);
 
   // Fetch courses when category is selected
   useEffect(() => {
-    const fetchCourses = async () => {
+    const loadCourses = async () => {
       if (!selectedCategory) return;
-      try {
-        const res = await axios.get(
-          `${
-            import.meta.env.VITE_API_URL
-          }/courses/getoncategory/${selectedCategory}`
-        );
-        setCourses(res.data.courses || []);
-        setSelectedCourseId("");
-      } catch (err) {
-        console.error("Error fetching courses:", err);
-        setCourses([]);
-      }
+      const courseList = await fetchCoursesByCategory(selectedCategory);
+      setCourses(courseList);
+      setSelectedCourseId("");
     };
-
-    fetchCourses();
+    loadCourses();
   }, [selectedCategory]);
 
   const handleLectureChange = (index, field, value) => {
@@ -87,17 +74,14 @@ const AddModel = () => {
     }
 
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/coursemodel`,
-        {
-          courseId: selectedCourseId,
-          lectures,
-        }
-      );
-      setMessage(res.data.message || "✅ Module added successfully!");
+      const response = await submitCourseModel({
+        courseId: selectedCourseId,
+        lectures,
+      });
+      setMessage(response.message || "✅ Module added successfully!");
       setSelectedCourseId("");
       setLectures([{ lectureNumber: 1, title: "", content: "", topics: "" }]);
-      navigate('/coursemodel')
+      navigate("/coursemodel");
     } catch (err) {
       const errorMsg =
         err.response?.data?.message ||
