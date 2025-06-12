@@ -1,11 +1,15 @@
-import axios from "axios";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { useState } from 'react';
-import { toast } from "react-toastify";
+import { useState } from "react";
+import { toast } from "react-hot-toast";
+import axios from "../../utils/axios";
 
 const AddCategory = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -14,101 +18,123 @@ const AddCategory = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/categories`, data);
+      const response = await axios.post(`/api/v1/categories`, data);
+      console.log(response, "res");
       toast.success("Category added successfully!");
-      navigate("/course-categories");
+      navigate("/dashboard/course-categories");
     } catch (error) {
-      console.error(error);
-      toast.error("Error adding category!");
+      const message =
+        error?.response?.data?.message || "An unexpected error occurred.";
+      toast.error(message);
+      console.error("Axios Error:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className='p-6 bg-gray-800 rounded-lg shadow-md w-full mx-auto'>
-      <h2 className='text-3xl font-semibold text-gray-100 mb-6 text-center'>Add Category</h2>
+    <div className="p-6 bg-gray-800 rounded-lg shadow-md w-full mx-auto">
+      <h2 className="text-3xl font-semibold text-gray-100 mb-6 text-center">
+        Add Category
+      </h2>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-
         {/* Category Name */}
         <div>
-          <label className='block text-gray-400 mb-2'>Category Name</label>
+          <label className="block text-gray-400 mb-2">Category Name</label>
           <input
-            type='text'
-            {...register("Category_Name", { required: "Category Name is required" })}
-            className='w-full px-4 py-2 bg-gray-700 text-white rounded-md'
+            type="text"
+            {...register("Category_Name", {
+              required: "Category Name is required",
+            })}
+            className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
             placeholder="Enter category name"
           />
-          {errors.Category_Name && <span className="text-red-500">{errors.Category_Name.message}</span>}
+          {errors.Category_Name && (
+            <span className="text-red-500">{errors.Category_Name.message}</span>
+          )}
         </div>
 
         {/* URL Slug */}
         <div>
-          <label className='block text-gray-400 mb-2'>URL Slug</label>
+          <label className="block text-gray-400 mb-2">URL Slug</label>
           <input
-            type='text'
+            type="text"
             {...register("url_Slug", { required: "URL Slug is required" })}
-            className='w-full px-4 py-2 bg-gray-700 text-white rounded-md'
+            className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
             placeholder="Enter URL slug"
           />
-          {errors.url_Slug && <span className="text-red-500">{errors.url_Slug.message}</span>}
+          {errors.url_Slug && (
+            <span className="text-red-500">{errors.url_Slug.message}</span>
+          )}
         </div>
 
         {/* Icon */}
         <div>
-          <label className='block text-gray-400 mb-2'>Icon</label>
+          <label className="block text-gray-400 mb-2">Icon</label>
           <input
-            type='text'
+            type="text"
             {...register("Icon", { required: "Icon is required" })}
-            className='w-full px-4 py-2 bg-gray-700 text-white rounded-md'
+            className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
             placeholder="Enter icon class"
           />
-          {errors.Icon && <span className="text-red-500">{errors.Icon.message}</span>}
+          {errors.Icon && (
+            <span className="text-red-500">{errors.Icon.message}</span>
+          )}
         </div>
 
         {/* Position */}
         <div>
-          <label className='block text-gray-400 mb-2'>Position</label>
+          <label className="block text-gray-400 mb-2">Position</label>
           <input
-            type='text'
-            {...register("position",)}
-            className='w-full px-4 py-2 bg-gray-700 text-white rounded-md'
+            type="text"
+            {...register("position")}
+            className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
             placeholder="Enter position"
           />
-          {errors.position && <span className="text-red-500">{errors.position.message}</span>}
+          {errors.position && (
+            <span className="text-red-500">{errors.position.message}</span>
+          )}
         </div>
 
         {/* View on Web */}
         <div>
-          <label className='block text-gray-400 mb-2'>View on Web</label>
-          <div className='flex space-x-4'>
-            <label className='text-gray-400'>
+          <label className="block text-gray-400 mb-2">View on Web</label>
+          <div className="flex space-x-4">
+            <label className="text-gray-400">
               <input
-                type='radio'
+                type="radio"
                 value={true}
-                {...register("viewonweb", { required: "Please select an option" })}
-                className='mr-2'
+                {...register("viewonweb", {
+                  required: "Please select an option",
+                })}
+                className="mr-2"
               />
               Yes
             </label>
-            <label className='text-gray-400'>
+            <label className="text-gray-400">
               <input
-                type='radio'
+                type="radio"
                 value={false}
-                {...register("viewonweb", { required: "Please select an option" })}
-                className='mr-2'
+                {...register("viewonweb", {
+                  required: "Please select an option",
+                })}
+                className="mr-2"
               />
               No
             </label>
           </div>
-          {errors.viewonweb && <span className="text-red-500">{errors.viewonweb.message}</span>}
+          {errors.viewonweb && (
+            <span className="text-red-500">{errors.viewonweb.message}</span>
+          )}
         </div>
 
         {/* Submit Button */}
         <button
-          type='submit'
+          type="submit"
           className={`w-full px-4 py-2 rounded-lg text-white ${
-            isSubmitting ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500'
+            isSubmitting
+              ? "bg-gray-500 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-500"
           }`}
           disabled={isSubmitting}
         >

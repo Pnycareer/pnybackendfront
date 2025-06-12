@@ -1,190 +1,44 @@
-import axios from "axios";
+
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import Header from "../../components/common/Header";
-import { useEffect, useState, useRef } from "react";
-import "react-quill/dist/quill.snow.css";
-import { toast } from "react-toastify";
+import { cityOptions, shortcourseOptions } from "../../components/Data/Data";
+import { useState} from "react";
 import RichTextEditor from "../../components/RichTextEditor/RichTextEditor";
+import useCategories from "../../hooks/useCategories";
+import useInstructors from "../../hooks/useInstructors";
+import useCourses from "../../hooks/useCourses";
 
 const AddCourse = () => {
-  const [categories, setCategories] = useState([]);
-  const [instructors, setInstructors] = useState([]);
+  const { categories } = useCategories();
+  const { instructors } = useInstructors();
+  const { addCourse } = useCourses();
   const [selectedCourseImage, setSelectedCourseImage] = useState(null); // State for course image file
   const [selectedBrochure, setSelectedBrochure] = useState(null); // State for brochure file
   const [courseType, setCourseType] = useState("main"); // default is "main"
+  const [courseDescription, setCourseDescription] = useState(""); // State for course description
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const quillRef = useRef();
-
-  // Register custom YouTube icon once
-
-  const cityOptions = [
-    "lahore",
-    "rawalpindi",
-    "karachi",
-    "multan",
-    "sialkot",
-    "faisalabad",
-    "gujranwala",
-    "azad-Kashmir",
-    "islamabad",
-    "sargodha",
-    "other",
-  ];
-  const shortcourseOptions = [
-    "short course lahore",
-    "short course rawalpindi",
-    "short course karachi",
-    "short course multan",
-    "short course sialkot",
-    "short course faisalabad",
-    "short course gujranwala",
-    "short course azad-Kashmir",
-    "short course islamabad",
-    "short course sargodha",
-  ];
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const navigate = useNavigate();
-  const [courseDescription, setCourseDescription] = useState(""); // State for course description
-  // Fetch categories
-  const fetchCategories = () => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/v1/categories`)
-      .then((response) => response.json())
-      .then((data) => setCategories(data))
-      .catch((error) => console.error("Error fetching categories:", error));
-  };
-  // Fetch instructors
-  const fetchInstructors = () => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/instructors/get-instructor`)
-      .then((response) => response.json())
-      .then((data) => setInstructors(data))
-      .catch((error) => console.error("Error fetching instructors:", error));
-  };
-  useEffect(() => {
-    fetchCategories();
-    fetchInstructors();
-  }, []);
-  const onSubmit = async (data) => {
-    setIsSubmitting(true); // start loader
-    Object.keys(data).forEach((key) => {
-      if (typeof data[key] === "string") {
-        data[key] = data[key].trim();
-      }
-    });
 
-    if (data.url_Slug) {
-      data.url_Slug = data.url_Slug
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "") // remove special characters
-        .replace(/\s+/g, "-") // replace spaces with dash
-        .replace(/-+/g, "-"); // replace multiple dashes with single dash
-    }
-    const formData = new FormData();
-    formData.append("course_Name", data.course_Name);
-    formData.append("url_Slug", data.url_Slug);
-    formData.append("video_Id", data.video_Id);
-    formData.append("course_Category", data.course_Category); // Ensure it's a valid ObjectId
-    formData.append("category_Description", data.category_Description || "");
-    formData.append("Skill_Level", data.Skill_Level);
-    formData.append("Short_Description", data.Short_Description);
-    formData.append("Course_Description", courseDescription); // From ReactQuill
-    formData.append("Instructor", data.instructor); // Ensure it's a valid ObjectId
-    formData.append("Monthly_Fee", data.Monthly_Fee);
-    formData.append("Admission_Fee", data.Admission_Fee);
-    formData.append("Duration_Months", data.Duration_Months);
-    formData.append("Duration_Day", data.Duration_Day);
-    formData.append("Meta_Title", data.Meta_Title);
-    formData.append("Meta_Description", data.Meta_Description);
-    formData.append("Status", data.Status);
-    formData.append("View_On_Web", data.View_On_Web);
-    formData.append("In_Sitemap", data.In_Sitemap);
-    formData.append("priority", data.priority);
-    formData.append("bootcamp", data.bootcamp === "true");
-    formData.append("Page_Index", data.Page_Index);
-    formData.append("Custom_Canonical_Url", data.Custom_Canonical_Url);
-    // Append files if they exist
-    if (selectedCourseImage) {
-      formData.append("course_Image", selectedCourseImage);
-    }
-    if (selectedBrochure) {
-      formData.append("Brochure", selectedBrochure);
-    }
-    // Log the FormData before sending
-    console.log("FormData Entries:");
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/courses/add-course`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      console.log("Response Data:", response.data); // Log full response
-      toast.success("Course added successfully!");
-      navigate("/courses");
-    } catch (error) {
-      console.error("Error adding course:", error.response || error.message);
-      toast.error(error.response?.data?.message || "Something went wrong!");
-    } finally {
-      setIsSubmitting(false); // stop loader
-    }
-  };
 
-  const insertYouTubeVideo = () => {
-    const videoId = prompt("Enter YouTube Video ID");
+ const onSubmit = async (data) => {
+  await addCourse({
+    data,
+    courseDescription,
+    courseImage: selectedCourseImage,
+    brochure: selectedBrochure,
+    setIsSubmitting,
+  });
+};
 
-    if (videoId) {
-      const embedUrl = `https://www.youtube.com/embed/${videoId.trim()}`;
-      const editor = quillRef.current.getEditor();
-      const range = editor.getSelection(true);
-      editor.insertEmbed(range.index, "video", embedUrl);
-      editor.setSelection(range.index + 1);
-    }
-  };
 
-  const handleImageUpload = () => {
-    const input = document.createElement("input");
-    input.setAttribute("type", "file");
-    input.setAttribute("accept", "image/*");
-    input.click();
-
-    input.onchange = async () => {
-      const file = input.files[0];
-      const formData = new FormData();
-      formData.append("editorImage", file);
-
-      try {
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/upload/upload-editor-image`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-
-        const imageUrl = response.data.url;
-        const quill = quillRef.current.getEditor();
-        const range = quill.getSelection();
-        quill.insertEmbed(range.index, "image", imageUrl);
-      } catch (error) {
-        console.error("Image upload failed:", error);
-      }
-    };
-  };
 
   return (
     <div className="w-full overflow-y-auto">
-      <Header />
-      <div className="p-6 bg-gray-800 rounded-lg shadow-md m-full mx-auto mt-10">
+      <div className="p-6 bg-gray-800 shadow-md m-full mx-auto">
         <h2 className="text-3xl font-semibold text-gray-100 mb-6 text-center">
           Add Course
         </h2>
@@ -523,7 +377,7 @@ const AddCourse = () => {
             )}
           </div>
           {/* Custom Canonical URL */}
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block text-gray-400 mb-2">
               Custom Canonical URL
             </label>
@@ -533,7 +387,7 @@ const AddCourse = () => {
               className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
               placeholder="Enter custom canonical URL"
             />
-          </div>
+          </div> */}
 
           {/* Course Image */}
           <div className="mb-4">

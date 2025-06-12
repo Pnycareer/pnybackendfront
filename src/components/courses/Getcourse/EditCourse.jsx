@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+// import axios from "axios";
 import Header from "../../common/Header";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { toast } from "react-toastify";
 import Quill from "quill";
 import RichTextEditor from "../../RichTextEditor/RichTextEditor";
+import axios from "../../../utils/axios";
+import useCourses from "../../../hooks/useCourses";
 
 const EditCourse = () => {
   const navigate = useNavigate();
@@ -43,6 +45,7 @@ const EditCourse = () => {
   const [courseType, setCourseType] = useState("normal"); // normal | city
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { updateCourse } = useCourses(); // 👈 inside component
 
   const quillRef = useRef();
 
@@ -62,6 +65,7 @@ const EditCourse = () => {
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/v1/categories`
       );
+      console.log("Fetched categories:", response.data); // 🔍 Debug this
       setCategories(response.data);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -72,7 +76,7 @@ const EditCourse = () => {
     const fetchData = async () => {
       try {
         const [courseResponse, instructorsResponse] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_URL}/courses/${id}`),
+          axios.get(`${import.meta.env.VITE_API_URL}/courses/getonid/${id}`),
           axios.get(
             `${import.meta.env.VITE_API_URL}/api/instructors/get-instructor`
           ),
@@ -98,57 +102,6 @@ const EditCourse = () => {
     fetchCategories();
   }, [id]);
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   const formData = new FormData();
-
-  //   for (const key in course) {
-  //     const value = course[key];
-
-  //     // 1️⃣  Course category (Object or id string)
-  //     if (key === "course_Category") {
-  //       formData.append(
-  //         key,
-  //         course.course_Category._id || course.course_Category
-  //       );
-
-  //       // 2️⃣  course_Image – only send if the user picked a *new* file
-  //     } else if (key === "course_Image") {
-  //       if (value instanceof File) formData.append(key, value);
-
-  //       // 3️⃣  Brochure – never send the old path, it will be added below if new
-  //     } else if (key === "Brochure") {
-  //       /* skip */
-  //       // 4️⃣  Everything else – send if it has a meaningful value
-  //     } else if (
-  //       value !== null &&
-  //       value !== undefined &&
-  //       value !== "" &&
-  //       !(typeof value === "object" && Object.keys(value).length === 0)
-  //     ) {
-  //       formData.append(key, value);
-  //     }
-  //   }
-
-  //   // 5️⃣  Add brochure file only when user selected a new one
-  //   if (brochureFile) formData.append("Brochure", brochureFile);
-
-  //   try {
-  //     await axios.put(
-  //       `${import.meta.env.VITE_API_URL}/courses/update/${id}`,
-  //       formData
-  //     );
-  //     toast.success("Course updated successfully!");
-  //     navigate("/courses");
-  //   } catch (err) {
-  //     console.error("Error updating course:", err);
-  //     const errorMsg =
-  //       err?.response?.data?.message || "Failed to update course";
-  //     toast.error(errorMsg);
-  //   }
-  // };
-
   const slugify = (text) => {
     return text
       .trim()
@@ -157,65 +110,20 @@ const EditCourse = () => {
       .replace(/\s+/g, "-") // Replace spaces with dash
       .replace(/-+/g, "-"); // Replace multiple dashes with single dash
   };
-  
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
-  
-    const formData = new FormData();
-  
-    for (const key in course) {
-      let value = course[key];
-  
-      // ✅ Apply slugify to the url_Slug directly in the form data
-      if (key === "url_Slug" && value) {
-        value = slugify(value);
-      }
-  
-      // 1️⃣ Course category (Object or id string)
-      if (key === "course_Category") {
-        formData.append(key, value._id || value);
-  
-      // 2️⃣ course_Image – only send if the user picked a *new* file
-      } else if (key === "course_Image") {
-        if (value instanceof File) formData.append(key, value);
-  
-      // 3️⃣ Brochure – never send the old path, it will be added below if new
-      } else if (key === "Brochure") {
-        /* skip */
-      
-      // 4️⃣ Everything else – send if it has a meaningful value
-      } else if (
-        value !== null &&
-        value !== undefined &&
-        value !== "" &&
-        !(typeof value === "object" && Object.keys(value).length === 0)
-      ) {
-        formData.append(key, value);
-      }
-    }
-  
-    // 5️⃣ Add brochure file only when user selected a new one
-    if (brochureFile) formData.append("Brochure", brochureFile);
-  
-    try {
-      await axios.put(
-        `${import.meta.env.VITE_API_URL}/courses/update/${id}`,
-        formData
-      );
-      toast.success("Course updated successfully!");
-      navigate("/courses");
-    } catch (err) {
-      console.error("Error updating course:", err);
-      const errorMsg =
-        err?.response?.data?.message || "Failed to update course";
-      toast.error(errorMsg);
-    }
+     e.preventDefault(); // 🔥 This is what you're missing!
+    await updateCourse({
+      id,
+      data: course,
+      brochureFile,
+      setIsSubmitting: null, // optional, or add one
+    });
   };
-  
-  
-  const handleCancel = () => {
-    navigate("/courses");
-  };
+
+  // const handleCancel = () => {
+  //   navigate("/courses");
+  // };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -228,17 +136,9 @@ const EditCourse = () => {
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
- 
-
-
-
- 
-  
-
   return (
     <div className="w-full overflow-auto">
-      <Header />
-      <div className="bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border my-10 border-gray-700 mx-auto w-full">
+      <div className="bg-gray-500 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border my-10 border-gray-700 mx-auto w-full">
         <h2 className="text-2xl font-semibold text-gray-100 mb-5">
           Edit Course
         </h2>
@@ -266,6 +166,28 @@ const EditCourse = () => {
               className="w-full p-2 rounded bg-gray-700 text-white"
             />
           </div>
+          {/* Course Category */}
+          {/* <div className="mb-4">
+            <label className="block text-gray-300">Course Category</label>
+            <select
+              name="course_Category"
+              value={course.course_Category?._id || course.course_Category}
+              onChange={(e) =>
+                setCourse((prev) => ({
+                  ...prev,
+                  course_Category: e.target.value,
+                }))
+              }
+              className="w-full p-2 rounded bg-gray-700 text-white"
+            >
+              <option value="">Select a category</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat._id}>
+                  {cat.Category_Name}
+                </option>
+              ))}
+            </select>
+          </div> */}
 
           {/* Course Image */}
           <div className="mb-4">
@@ -543,7 +465,7 @@ const EditCourse = () => {
             </button>
             <button
               type="button"
-              onClick={handleCancel}
+              // onClick={handleCancel}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 focus:outline-none"
             >
               Cancel

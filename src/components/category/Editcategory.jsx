@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
+import axios from "../../utils/axios";
 
 const EditCategory = () => {
   const { id } = useParams();
@@ -37,27 +38,27 @@ const EditCategory = () => {
     setFormData((prev) => ({ ...prev, [name]: newValue }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/categories/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
 
-      if (!res.ok) throw new Error("Update failed");
 
-      toast.success("Category updated successfully!");
-      navigate("/course-categories");
-    } catch (error) {
-      console.error("Update error:", error);
-      toast.error("Error updating category");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsSubmitting(true);
+
+  try {
+    const res = await axios.put(`/api/v1/categories/${id}`, formData);
+
+    toast.success("Category updated successfully!");
+    navigate("/dashboard/course-categories");
+  } catch (error) {
+    console.error("Update error:", error);
+    const message =
+      error?.response?.data?.message || "Error updating category";
+    toast.error(message);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   return (
     <div className="p-6 bg-gray-900 text-white rounded-lg shadow-lg w-full mx-auto">

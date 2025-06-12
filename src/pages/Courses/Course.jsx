@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Search } from "lucide-react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { toast } from "react-toastify";
+import useCourses from "../../hooks/useCourses";
+
 
 const Courses = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -14,26 +14,18 @@ const Courses = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const fetchCourses = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/courses/get-course`,
-        { withCredentials: true }
-      );
-      const grouped = response.data.data;
-      setCategoriesWithCourses(grouped);
-      setFilteredData(grouped);
-    } catch (error) {
-      console.error("Error fetching courses:", error);
-      toast.error("Failed to load courses.");
-    } finally {
-      setLoading(false);
-    }
+  const { fetchCourses, deleteCourse, updateStatus } = useCourses();
+
+  const fetchAndUpdate = async () => {
+    setLoading(true);
+    const data = await fetchCourses();
+    setCategoriesWithCourses(data);
+    setFilteredData(data);
+    setLoading(false);
   };
 
   useEffect(() => {
-    fetchCourses();
+    fetchAndUpdate();
   }, [location.pathname]);
 
   const handleSearch = (e) => {
@@ -42,7 +34,7 @@ const Courses = () => {
 
     if (!term) {
       setFilteredData(categoriesWithCourses);
-      setOpenCategories([]); // Collapse all when cleared
+      setOpenCategories([]);
       return;
     }
 
@@ -58,8 +50,6 @@ const Courses = () => {
       .filter(Boolean);
 
     setFilteredData(filtered);
-
-    // Open all matching category IDs
     const matchedIds = filtered.map((cat) => cat._id);
     setOpenCategories(matchedIds);
   };
@@ -71,37 +61,15 @@ const Courses = () => {
   };
 
   const handleDelete = async (id) => {
-    try {
-      await axios.delete(
-        `${import.meta.env.VITE_API_URL}/courses/delete/${id}`,
-        { withCredentials: true }
-      );
-      toast.success("Course deleted successfully!");
-      fetchCourses();
-    } catch (error) {
-      console.error("Error deleting course:", error);
-      toast.error("Failed to delete course.");
-    }
+    await deleteCourse(id, fetchAndUpdate);
   };
 
-  const updateStatus = async (id, currentStatus) => {
-    const newStatus = currentStatus === "Active" ? "Inactive" : "Active";
-    try {
-      await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/courses/${id}`,
-        { status: newStatus },
-        { withCredentials: true }
-      );
-      toast.success(`Status updated to ${newStatus}`);
-      fetchCourses();
-    } catch (error) {
-      console.error("Error updating status:", error);
-      toast.error("Failed to update status.");
-    }
+  const handleStatusChange = async (id, currentStatus) => {
+    await updateStatus(id, currentStatus, fetchAndUpdate);
   };
 
   const handleEdit = (courseId) => {
-    navigate(`/editcourse/${courseId}`);
+    navigate(`/dashboard/editcourse/${courseId}`);
   };
 
   const isAddCoursePage = location.pathname.includes("addcourse");
@@ -134,7 +102,7 @@ const Courses = () => {
                   size={18}
                 />
               </div>
-              <Link to="/addcourse">
+              <Link to="/dashboard/addcourse">
                 <button className="bg-blue-600 hover:bg-blue-500 text-white hidden sm:block font-semibold py-2 px-4 rounded-lg transition-all duration-300">
                   Add Courses
                 </button>
@@ -227,12 +195,7 @@ const Courses = () => {
                                   <img
                                     src={
                                       course.course_Image
-                                        ? `${
-                                            import.meta.env.VITE_API_URL
-                                          }/${course.course_Image.replace(
-                                            /\\/g,
-                                            "/"
-                                          )}`
+                                        ? `${import.meta.env.VITE_API_URL}/${course.course_Image.replace(/\\/g, "/")}`
                                         : "https://via.placeholder.com/50"
                                     }
                                     alt="Course"
@@ -248,7 +211,7 @@ const Courses = () => {
                                 <td className="py-2">
                                   <button
                                     onClick={() =>
-                                      updateStatus(course._id, course.status)
+                                      handleStatusChange(course._id, course.status)
                                     }
                                     className={`px-2 py-1 text-xs font-semibold rounded ${
                                       course.status === "Active"

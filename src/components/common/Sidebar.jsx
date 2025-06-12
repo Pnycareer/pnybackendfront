@@ -1,236 +1,295 @@
-import { BarChart2, BookAIcon, Menu, Settings, TrendingUp } from "lucide-react";
+import { BarChart2, BookAIcon, Menu, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { BiCategory } from "react-icons/bi";
 import { GiTeacher } from "react-icons/gi";
-import { MdCategory, MdEvent, MdEventNote, MdEventRepeat, MdFolderSpecial, MdQueryBuilder, MdQueryStats } from "react-icons/md";
+import { MdEventNote, MdFolderSpecial } from "react-icons/md";
 import { TbCategory, TbWriting } from "react-icons/tb";
 import { FaQq } from "react-icons/fa6";
-import { FcGallery, FcQuestions } from "react-icons/fc";
-import { BsQuestion } from "react-icons/bs";
+import { FcGallery } from "react-icons/fc";
 import { GrGallery } from "react-icons/gr";
-import { SiConcourse, SiMetrodelaciudaddemexico } from "react-icons/si";
-const SIDEBAR_ITEMS = [
-	{
-		name: "Pny Dashboard",
-		icon: BarChart2,
-		color: "#6366f1",
-		href: "/",
-	},
-	{
-		name: "Web Banner",
-		icon: BarChart2,
-		color: "#6366f1",
-		href: "/web-banner",
-	},
-	{
-		name: "Courses",
-		icon: BookAIcon,
-		color: "#EC4899",
-		href: "#",
-		dropdown: [
-			{ name: "Category", icon: BiCategory, color: "#8B5CF6", href: "/course-categories" },
-			{ name: "Courses", icon: BookAIcon, color: "#EC4899", href: "/courses" },
-			{ name: "CourseModel", icon:SiMetrodelaciudaddemexico, color: "#EC4899", href: "/coursemodel" },
-			
-		]
-	},
-	{
-		name: "Blog",
-		icon: TbWriting,
-		color: "#EC4899",
-		href: "#",
-		dropdown: [
-			{ name: "Blog Post", icon: BookAIcon, color: "#EC4899", href: "/blog-post" },
-			{ name: "All Blogs", icon: BookAIcon, color: "#EC4899", href: "/all-blogs" }
-		]
-	},
-	{
-		name: "Instructor",
-		icon: GiTeacher,
-		color: "#10B981",
-		href: "/instructors",
-	},
-	// {
-	// 	name: "Special Blog",
-	// 	icon: MdFolderSpecial,
-	// 	color: "#F59E0B",
-	// 	href: "#",
-	// 	dropdown: [
-	// 		{ name: "SP-C Categories", icon: MdFolderSpecial, color: "#F59E0B", href: "/sp-c-categories" },
-	// 		{ name: "SP-C Blog Post", icon: MdFolderSpecial, color: "#F59E0B", href: "/sp-c-blog-post" }
-	// 	]
-	// },
-	{ name: "E-Flyers", icon: MdFolderSpecial, color: "#F59E0B", href: "#",
-		dropdown: [
-            { name: "E-Flyers", icon: BiCategory, color: "#8B5CF6", href: "/eflayer" }
-		]
-	 },
-	{ name: "Brouchure Data", icon: MdFolderSpecial, color: "#F59E0B", href: "/brouchuredata",
-	 },
-	//  { name: "SubCategory", icon:MdCategory, color: "#F59E0B", href: "#",
-	// 	dropdown: [
-    //         { name: "Subcate", icon:TbCategory, color: "#8B5CF6", href: "/subcat" }
-	// 	]
-	//  },
-	//  { name: "SubCourse", icon:SiConcourse, color: "#F59E0B", href: "#",
-	// 	dropdown: [
-    //         { name: "Subcourse", icon:SiConcourse, color: "#8B5CF6", href: "/maincourse" }
-	// 	]
-	//  },
-	{ name: "Faqs", icon: FaQq, color: "#F59E0B", href: "#" ,
-		dropdown: [
-            { name: "Faqs", icon: BiCategory, color: "#8B5CF6", href: "/faqs" },
-   
-		]
-	},
-	// { name: "Faquestion", icon:BsQuestion, color: "#F59E0B", href: "#" ,
-	// 	dropdown: [
-    //         { name: "Faquestion", icon:FcQuestions, color: "#8B5CF6", href: "/faquestion" },
-   
-	// 	]
-	// },
-	{ name: "Gallery", icon:GrGallery, color: "#F59E0B", href: "#" ,
-		dropdown: [
-            { name: "Gallery", icon:FcGallery, color: "#8B5CF6", href: "/gallery" },
-		]
-	},
-	// { name: "FreeTrial", icon:MdQueryStats, color: "#F59E0B", href: "#" ,
-	// 	dropdown: [
-    //         { name: "FreeTrialQ", icon:MdQueryBuilder, color: "#8B5CF6", href: "/freetrail" },
-	// 	]
-	// },
-	// { name: "Event", icon:MdEventNote, color: "#F59E0B", href: "#" ,
-	// 	dropdown: [
-    //         { name: "EventCat", icon:MdEvent, color: "#8B5CF6", href: "/eventcat" },
-	// 		{ name: "EventPost", icon:MdEventRepeat, color: "#8B5CF6", href: "/event-post" },
-	// 	]
-	// },
-	{ name: "Other", icon:MdEventNote, color: "#F59E0B", href: "#" ,
-		dropdown: [
-			{ name: "Terms & Conditions", icon: TrendingUp, color: "#3B82F6", href: "/termsandconditions"},
-			{ name: "Privacy Policy", icon: TrendingUp, color: "#3B82F6", href: "/privacypolicy"},
-			{ name: "News", icon: TrendingUp, color: "#3B82F6", href: "/news"},
-		]
-	},
-	
-	// { name: "Analytics", icon: TrendingUp, color: "#3B82F6", href: "/analytics" },
-	
-	// { name: "Settings", icon: Settings, color: "#6EE7B7", href: "/settings" },
+import { SiMetrodelaciudaddemexico } from "react-icons/si";
+import Header from "./Header";
+import useAuth from "../../context/useAuth";
+
+const ALL_SIDEBAR_ITEMS = [
+  {
+    name: "Pny Dashboard",
+    icon: BarChart2,
+    color: "#6366f1",
+    href: "/dashboard",
+  },
+  {
+    name: "Users",
+    icon: BarChart2,
+    color: "#6366f1",
+    href: "/dashboard/users",
+  },
+  {
+    name: "Web Banner",
+    icon: BarChart2,
+    color: "#6366f1",
+    href: "/dashboard/web-banner",
+  },
+  {
+    name: "Courses",
+    icon: BookAIcon,
+    color: "#EC4899",
+    href: "#",
+    dropdown: [
+      {
+        name: "Category",
+        icon: BiCategory,
+        color: "#8B5CF6",
+        href: "/dashboard/course-categories",
+      },
+      {
+        name: "Courses",
+        icon: BookAIcon,
+        color: "#EC4899",
+        href: "/dashboard/courses",
+      },
+      {
+        name: "CourseModel",
+        icon: SiMetrodelaciudaddemexico,
+        color: "#EC4899",
+        href: "/dashboard/coursemodel",
+      },
+    ],
+  },
+  {
+    name: "Blog",
+    icon: TbWriting,
+    color: "#EC4899",
+    href: "#",
+    dropdown: [
+      {
+        name: "Blog Post",
+        icon: BookAIcon,
+        color: "#EC4899",
+        href: "/dashboard/blog-post",
+      },
+      {
+        name: "All Blogs",
+        icon: BookAIcon,
+        color: "#EC4899",
+        href: "/dashboard/all-blogs",
+      },
+    ],
+  },
+  {
+    name: "Instructor",
+    icon: GiTeacher,
+    color: "#10B981",
+    href: "/dashboard/instructors",
+  },
+  {
+    name: "E-Flyers",
+    icon: MdFolderSpecial,
+    color: "#F59E0B",
+    href: "#",
+    dropdown: [
+      {
+        name: "E-Flyers",
+        icon: BiCategory,
+        color: "#8B5CF6",
+        href: "/eflayer",
+      },
+    ],
+  },
+  {
+    name: "Brouchure Data",
+    icon: MdFolderSpecial,
+    color: "#F59E0B",
+    href: "/brouchuredata",
+  },
+  {
+    name: "Faqs",
+    icon: FaQq,
+    color: "#F59E0B",
+    href: "#",
+    dropdown: [
+      {
+        name: "Faqs",
+        icon: BiCategory,
+        color: "#8B5CF6",
+        href: "/faqs",
+      },
+    ],
+  },
+  {
+    name: "Gallery",
+    icon: GrGallery,
+    color: "#F59E0B",
+    href: "#",
+    dropdown: [
+      {
+        name: "Gallery",
+        icon: FcGallery,
+        color: "#8B5CF6",
+        href: "/gallery",
+      },
+    ],
+  },
+  {
+    name: "Other",
+    icon: MdEventNote,
+    color: "#F59E0B",
+    href: "#",
+    dropdown: [
+      {
+        name: "Terms & Conditions",
+        icon: TrendingUp,
+        color: "#3B82F6",
+        href: "/termsandconditions",
+      },
+      {
+        name: "Privacy Policy",
+        icon: TrendingUp,
+        color: "#3B82F6",
+        href: "/privacypolicy",
+      },
+      {
+        name: "News",
+        icon: TrendingUp,
+        color: "#3B82F6",
+        href: "/news",
+      },
+    ],
+  },
 ];
 
 const Sidebar = () => {
-	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-	const [openDropdown, setOpenDropdown] = useState(null); // Manage open dropdown
+  const { user } = useAuth();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [openDropdown, setOpenDropdown] = useState(null);
 
-	const toggleDropdown = (name) => {
-		if (openDropdown === name) {
-			setOpenDropdown(null); // Close if it's already open
-		} else {
-			setOpenDropdown(name); // Open selected dropdown
-		}
-	};
+  const toggleDropdown = (name) => {
+    setOpenDropdown((prev) => (prev === name ? null : name));
+  };
 
-	return (
-		<motion.div
-			className={`relative z-10 transition-all duration-300 ease-in-out flex-shrink-0 ${isSidebarOpen ? "w-64" : "w-20"}`}
-			animate={{ width: isSidebarOpen ? 256 : 80 }}
-		>
-			<div className='h-full bg-gray-800 bg-opacity-50 backdrop-blur-md p-4 flex flex-col border-r border-gray-700 overflow-y-auto'>
-				<motion.button
-					whileHover={{ scale: 1.1 }}
-					whileTap={{ scale: 0.9 }}
-					onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-					className='p-2 rounded-full hover:bg-gray-700 transition-colors max-w-fit'
-				>
-					<Menu size={24} />
-				</motion.button>
+  // 🧠 Filter sidebar items by role
+  const sidebarItems = ALL_SIDEBAR_ITEMS.filter((item) => {
+    if (user?.role === "csr") {
+      return item.name === "Brouchure Data";
+    }
 
-				<nav className='mt-8 flex-grow'>
-					{SIDEBAR_ITEMS.map((item) => (
-						<div key={item.name}>
-							{/* Dropdown logic */}
-							{item.dropdown ? (
-								<div>
-									<motion.div
-										onClick={() => toggleDropdown(item.name)}
-										className='flex items-center p-4 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors mb-2 cursor-pointer'
-									>
-										<item.icon size={20} style={{ color: item.color, minWidth: "20px" }} />
-										<AnimatePresence>
-											{isSidebarOpen && (
-												<motion.span
-													className='ml-4 whitespace-nowrap'
-													initial={{ opacity: 0, width: 0 }}
-													animate={{ opacity: 1, width: "auto" }}
-													exit={{ opacity: 0, width: 0 }}
-													transition={{ duration: 0.2, delay: 0.3 }}
-												>
-													{item.name}
-												</motion.span>
-											)}
-										</AnimatePresence>
-									</motion.div>
-									{/* Render dropdown items */}
-									<AnimatePresence>
-										{openDropdown === item.name && (
-											<motion.div
-												initial={{ opacity: 0, height: 0 }}
-												animate={{ opacity: 1, height: "auto" }}
-												exit={{ opacity: 0, height: 0 }}
-												className='pl-8 space-y-2'
-											>
-												{item.dropdown.map((subItem) => (
-													<Link key={subItem.href} to={subItem.href}>
-														<motion.div className='flex items-center p-2 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors'>
-															<subItem.icon size={16} style={{ color: subItem.color }} />
-															<AnimatePresence>
-																{isSidebarOpen && (
-																	<motion.span
-																		className='ml-2 whitespace-nowrap'
-																		initial={{ opacity: 0, width: 0 }}
-																		animate={{ opacity: 1, width: "auto" }}
-																		exit={{ opacity: 0, width: 0 }}
-																		transition={{ duration: 0.2, delay: 0.3 }}
-																	>
-																		{subItem.name}
-																	</motion.span>
-																)}
-															</AnimatePresence>
-														</motion.div>
-													</Link>
-												))}
-											</motion.div>
-										)}
-									</AnimatePresence>
-								</div>
-							) : (
-								<Link to={item.href}>
-									<motion.div className='flex items-center p-4 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors mb-2'>
-										<item.icon size={20} style={{ color: item.color, minWidth: "20px" }} />
-										<AnimatePresence>
-											{isSidebarOpen && (
-												<motion.span
-													className='ml-4 whitespace-nowrap'
-													initial={{ opacity: 0, width: 0 }}
-													animate={{ opacity: 1, width: "auto" }}
-													exit={{ opacity: 0, width: 0 }}
-													transition={{ duration: 0.2, delay: 0.3 }}
-												>
-													{item.name}
-												</motion.span>
-											)}
-										</AnimatePresence>
-									</motion.div>
-								</Link>
-							)}
-						</div>
-					))}
-				</nav>
-			</div>
-		</motion.div>
-	);
+    if (item.name === "Users" && user?.role !== "superadmin") {
+      return false; // hide 'Users' unless superadmin
+    }
+
+    return true; // show everything else
+  });
+
+  return (
+    <div className="flex h-screen">
+      <motion.div
+        className={`relative z-10 transition-all duration-300 ease-in-out flex-shrink-0 bg-black text-white ${
+          isSidebarOpen ? "w-64" : "w-20"
+        }`}
+        animate={{ width: isSidebarOpen ? 256 : 80 }}
+      >
+        <div className="h-full bg-gray-800 bg-opacity-50 backdrop-blur-md p-4 flex flex-col border-r border-gray-700 overflow-y-auto">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="p-2 rounded-full hover:bg-gray-700 transition-colors max-w-fit"
+          >
+            <Menu size={24} />
+          </motion.button>
+
+          <nav className="mt-8 flex-grow">
+            {sidebarItems.map((item) => (
+              <div key={item.name}>
+                {item.dropdown ? (
+                  <div>
+                    <motion.div
+                      onClick={() => toggleDropdown(item.name)}
+                      className="flex items-center p-4 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors mb-2 cursor-pointer"
+                    >
+                      <item.icon
+                        size={20}
+                        style={{ color: item.color, minWidth: "20px" }}
+                      />
+                      {isSidebarOpen && (
+                        <motion.span
+                          className="ml-4 whitespace-nowrap"
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: "auto" }}
+                          exit={{ opacity: 0, width: 0 }}
+                          transition={{ duration: 0.2, delay: 0.3 }}
+                        >
+                          {item.name}
+                        </motion.span>
+                      )}
+                    </motion.div>
+                    {openDropdown === item.name && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="pl-8 space-y-2"
+                      >
+                        {item.dropdown.map((subItem) => (
+                          <Link key={subItem.href} to={subItem.href}>
+                            <motion.div className="flex items-center p-2 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors">
+                              <subItem.icon
+                                size={16}
+                                style={{ color: subItem.color }}
+                              />
+                              {isSidebarOpen && (
+                                <motion.span
+                                  className="ml-2 whitespace-nowrap"
+                                  initial={{ opacity: 0, width: 0 }}
+                                  animate={{ opacity: 1, width: "auto" }}
+                                  exit={{ opacity: 0, width: 0 }}
+                                  transition={{ duration: 0.2, delay: 0.3 }}
+                                >
+                                  {subItem.name}
+                                </motion.span>
+                              )}
+                            </motion.div>
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </div>
+                ) : (
+                  <Link to={item.href}>
+                    <motion.div className="flex items-center p-4 text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors mb-2">
+                      <item.icon
+                        size={20}
+                        style={{ color: item.color, minWidth: "20px" }}
+                      />
+                      {isSidebarOpen && (
+                        <motion.span
+                          className="ml-4 whitespace-nowrap"
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: "auto" }}
+                          exit={{ opacity: 0, width: 0 }}
+                          transition={{ duration: 0.2, delay: 0.3 }}
+                        >
+                          {item.name}
+                        </motion.span>
+                      )}
+                    </motion.div>
+                  </Link>
+                )}
+              </div>
+            ))}
+          </nav>
+        </div>
+      </motion.div>
+
+      {/* RIGHT CONTENT */}
+      <div className="flex-1 overflow-y-auto bg-gray-300">
+        <Header />
+        <Outlet />
+      </div>
+    </div>
+  );
 };
 
 export default Sidebar;
