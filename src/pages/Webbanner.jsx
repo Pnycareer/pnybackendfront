@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios from "../utils/axios";
+import toast from "react-hot-toast";
 
 const Webbanner = () => {
   const [banner, setBanner] = useState(null);
@@ -30,65 +31,89 @@ const Webbanner = () => {
   };
 
   // Upload New Banner
-  const uploadBanner = async () => {
-    if (!selectedFile) {
-      alert("Please select an image!");
-      return;
-    }
+ const uploadBanner = async () => {
+  if (!selectedFile) {
+    toast.error("Please select an image!");
+    return;
+  }
 
-    const formData = new FormData();
-    formData.append("webbanner", selectedFile);
+  const formData = new FormData();
+  formData.append("webbanner", selectedFile);
 
-    try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/webbanner/upload`, formData, {
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_URL}/api/v1/webbanner/upload`,
+      formData,
+      {
         headers: { "Content-Type": "multipart/form-data" },
-      });
-      setBanner(response.data.banner);
-      alert("Banner uploaded successfully!");
-    } catch (error) {
-      console.error("Upload Error:", error);
-      alert("Error uploading banner!");
-    }
-  };
+      }
+    );
+
+    setBanner(response.data.banner);
+    const message = response.data?.message || "Banner uploaded successfully!";
+    toast.success(message);
+  } catch (error) {
+    console.error("Upload Error:", error);
+    const message =
+      error.response?.data?.message || "Failed to upload banner!";
+    toast.error(message);
+  }
+};
 
   // Update Existing Banner
-  const updateBanner = async () => {
-    if (!banner || !banner._id || !selectedFile) {
-      alert("Please upload a new image to update!");
-      return;
-    }
+const updateBanner = async () => {
+  if (!banner || !banner._id || !selectedFile) {
+    toast.error("Please upload a new image to update!");
+    return;
+  }
 
-    const formData = new FormData();
-    formData.append("webbanner", selectedFile);
+  const formData = new FormData();
+  formData.append("webbanner", selectedFile);
 
-    try {
-      const response = await axios.put(`${import.meta.env.VITE_API_URL}/api/v1/webbanner/update/${banner._id}`, formData, {
+  try {
+    const response = await axios.put(
+      `${import.meta.env.VITE_API_URL}/api/v1/webbanner/update/${banner._id}`,
+      formData,
+      {
         headers: { "Content-Type": "multipart/form-data" },
-      });
-      setBanner(response.data.banner);
-      alert("Banner updated successfully!");
-    } catch (error) {
-      console.error("Update Error:", error);
-      alert("Error updating banner!");
-    }
-  };
+      }
+    );
 
+    setBanner(response.data.banner);
+    const message = response.data?.message || "Banner updated successfully!";
+    toast.success(message);
+  } catch (error) {
+    console.error("Update Error:", error);
+    const message =
+      error.response?.data?.message || "Failed to update banner!";
+    toast.error(message);
+  }
+};
   // Delete Banner
-  const deleteBanner = async () => {
-    if (!banner || !banner._id) {
-      alert("No banner to delete!");
-      return;
-    }
 
-    try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/v1/webbanner/${banner._id}`);
-      setBanner(null);
-      alert("Banner deleted successfully!");
-    } catch (error) {
-      console.error("Delete Error:", error);
-      alert("Error deleting banner!");
-    }
-  };
+
+const deleteBanner = async () => {
+  if (!banner || !banner._id) {
+    toast.error("No banner to delete!");
+    return;
+  }
+
+  try {
+    const res = await axios.delete(
+      `${import.meta.env.VITE_API_URL}/api/v1/webbanner/${banner._id}`
+    );
+
+    setBanner(null);
+    const message = res.data?.message || "Banner deleted successfully!";
+    toast.success(message);
+  } catch (error) {
+    console.error("Delete Error:", error);
+    const message =
+      error.response?.data?.message || "Failed to delete banner!";
+    toast.error(message);
+  }
+};
+
 
   return (
     <div className="max-w-4xl mx-auto my-10 p-6 shadow-lg rounded-xl">

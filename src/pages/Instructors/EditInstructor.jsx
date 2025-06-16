@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
 import Header from "../../components/common/Header";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 import Select from "react-select";
+import axios from "../../utils/axios";
 
 const EditInstructor = () => {
   const { id } = useParams();
@@ -18,7 +18,7 @@ const EditInstructor = () => {
     const fetchInstructor = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/instructors/${id}`
+          `/api/instructors/${id}`
         );
         const data = response.data.data;
         setInstructor(data);
@@ -42,7 +42,7 @@ const EditInstructor = () => {
     const fetchCategories = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/v1/categories`
+          `/api/v1/categories`
         );
 
         // Format for react-select
@@ -61,42 +61,44 @@ const EditInstructor = () => {
   }, [id]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("name", instructor.name);
-    formData.append("photo", selectedImage || instructor.photo);
-    formData.append("other_info", instructor.other_info);
-    formData.append("in_View", instructor.in_View);
+  const formData = new FormData();
+  formData.append("name", instructor.name);
+  formData.append("photo", selectedImage || instructor.photo);
+  formData.append("other_info", instructor.other_info);
+  formData.append("in_View", instructor.in_View);
 
-    // Append each selected category separately
-    selectedCategories.forEach((category) => {
-      formData.append("categories[]", category.value);
-    });
+  selectedCategories.forEach((category) => {
+    formData.append("categories[]", category.value);
+  });
 
-    try {
-      await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/instructors/${id}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      toast.success("Instructor updated successfully!");
-      navigate("/instructors");
-    } catch (error) {
-      console.error(
-        "Error updating instructor:",
-        error.response ? error.response.data : error.message
-      );
-      toast.error(
-        "Failed to update instructor. Reason: " +
-          (error.response?.data?.message || error.message)
-      );
-    }
-  };
+  try {
+    const response = await axios.put(
+      `/api/instructors/${id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    // Show success toast with backend message
+    toast.success(response.data.message || "Instructor updated successfully!");
+    navigate("/dashboard/instructors");
+  } catch (error) {
+    console.error(
+      "Error updating instructor:",
+      error.response ? error.response.data : error.message
+    );
+
+    // Show error toast with backend message
+    toast.error(
+        (error.response?.data?.message || error.message)
+    );
+  }
+};
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
+import { toast } from "react-hot-toast";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../../utils/axios";
 
 const Instructors = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,7 +17,7 @@ const Instructors = () => {
     const fetchInstructors = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/instructors/get-instructor`
+          `/api/instructors/get-instructor`
         );
         setUsers(response.data);
         setFilteredUsers(response.data);
@@ -42,15 +43,25 @@ const Instructors = () => {
   };
 
   const handleDelete = async (id) => {
-    try {
-      await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/instructors/${id}`
-      );
-      setFilteredUsers(filteredUsers.filter((user) => user._id !== id));
-    } catch (error) {
-      console.error("Failed to delete user", error);
-    }
-  };
+  const confirmDelete = window.confirm("Are you sure you want to delete this instructor?");
+  if (!confirmDelete) return;
+
+  try {
+    const response = await axios.delete(`/api/instructors/${id}`);
+    
+    // Update UI
+    setFilteredUsers(filteredUsers.filter((user) => user._id !== id));
+
+    // Show success toast with backend message
+    toast.success(response.data.message || "Instructor deleted successfully");
+  } catch (error) {
+    console.error("Failed to delete user", error);
+
+    // Show error toast with backend message if available
+    toast.error(error.response?.data?.message || "Failed to delete instructor");
+  }
+};
+
 
   const handleEditClick = (userId) => {
     navigate(`/dashboard/editinstructors/${userId}`);

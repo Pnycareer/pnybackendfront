@@ -1,6 +1,5 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import axios from "../../utils/axios";
 
 const Eflayer = () => {
   const [formData, setFormData] = useState({
@@ -15,21 +14,21 @@ const Eflayer = () => {
   const [message, setMessage] = useState("");
 
   // Fetch categories on page load
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/api/v1/categories`
-        );
-        const data = await res.json();
-        setCategories(data);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
+useEffect(() => {
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(
+        `/api/v1/categories`
+      );
 
-    fetchCategories();
-  }, []);
+      setCategories(response.data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  fetchCategories();
+}, []);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;

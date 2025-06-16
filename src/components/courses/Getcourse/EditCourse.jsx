@@ -21,7 +21,7 @@ const EditCourse = () => {
     Admission_Fee: "",
     Brochure: "",
     Course_Description: "",
-    Custom_Canonical_Url: "",
+    // Custom_Canonical_Url: "",
     Duration_Day: "",
     Duration_Months: "",
     In_Sitemap: false,
@@ -445,7 +445,7 @@ const EditCourse = () => {
             />
           </div>
 
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block text-gray-300">Custom_Canonical_Url</label>
             <input
               type="text"
@@ -454,7 +454,7 @@ const EditCourse = () => {
               onChange={handleChange}
               className="w-full p-2 rounded bg-gray-700 text-white"
             />
-          </div>
+          </div> */}
 
           <div className="flex justify-between">
             <button

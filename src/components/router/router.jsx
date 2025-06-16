@@ -13,23 +13,20 @@ const EditCategory = lazy(() => import("../category/Editcategory"));
 const Courses = lazy(() => import("../../pages/Courses/Course"));
 const AddCourse = lazy(() => import("../../pages/Courses/AddCourse"));
 const EditCourse = lazy(() => import("../courses/Getcourse/EditCourse"));
-const CourseModulesTable = lazy(() =>
-  import("../../pages/CourseModel/ModelCourse")
-);
+const CourseModulesTable = lazy(() =>import("../../pages/CourseModel/ModelCourse"));
 const EditModel = lazy(() => import("../../pages/CourseModel/EditModel"));
 const AddModel = lazy(() => import("../../pages/CourseModel/AddModel"));
 const Allblogs = lazy(() => import("../../pages/Blog/Allblogs"));
 const Blog = lazy(() => import("../../pages/Blog/Blog"));
 const EditBlog = lazy(() => import("../../pages/Blog/EditBlog"));
 const Instructors = lazy(() => import("../../pages/Instructors/Instructors"));
-const Addinstructors = lazy(() =>
-  import("../../pages/Instructors/AddInstructor")
-);
-const EditInstructor = lazy(() =>
-  import("../../pages/Instructors/EditInstructor")
-);
+const Addinstructors = lazy(() =>import("../../pages/Instructors/AddInstructor"));
+const EditInstructor = lazy(() =>import("../../pages/Instructors/EditInstructor"));
 const Register = lazy(() => import("../../pages/Auth/Register"));
 const Users = lazy(() => import("../../pages/Users/Allusers"));
+const Geteflayer = lazy(() => import("../../pages/Eflyer/GetEflyers"));
+const posteflayer = lazy(() => import("../../pages/Eflyer/Eflayer"));
+const editeflayer = lazy(() => import("../../pages/Eflyer/EditEflyers"));
 
 // Wrapper for Suspense
 const withSuspense = (Component) => (
@@ -52,8 +49,7 @@ const router = createBrowserRouter([
 
   // Dashboard-Routes
   {
-    path: "/dashboard",
-    element: (
+    path: "/dashboard", element: (
       <PrivateRoute>
         <Sidebar />
       </PrivateRoute>
@@ -113,6 +109,11 @@ const router = createBrowserRouter([
       { path: "instructors", element: withSuspense(Instructors) },
       { path: "addinstructors", element: withSuspense(Addinstructors) },
       { path: "editinstructors/:id", element: withSuspense(EditInstructor) },
+
+      // E-flyers
+      { path: "eflayer", element: withSuspense(Geteflayer) },
+      { path: "add-eflayer", element: withSuspense(posteflayer) },
+      { path: "edit-eflayer/:id", element: withSuspense(editeflayer) },
     ],
   },
 ]);

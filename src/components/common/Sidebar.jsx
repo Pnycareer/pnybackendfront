@@ -94,7 +94,7 @@ const ALL_SIDEBAR_ITEMS = [
         name: "E-Flyers",
         icon: BiCategory,
         color: "#8B5CF6",
-        href: "/eflayer",
+        href: "/dashboard/eflayer",
       },
     ],
   },

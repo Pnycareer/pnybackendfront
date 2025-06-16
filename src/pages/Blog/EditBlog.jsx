@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import toast from "react-hot-toast";
+import axios from "../../utils/axios";
 
 const categories = [
   { label: "Technology", value: "technology" },
@@ -43,6 +44,7 @@ const EditBlog = () => {
   const [blogImage, setBlogImage] = useState(null);
   const [authorProfileImage, setAuthorProfileImage] = useState(null);
   const [socialLinks, setSocialLinks] = useState([{ platform: "", url: "" }]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchBlogData();
@@ -114,64 +116,67 @@ const EditBlog = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const data = new FormData();
+  const data = new FormData();
 
-    // Append all fields
-    Object.keys(formData).forEach((key) => {
-      let fieldName = key;
-      if (key === "urlSlug") {
-        const finalSlug = formData.urlSlug
-          .trim()
-          .toLowerCase()
-          .replace(/[^a-z0-9\s-]/g, "")
-          .replace(/\s+/g, "-")
-          .replace(/-+/g, "-");
-        data.append("url_slug", finalSlug);
-      }
-      const value = formData[key];
-      if (typeof value === "string") {
-        data.append(fieldName, value.trim());
-      } else {
-        data.append(fieldName, value);
-      }
-    });
+  // Append all fields
+  Object.keys(formData).forEach((key) => {
+    let fieldName = key;
+    const value = formData[key];
 
-    if (blogImage) {
-      data.append("blogImage", blogImage);
+    if (key === "urlSlug") {
+      const finalSlug = value
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-");
+      data.append("url_slug", finalSlug);
+    } else if (typeof value === "string") {
+      data.append(fieldName, value.trim());
+    } else {
+      data.append(fieldName, value);
     }
+  });
 
-    if (authorProfileImage) {
-      data.append("authorProfileImage", authorProfileImage);
+  if (blogImage) {
+    data.append("blogImage", blogImage);
+  }
+
+  if (authorProfileImage) {
+    data.append("authorProfileImage", authorProfileImage);
+  }
+
+  data.append("newCategory", formData.blogCategory);
+
+  const socialLinksObject = {};
+  socialLinks.forEach(({ platform, url }) => {
+    if (platform && url) {
+      socialLinksObject[platform.trim()] = url.trim();
     }
+  });
+  data.append("socialLinks", JSON.stringify(socialLinksObject));
 
-    data.append("newCategory", formData.blogCategory);
-
-
-    const socialLinksObject = {};
-    socialLinks.forEach(({ platform, url }) => {
-      if (platform && url) {
-        socialLinksObject[platform.trim()] = url.trim();
+  try {
+    const res = await axios.put(
+      `${import.meta.env.VITE_API_URL}/api/blogs/${id}`,
+      data,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
       }
-    });
-    data.append("socialLinks", JSON.stringify(socialLinksObject));
+    );
 
-    try {
-      const res = await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/blogs/${id}`,
-        data,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+    toast.success(res.data?.message || "Blog updated successfully!");
+    navigate("/dashboard/all-blogs");
+  } catch (error) {
+    console.error("Failed to update blog:", error);
+    const message =
+      error.response?.data?.message || "Something went wrong while updating the blog.";
+    toast.error(message);
+  }
+};
 
-      alert("Blog updated successfully!");
-    } catch (error) {
-      console.error("Failed to update blog:", error);
-      alert("Failed to update blog!");
-    }
-  };
 
   return (
     <div className="w-full mx-auto p-6 overflow-y-auto min-h-screen">
@@ -339,7 +344,6 @@ const EditBlog = () => {
                   handleSocialLinkChange(index, "platform", e.target.value)
                 }
                 className="border p-2 rounded flex-1 text-black"
-                required
               >
                 <option value="">Select Platform</option>
                 <option value="facebook">Facebook</option>
@@ -357,7 +361,6 @@ const EditBlog = () => {
                   handleSocialLinkChange(index, "url", e.target.value)
                 }
                 className="border p-2 rounded flex-1 text-black"
-                required
               />
             </div>
           ))}

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
 import RichTextEditor from "../../components/RichTextEditor/RichTextEditor";
+import axios from "../../utils/axios";
+import toast from "react-hot-toast";
 
 const Blog = () => {
   const [formData, setFormData] = useState({
@@ -63,76 +64,80 @@ const Blog = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true); // ✅ Start loader
+  e.preventDefault();
+  setLoading(true);
 
-    const data = new FormData();
+  const data = new FormData();
 
-    // Append fields
-    Object.keys(formData).forEach((key) => {
-      const value = formData[key];
-      if (typeof value === "string") {
-        data.append(key, value.trim());
-      } else {
-        data.append(key, value);
+  // Append all form fields
+  Object.keys(formData).forEach((key) => {
+    const value = formData[key];
+    if (typeof value === "string") {
+      data.append(key, value.trim());
+    } else {
+      data.append(key, value);
+    }
+  });
+
+  if (blogImage) {
+    data.append("blogImage", blogImage);
+  }
+
+  if (authorProfileImage) {
+    data.append("authorProfileImage", authorProfileImage);
+  }
+
+  // Slug generation
+  const finalSlug = formData.urlSlug
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+  data.append("url_slug", finalSlug);
+
+  try {
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_URL}/api/blogs`,
+      data,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       }
+    );
+
+    const message = res.data?.message || "Blog posted successfully!";
+    setLoading(false);
+    toast.success(message);
+    navigate("/dashboard/all-blogs");
+
+    // Reset form
+    setFormData({
+      blogName: "",
+      shortDescription: "",
+      blogCategory: "",
+      blogDescription: "",
+      publishDate: "",
+      authorName: "",
+      authorBio: "",
+      tags: "",
+      metaTitle: "",
+      urlSlug: "",
+      metaDescription: "",
+      canonical: "",
     });
+    setBlogImage(null);
+    setAuthorProfileImage(null);
+  } catch (error) {
+    console.error(error);
+    const message =
+      error.response?.data?.message || "Something went wrong while posting the blog.";
+    setLoading(false);
+    toast.error(message);
+  }
+};
 
-    if (blogImage) {
-      data.append("blogImage", blogImage);
-    }
-    const finalSlug = formData.urlSlug
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
-
-    data.append("url_slug", finalSlug);
-
-    // data.append("url_slug", formData.urlSlug.trim());
-
-    if (authorProfileImage) {
-      data.append("authorProfileImage", authorProfileImage);
-    }
-
-    try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/blogs`,
-        data,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      setLoading(false); // ✅ Stop loader
-      alert("Blog posted successfully!");
-      navigate("/all-blogs");
-
-      // Reset form
-      setFormData({
-        blogName: "",
-        shortDescription: "",
-        blogCategory: "",
-        blogDescription: "",
-        publishDate: "",
-        authorName: "",
-        authorBio: "",
-        tags: "",
-        metaTitle: "",
-        urlSlug: "",
-        metaDescription: "",
-        canonical: "",
-      });
-      setBlogImage(null);
-      setAuthorProfileImage(null);
-    } catch (error) {
-      console.error(error);
-      alert("Failed to post blog.");
-    }
-  };
 
   return (
     <div className="mx-auto p-6 bg-gray-400">

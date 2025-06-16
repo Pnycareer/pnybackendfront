@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
 import { useInView } from "react-intersection-observer";
 import { Link } from "react-router-dom";
+import axios from "../../utils/axios";
 
 const Allblogs = () => {
   const [categories, setCategories] = useState([]);
@@ -41,25 +41,32 @@ const Allblogs = () => {
     }
   };
 
-  const handleDelete = async (blogId) => {
-    try {
-      // Make delete API request
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/blogs/${blogId}`);
-      
-      // Remove the blog from UI (locally update)
-      setCategories((prevCategories) =>
-        prevCategories.map((cat) => ({
-          ...cat,
-          blogs: cat.blogs.filter((blog) => blog._id !== blogId),
-        }))
-      );
-  
-      toast.success("Blog deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting blog:", error);
-      toast.error("Failed to delete blog!");
-    }
-  };
+ const handleDelete = async (blogId) => {
+  const confirmed = window.confirm("Are you sure you want to delete this blog?");
+  if (!confirmed) return;
+
+  try {
+    // Make delete API request
+    const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/blogs/${blogId}`);
+
+    // Remove the blog from UI (locally update)
+    setCategories((prevCategories) =>
+      prevCategories.map((cat) => ({
+        ...cat,
+        blogs: cat.blogs.filter((blog) => blog._id !== blogId),
+      }))
+    );
+
+    toast.success(res.data?.message || "Blog deleted successfully!");
+  } catch (error) {
+    console.error("Error deleting blog:", error);
+    const message =
+      error.response?.data?.message || "Something went wrong while deleting the blog.";
+    toast.error(message);
+  }
+};
+
+
   
 
   const handleEdit = (blogId) => {
@@ -114,7 +121,7 @@ const Allblogs = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-black">All Blogs</h1>
         <div className="flex gap-4 items-center">
-          <Link to='/blog-post' className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+          <Link to='/dashboard/blog-post' className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
             Add Blog
           </Link>
         </div>
